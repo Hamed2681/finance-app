@@ -36,28 +36,28 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .custom-picker input[type=date]{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;}
 .custom-picker .btn-apply{background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:6px;cursor:pointer;}
 
-/* ── CARDS GRID 2-COL ── */
-.cards-grid-2col{flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:65px;scrollbar-width:none;align-content:start;}
+/* ── CARDS GRID: الدخل/المصروفات صف ثابت دايمًا، الباقى يتدفق طبيعيًا ── */
+.cards-grid-2col{flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:1fr;grid-auto-rows:min-content;gap:8px;padding-bottom:65px;scrollbar-width:none;align-content:start;}
 .cards-grid-2col::-webkit-scrollbar{display:none;}
-.col-left,.col-right{display:flex;flex-direction:column;gap:8px;min-width:0;}
-/* فى شبكة RTL وعرض الشاشة الكبير (عمودين): أول عنصر فى الكود يظهر يمين الشاشة.
-   نريد الالتزامات/الديون يمين، فتُعطى ترتيب أسبق — فقط عند وجود عمودين فعليًا */
+/* صف الدخل/المصروفات: عمودين دايمًا فى كل أحجام الشاشات */
+.ie-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 @media (min-width:521px){
-  .col-right{order:1;}
-  .col-left{order:2;}
+  .cards-grid-2col{grid-template-columns:1fr 1fr;}
+  .ie-row{grid-column:1/-1;}
 }
 
-/* شارت على يسار الكرت (commit/debt) */
+/* شارت على يسار الكرت (commit/debt) — موضع افتراضي */
 .scard.has-side-chart{padding-left:60px;}
-.scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;}
-.scard-side-chart svg{width:54px;height:54px;}
+.scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
+.scard-side-chart svg{width:54px;height:54px;opacity:.85;}
 .scard{position:relative;}
 
-/* عكس موضع الشارت لكروت الدخل والمصروفات: الشارت يمين، المحتوى يسار */
+/* عكس موضع الشارت: على اليمين (side-chart-right) — الشارت يمين، الـ accent يمين (من الطرف) */
 .scard.has-side-chart.side-chart-right{padding-left:0;padding-right:60px;}
 .scard.has-side-chart.side-chart-right .scard-side-chart{left:auto;right:0;}
+/* في RTL: الـ accent هو أول عنصر فيزيائياً في الـ inner، فيظهر يمين. للحفاظ على مظهره عند قلب ترتيب المحتوى للـ chart يمين، نعكس ترتيب الـ inner */
 .scard.has-side-chart.side-chart-right .scard-inner{flex-direction:row-reverse;}
-.scard.has-side-chart.side-chart-right .scard-accent{border-radius:0 15px 15px 0;}
+.scard.has-side-chart.side-chart-right .scard-accent{border-radius:14px 0 0 14px;}
 
 /* ── CHART PANEL: نسبة للدخل ── */
 .chart-panel{background:linear-gradient(180deg,#1a2230 0%,var(--card) 100%);border:1px solid var(--border);border-radius:16px;padding:10px 8px;display:flex;flex-direction:column;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);}
@@ -77,34 +77,55 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 }
 
 /* ── SUMMARY CARD ── */
-.scard{border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .1s,box-shadow .2s;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);}
+.scard{border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .1s,box-shadow .2s;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);}
 .scard:active{transform:scale(.99);}
-.scard-inner{display:flex;align-items:stretch;min-height:90px;border-radius:15px;}
-.scard.income  .scard-inner{background:linear-gradient(135deg,#1a3822 0%,#0f2018 100%);border:1px solid rgba(62,207,106,.3);}
-.scard.expense .scard-inner{background:linear-gradient(135deg,#152240 0%,#0d1628 100%);border:1px solid rgba(77,168,240,.3);}
-.scard.commit  .scard-inner{background:linear-gradient(135deg,#3a1818 0%,#200e0e 100%);border:1px solid rgba(240,84,84,.3);}
-.scard.debt    .scard-inner{background:linear-gradient(135deg,#342005 0%,#1e1303 100%);border:1px solid rgba(224,176,48,.3);}
+.scard-inner{display:flex;align-items:stretch;min-height:90px;border-radius:14px;}
+.scard.income  .scard-inner,
+.scard.expense .scard-inner,
+.scard.commit  .scard-inner,
+.scard.debt    .scard-inner{background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(120,140,170,.18);}
 /* left accent bar */
-.scard.income  .scard-accent{background:var(--green);}
-.scard.expense .scard-accent{background:var(--blue);}
-.scard.commit  .scard-accent{background:var(--red);}
-.scard.debt    .scard-accent{background:var(--yellow);}
+.scard.income  .scard-accent,
+.scard.expense .scard-accent,
+.scard.commit  .scard-accent,
+.scard.debt    .scard-accent{background:linear-gradient(180deg,#5a8fb5 0%,#3d6c8e 100%);}
 
-.scard-accent{width:5px;flex-shrink:0;border-radius:15px 0 0 15px;}
+.scard-accent{width:5px;flex-shrink:0;border-radius:14px 0 0 14px;}
 /* الكرت نفسه: أصغر، والشارت يطلع برّا على اليمين */
 .scard{padding:0;}
 .scard-content{flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;}
 /* شارتس كارت الالتزامات والديون: خارج الكرت على اليسار */
 .scard.has-side-chart{padding-left:60px;}
-.scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;}
-.scard-side-chart svg{width:54px;height:54px;}
+.scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
+.scard-side-chart svg{width:54px;height:54px;opacity:.85;}
 .scard{position:relative;}
+
+/* ── كرت الدخل/المصروفات بأسلوب كرت المخزون: العنوان فوق، دائرة كبيرة فى النص، الرقم تحت ── */
+.scard.stacked{display:flex;flex-direction:column;padding:10px 8px 12px;min-height:185px;}
+.scard.stacked .scard-inner{background:transparent;border:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;border-radius:0;min-height:0;}
+.scard.stacked .scard-accent{display:none;}
+.scard.stacked .scard-content{padding:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;background:transparent;}
+.scard.stacked .scard-top{width:100%;justify-content:flex-start;margin-bottom:0;}
+.scard.stacked .scard-title{background:none;border:none;padding:0;font-size:13px;}
+.scard.stacked .scard-title .scard-ico{width:26px;height:26px;border-radius:9px;background:rgba(120,140,170,.15);color:#9bb4cf;}
+.scard.stacked .scard-title .scard-ico svg{width:15px;height:15px;}
+.scard.income.stacked .scard-title .scard-ico{background:rgba(62,207,106,.16);color:#3ecf6a;}
+.scard.expense.stacked .scard-title .scard-ico{background:rgba(77,168,240,.16);color:#4da8f0;}
+.scard.stacked .scard-center{width:88px;height:88px;display:flex;align-items:center;justify-content:center;position:relative;margin:2px 0;}
+.scard.stacked .scard-center svg{width:88px;height:88px;}
+.scard.stacked .scard-center .ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;}
+.scard.stacked .scard-center .ring-pct{font-size:17px;font-weight:800;color:#dde4ef;}
+.scard.stacked .scard-center .ring-sub{font-size:8px;color:rgba(255,255,255,.45);font-weight:600;margin-top:2px;}
+.scard.stacked .scard-nums{justify-content:center;align-items:center;gap:2px;flex-direction:column;width:100%;}
+.scard.stacked .scard-num{align-items:center;gap:0px;text-align:center;}
+.scard.stacked .scard-num-lbl{font-size:9px;color:rgba(255,255,255,.5);}
+.scard.stacked .scard-num-val{font-size:18px;font-weight:800;color:#e6edf7;}
 
 /* كرت الدخل+المصروفات: مدمجين مع شارت واحد يمثّل الدخل/النفقات */
 .income-expense-row{display:flex;gap:6px;align-items:stretch;}
 .income-expense-row .scard{flex:1;min-width:0;}
-.ie-shared-chart{flex:0 0 auto;width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:6px 4px;gap:3px;}
-.ie-shared-chart svg{width:54px;height:54px;}
+.ie-shared-chart{flex:0 0 auto;width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.03);border:1px solid rgba(120,140,170,.15);border-radius:13px;padding:6px 4px;gap:3px;}
+.ie-shared-chart svg{width:54px;height:54px;opacity:.85;}
 .ie-shared-chart .ie-lbl{font-size:8px;color:var(--muted);text-align:center;line-height:1.1;}
 
 /* شارت خاص داخل scard.commit / scard.debt — مقلّص */
@@ -112,22 +133,28 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .scard.debt .scard-chart{width:42px;height:32px;}
 .scard-chart{width:42px;height:32px;}/* SVG chart area */
 .scard-nums{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
+.scard-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;}
+.scard-title{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#dde4ef;background:rgba(120,140,170,.1);border:1px solid rgba(120,140,170,.18);border-radius:7px;padding:3px 8px 3px 6px;line-height:1;}
+.scard-title .scard-ico{width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;color:#9bb4cf;flex-shrink:0;}
+.scard-title .scard-ico svg{width:14px;height:14px;display:block;}
 .scard-num{display:flex;flex-direction:column;}
-.scard-num-lbl{font-size:8px;color:rgba(255,255,255,.45);line-height:1;}
-.scard-num-val{font-size:17px;font-weight:900;line-height:1.1;}
-/* debt extra: mode btns */
-.debt-mode-mini{display:flex;gap:3px;}
-.dmb{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:4px;color:rgba(255,255,255,.5);font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;padding:2px 6px;cursor:pointer;transition:all .15s;}
-.dmb.active{background:var(--yellow);border-color:var(--yellow);color:#000;}
-.fcard.debt.debtor-mode .dmb.active{background:var(--green);border-color:var(--green);color:#000;}
+.scard-num-lbl{font-size:9px;color:rgba(255,255,255,.5);line-height:1;font-weight:600;}
+.scard-num-val{font-size:16px;font-weight:800;line-height:1.1;color:#e6edf7;}
+.cv-num-red{color:var(--red)!important;}
+.cv-num-green{color:var(--green)!important;}
+.cv-num-yellow{color:var(--yellow)!important;}
+.cv-num-blue{color:var(--blue)!important;}
+/* debt extra: mode label (badge — not clickable, التبديل بالتمرير) */
+.debt-mode-label{display:inline-block;font-size:10px;font-weight:800;padding:2px 9px;border-radius:6px;background:rgba(120,140,170,.25);color:#a8c0d8;border:1px solid rgba(120,140,170,.4);}
+.scard.debt.debtor-mode .debt-mode-label{background:rgba(120,140,170,.45);color:#cfdcec;}
 
 /* ── OVERLAY ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:199;backdrop-filter:blur(3px);}
-.overlay.show{display:block;}
+.overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:199;backdrop-filter:blur(3px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,visibility .28s;}
+.overlay.show{opacity:1;visibility:visible;pointer-events:auto;}
 
 /* ── FLOATING TABLE WINDOW (level 1 — card tap) ── */
-.ftable{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:94vw;max-width:420px;max-height:75vh;background:var(--card);border-radius:14px;z-index:200;flex-direction:column;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.8);}
-.ftable.show{display:flex;}
+.ftable{display:flex;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);width:84vw;max-width:380px;max-height:75vh;background:var(--card);border-radius:14px;z-index:200;flex-direction:column;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.8);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
+.ftable.show{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
 .ftable-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;}
 .ftable.income  .ftable-hdr{background:var(--hi);}
 .ftable.expense .ftable-hdr{background:var(--he);}
@@ -137,7 +164,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .ftable-title{font-size:14px;font-weight:800;color:#fff;}
 .ftable-hdr-btns{display:flex;gap:5px;align-items:center;}
 .btn-ft{height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:0 8px;display:flex;align-items:center;gap:3px;}
-.btn-ft-icon{width:24px;padding:0;justify-content:center;font-size:13px;}
+.btn-ft-icon{width:24px;padding:0;justify-content:center;font-size:17px;font-weight:800;}
+.btn-ft-add{width:24px;padding:0;justify-content:center;font-size:19px;font-weight:800;line-height:1;}
 /* table body */
 .ftable-body{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg);}
 .tbl-wrap{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#2a3240 transparent;}
@@ -164,6 +192,9 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 .td-rn{color:var(--red);font-weight:700;text-align:center;}
 .td-edit{cursor:text;}
 .td-edit:hover td,.td-edit:hover{background:rgba(77,168,240,.08)!important;}
+.td-cat{padding:4px 4px!important;}
+.cat-sel{width:100%;max-width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:8.5px;padding:3px 2px;cursor:pointer;}
+.td-name.from-debt{color:var(--yellow);font-weight:800;}
 .td-date{cursor:pointer;}
 /* add form */
 .add-form{display:none;flex-shrink:0;background:rgba(0,0,0,.2);border-top:1px solid var(--border);padding:7px 9px;gap:5px;flex-direction:column;}
@@ -179,8 +210,8 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 .btn-del-cancel{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;}
 
 /* ── EXPANDED MODAL (level 2 — ⤢ button) ── */
-.emodal{display:none;position:fixed;top:4vh;left:50%;transform:translateX(-50%);width:96vw;max-width:500px;height:90vh;background:var(--bg);border-radius:14px;z-index:250;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);}
-.emodal.show{display:flex;}
+.emodal{display:flex;position:fixed;top:4vh;left:50%;transform:translateX(-50%) translateY(14px);width:90vw;max-width:460px;height:90vh;background:var(--bg);border-radius:14px;z-index:250;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
+.emodal.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);}
 .emodal-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 13px;}
 .emodal.income  .emodal-hdr{background:var(--hi);}
 .emodal.expense .emodal-hdr{background:var(--he);}
@@ -192,6 +223,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 .emodal .tbl-wrap{max-height:calc(90vh - 120px);}
 /* emodal: البند في سطر واحد + باقي الأعمدة مضغوطة */
 .emodal table{table-layout:auto;}
+#em-expense table{table-layout:fixed;}
 .emodal tbody td:nth-child(2){white-space:nowrap;overflow:visible;text-overflow:clip;word-break:normal;vertical-align:bottom;}
 /* ضغط أعمدة الأرقام + التاريخ + طريقة الدفع، وتمدد البند */
 .emodal table colgroup col:nth-child(1){width:auto;}     /* التاريخ */
@@ -219,8 +251,8 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 .emodal tbody td.fit-font > span.autofit{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:clip;}
 
 /* ── DEBT HISTORY MODAL ── */
-#dhm{display:none;position:fixed;top:5vh;left:50%;transform:translateX(-50%);width:92vw;max-width:400px;height:88vh;background:var(--card);border:1px solid var(--border);border-radius:14px;z-index:300;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);}
-#dhm.show{display:flex;}
+#dhm{display:flex;position:fixed;top:5vh;left:50%;transform:translateX(-50%) translateY(14px);width:86vw;max-width:380px;height:88vh;background:var(--card);border:1px solid var(--border);border-radius:14px;z-index:300;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
+#dhm.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);}
 
 /* ── SETTINGS ── */
 .page{flex:1;overflow:hidden;display:flex;flex-direction:column;}
@@ -297,44 +329,44 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 <!-- SUMMARY CARDS — تقسيم ٢ أعمدة -->
 <div class="cards-grid-2col">
 
-  <!-- العمود اليسار: الدخل + المصروفات (بنفس حجم كروت اليمين عبر شارت جانبي) -->
-  <div class="col-left">
-    <!-- الدخل + شارت نسبة النفقات/الدخل -->
-    <div class="scard income has-side-chart side-chart-right" onclick="openFTable('income')">
-      <div class="scard-side-chart">
-        <svg id="chart-income-side" viewBox="0 0 54 54"></svg>
-      </div>
+  <!-- صف ثابت: الدخل والمصروفات جنب بعض دايمًا (حتى على الموبايل الضيق) -->
+  <div class="ie-row">
+    <!-- الدخل -->
+    <div class="scard income stacked" onclick="openFTable('income')">
       <div class="scard-inner">
-        <div class="scard-accent"></div>
         <div class="scard-content">
           <div class="scard-top">
-            <span class="scard-title">الدخل</span>
+            <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>الدخل</span>
+          </div>
+          <div class="scard-center">
+            <svg id="chart-income-side" viewBox="0 0 84 84"></svg>
+            <div class="ring-text"><span class="ring-pct" id="ct-income-pct">0%</span><span class="ring-sub">من الدخل</span></div>
           </div>
           <div class="scard-nums">
             <div class="scard-num">
               <span class="scard-num-lbl">الإجمالي</span>
-              <span class="scard-num-val cv-g" id="ct-income-amount">0</span>
+              <span class="scard-num-val" id="ct-income-amount">0</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- المصروفات + شارت نسب (مصروفات / التزامات / سداد ديون) إلى الدخل -->
-    <div class="scard expense has-side-chart side-chart-right" onclick="openFTable('expense')">
-      <div class="scard-side-chart">
-        <svg id="chart-expense-side" viewBox="0 0 54 54"></svg>
-      </div>
+    <!-- المصروفات -->
+    <div class="scard expense stacked" onclick="openFTable('expense')">
       <div class="scard-inner">
-        <div class="scard-accent"></div>
         <div class="scard-content">
           <div class="scard-top">
-            <span class="scard-title">المصروفات</span>
+            <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18l-2 13H5L3 3z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg></span>المصروفات</span>
+          </div>
+          <div class="scard-center">
+            <svg id="chart-expense-side" viewBox="0 0 84 84"></svg>
+            <div class="ring-text"><span class="ring-pct" id="ct-expense-pct">0%</span><span class="ring-sub">من الدخل</span></div>
           </div>
           <div class="scard-nums">
             <div class="scard-num">
               <span class="scard-num-lbl">الإجمالي</span>
-              <span class="scard-num-val cv-b" id="ct-expense-amount">0</span>
+              <span class="scard-num-val" id="ct-expense-amount">0</span>
             </div>
           </div>
         </div>
@@ -342,9 +374,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
     </div>
   </div>
 
-  <!-- العمود اليمين: الالتزامات + الديون -->
-  <div class="col-right">
-    <!-- الالتزامات + شارت يسارها -->
+    <!-- الالتزامات -->
     <div class="scard commit has-side-chart" onclick="openFTable('commit')">
       <div class="scard-side-chart">
         <svg id="chart-commit-side" viewBox="0 0 54 54"></svg>
@@ -353,28 +383,28 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <div class="scard-accent"></div>
         <div class="scard-content">
           <div class="scard-top">
-            <span class="scard-title">الالتزامات</span>
+            <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3M13 14h3M8 18h3M13 18h3"/></svg></span>الالتزامات</span>
           </div>
           <div class="scard-nums">
             <div class="scard-num">
               <span class="scard-num-lbl">مطلوب</span>
-              <span class="scard-num-val cv-r" id="ct-commit-req">0</span>
+              <span class="scard-num-val cv-num-red" id="ct-commit-req">0</span>
             </div>
             <div class="scard-num">
               <span class="scard-num-lbl">مدفوع</span>
-              <span class="scard-num-val cv-y" id="ct-commit-paid">0</span>
+              <span class="scard-num-val cv-num-yellow" id="ct-commit-paid">0</span>
             </div>
             <div class="scard-num">
               <span class="scard-num-lbl">متبقي</span>
-              <span class="scard-num-val cv-g" id="ct-commit-rem">0</span>
+              <span class="scard-num-val cv-num-green" id="ct-commit-rem">0</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- الديون + شارت يسارها -->
-    <div class="scard debt has-side-chart" id="scard-debt" onclick="openFTable('debt')">
+    <!-- الديون: الرسم البياني على اليمين (تبادل مع الالتزامات) -->
+    <div class="scard debt has-side-chart side-chart-right" id="scard-debt" onclick="debtCardClick()">
       <div class="scard-side-chart">
         <svg id="chart-debt-side" viewBox="0 0 54 54"></svg>
       </div>
@@ -383,32 +413,29 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <div class="scard-content">
           <div class="scard-top">
             <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-              <span class="scard-title">الديون</span>
-              <div class="debt-mode-mini" onclick="event.stopPropagation()">
-                <button class="dmb active" id="btn-creditor" onclick="setDebtMode('creditor')">دائن</button>
-                <button class="dmb" id="btn-debtor" onclick="setDebtMode('debtor')">مدين</button>
-              </div>
+              <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 11h20"/><path d="M6 16h3"/></svg></span>الديون</span>
+              <span class="debt-mode-label" id="debt-mode-label">دائن</span>
+              <span style="font-size:10px;color:rgba(255,255,255,.28);">⇄</span>
             </div>
             <span id="debt-cat-label" style="font-size:9px;color:rgba(255,255,255,.4);"></span>
           </div>
           <div class="scard-nums">
             <div class="scard-num">
               <span class="scard-num-lbl">مطلوب</span>
-              <span class="scard-num-val cv-y" id="ct-debt-req">0</span>
+              <span class="scard-num-val cv-num-yellow" id="ct-debt-req">0</span>
             </div>
             <div class="scard-num">
               <span class="scard-num-lbl">مدفوع</span>
-              <span class="scard-num-val cv-b" id="ct-debt-paid">0</span>
+              <span class="scard-num-val cv-num-blue" id="ct-debt-paid">0</span>
             </div>
             <div class="scard-num">
               <span class="scard-num-lbl">متبقي</span>
-              <span class="scard-num-val cv-g" id="ct-debt-rem">0</span>
+              <span class="scard-num-val cv-num-green" id="ct-debt-rem">0</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
 </div><!-- /cards-grid-2col -->
 </div><!-- /pg-home -->
@@ -418,7 +445,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title">الدخل</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft" onclick="toggleForm('income');event.stopPropagation()">+ إضافة</button>
+      <button class="btn-ft btn-ft-add" onclick="toggleForm('income');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('income');event.stopPropagation()" title="تكبير">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
@@ -450,15 +477,15 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title">المصروفات</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft" onclick="toggleForm('expense');event.stopPropagation()">+ إضافة</button>
+      <button class="btn-ft btn-ft-add" onclick="toggleForm('expense');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('expense');event.stopPropagation()">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
   </div>
   <div class="ftable-body">
     <div class="tbl-wrap" id="tbl-expense">
-      <table><colgroup><col style="width:55%"><col style="width:45%"></colgroup>
-        <thead><tr><th>البند</th><th>المبلغ</th></tr></thead>
+      <table><colgroup><col style="width:36%"><col style="width:32%"><col style="width:32%"></colgroup>
+        <thead><tr><th>البند</th><th>المبلغ</th><th>الفئة</th></tr></thead>
         <tbody id="tbody-expense"></tbody>
       </table>
     </div>
@@ -466,7 +493,10 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
       <div class="add-form-row">
         <input type="text" id="fe-name" placeholder="البند">
         <input type="number" id="fe-amount" placeholder="المبلغ">
+      </div>
+      <div class="add-form-row">
         <select id="fe-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+        <select id="fe-cat"><option value="">الفئة</option></select>
       </div>
       <div class="add-form-row">
         <button class="btn-cancel" onclick="toggleForm('expense')">إلغاء</button>
@@ -482,7 +512,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title">الالتزامات</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft" onclick="toggleForm('commit');event.stopPropagation()">+ إضافة</button>
+      <button class="btn-ft btn-ft-add" onclick="toggleForm('commit');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('commit');event.stopPropagation()">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
@@ -515,7 +545,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title" id="ft-debt-title">الديون — دائن</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft" onclick="toggleForm('debt');event.stopPropagation()">+ إضافة</button>
+      <button class="btn-ft btn-ft-add" onclick="toggleForm('debt');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('debt');event.stopPropagation()">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
@@ -567,8 +597,8 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   </div>
   <div class="emodal-body">
     <div class="tbl-wrap">
-      <table><colgroup><col><col><col><col></colgroup>
-        <thead><tr><th>التاريخ</th><th>البند</th><th>المبلغ</th><th>طريقة الدفع</th></tr></thead>
+      <table><colgroup><col style="width:13%"><col style="width:27%"><col style="width:18%"><col style="width:27%"><col style="width:15%"></colgroup>
+        <thead><tr><th>التاريخ</th><th>البند</th><th>المبلغ</th><th>الفئة</th><th>طريقة الدفع</th></tr></thead>
         <tbody id="tbody-expense-em"></tbody>
       </table>
     </div>
@@ -711,8 +741,8 @@ function filteredData(type){
   const key=type==='debt'?debtKey():type;
   const all=loadData(key);
   const{from,to}=getRange(currentPeriod);
-  if(!from&&!to)return filterByCat(all);
-  return filterByCat(all.filter(r=>inRange(r.date,from,to)));
+  const dateFiltered=(!from&&!to)?all:all.filter(r=>inRange(r.date,from,to));
+  return type==='debt'?filterByCat(dateFiltered):dateFiltered;
 }
 function filterByCat(rows){
   if(debtCat==='الكل')return rows;
@@ -755,13 +785,32 @@ function setDebtMode(mode){
   ft.classList.toggle('debtor-mode',mode==='debtor');
   const em=document.getElementById('em-debt');
   em.classList.toggle('debtor-mode',mode==='debtor');
-  document.getElementById('btn-creditor').classList.toggle('active',mode==='creditor');
-  document.getElementById('btn-debtor').classList.toggle('active',mode==='debtor');
+  const mlbl=document.getElementById('debt-mode-label');
+  if(mlbl)mlbl.textContent=mode==='creditor'?'دائن':'مدين';
   const t='الديون — '+(mode==='creditor'?'دائن':'مدين');
   document.getElementById('ft-debt-title').textContent=t;
   const edt=document.getElementById('em-debt-title');
   if(edt)edt.textContent=t+' — تفاصيل';
   renderDebtCats();renderDebt();
+}
+// تبديل دائن/مدين بالتمرير يمين/يسار على كرت الديون
+let _debtCardSwiped=false;
+function debtCardClick(){
+  if(_debtCardSwiped){_debtCardSwiped=false;return;}
+  openFTable('debt');
+}
+function initDebtCardSwipe(){
+  const card=document.getElementById('scard-debt');
+  if(!card)return;
+  let sx=null;
+  card.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  card.addEventListener('touchend',e=>{
+    if(sx===null)return;
+    const dx=e.changedTouches[0].clientX-sx;sx=null;
+    if(Math.abs(dx)<40)return;
+    _debtCardSwiped=true;
+    setDebtMode(debtMode==='creditor'?'debtor':'creditor');
+  });
 }
 // swipe on ft-debt
 let _sx=null;
@@ -794,9 +843,9 @@ function renderIncome(){
     const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
     const tr=document.createElement('tr');
     tr.dataset.idx=ri;
-    tr.innerHTML=`<td class="td-name">${r.name}</td>
+    tr.innerHTML=`<td class="td-name${r.fromDebt?' from-debt':''}">${r.fromDebt?'↩ ':''}${r.name}</td>
       <td class="td-g td-edit" data-type="income" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>`;
-    bindLP(tr,'income');tb.appendChild(tr);
+    bindDblClick(tr,'income');tb.appendChild(tr);
   });
   document.getElementById('ct-income-amount').textContent=fmt(total);
   // expanded modal table
@@ -814,8 +863,9 @@ function renderExpense(){
     const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
     const tr=document.createElement('tr');tr.dataset.idx=ri;
     tr.innerHTML=`<td class="td-name">${r.name}</td>
-      <td class="td-b td-edit" data-type="expense" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>`;
-    bindLP(tr,'expense');tb.appendChild(tr);
+      <td class="td-b td-edit" data-type="expense" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
+      <td class="td-cat">${expenseCatSelectHTML(ri,r.cat)}</td>`;
+    bindDblClick(tr,'expense');tb.appendChild(tr);
   });
   document.getElementById('ct-expense-amount').textContent=fmt(total);
   if(currentEM==='expense') renderEM('expense');
@@ -835,7 +885,7 @@ function renderCommit(){
     tr.innerHTML=`<td class="td-name">${r.name}</td>
       <td class="td-r">${fmt(r.req)}</td>
       <td class="td-y td-edit" data-type="commit" data-idx="${ri}" data-field="paid">${fmt(r.paid)}</td>`;
-    bindLP(tr,'commit');tb.appendChild(tr);
+    bindDblClick(tr,'commit');tb.appendChild(tr);
   });
   document.getElementById('ct-commit-req').textContent=fmt(tReq);
   document.getElementById('ct-commit-paid').textContent=fmt(tPaid);
@@ -887,32 +937,31 @@ function updateSummary(){
   const re=document.getElementById('sum-remain');
   re.querySelector('span:last-child').textContent=fmt(Math.abs(rem));
   re.className='val '+(rem>=0?'cv-b':'cv-r');
-  // تحديث شارتي الدخل والمصروفات الجانبيين
-  updateRatioBars(income,expense,commitP,Math.max(0,debtNet('debt_creditor')));
+  // تحديث شارتات الكروت الأربعة الجانبية (كل شارت = نسبته إلى الدخل)
+  const credPaid=Math.max(0,debtNet('debt_creditor'));
+  const debPaid=Math.max(0,debtNet('debt_debtor'));
+  updateRatioBars(income,expense,commitP,credPaid,debPaid,totalExp);
 }
-function updateRatioBars(income,exp,commitPaid,debtCreditor){
+function updateRatioBars(income,exp,commitPaid,credPaid,debPaid,totalExp){
   const pct=(v)=>income>0?Math.min(100,Math.round((v/income)*100)):0;
-  // شارت كرت الدخل: نسبة النفقات إلى الدخل
-  drawPercentRing('chart-income-side',pct(exp),'#4da8f0');
-  // شارت كرت المصروفات: نسبة المصروفات إلى الدخل
-  drawPercentRing('chart-expense-side',pct(exp),'#4da8f0');
+  // كرت الدخل (stacked): نسبة المتبقى من الدخل بعد النفقات
+  const incomePct=pct(Math.max(0,income-totalExp));
+  drawPercentRing('chart-income-side',incomePct,'#7eb8e0',{pctId:'ct-income-pct',gradient:['#3ecf6a','#7eb8e0']});
+  // كرت المصروفات (stacked): نسبة المصروفات إلى الدخل
+  drawPercentRing('chart-expense-side',pct(exp),'#7eb8e0',{pctId:'ct-expense-pct',gradient:['#9fd4ff','#4da8f0']});
+  // كرت الالتزامات: نسبة المدفوع من الالتزامات إلى الدخل
+  drawPercentRing('chart-commit-side',pct(commitPaid),'#7eb8e0');
+  // كرت الديون: نسبة المدفوع فى التصنيف الحالى (دائن/مدين) إلى الدخل
+  const debtPct=debtMode==='creditor'?pct(credPaid):pct(debPaid);
+  const debtColor='#7eb8e0';
+  drawPercentRing('chart-debt-side',debtPct,debtColor);
 }
 
 // ══════════════════════════════════════════════
 //  MINI CHARTS (SVG)
 // ══════════════════════════════════════════════
 function drawCharts(){
-  // Commit: donut paid vs remaining (في الـ side-chart)
-  const cRows=filteredData('commit');
-  const cReq=cRows.reduce((s,r)=>s+Number(r.req||0),0);
-  const cPaid=cRows.reduce((s,r)=>s+Number(r.paid||0),0);
-  drawSideDonut('chart-commit-side',Math.max(0,cPaid),Math.max(0,cReq-cPaid),'#3ecf6a','#f05454','commit');
-  // Debt: donut paid vs remaining (في الـ side-chart)
-  const dRows=filteredData('debt');
-  const dReq=dRows.reduce((s,r)=>s+Number(r.req||0),0);
-  const dPaid=dRows.reduce((s,r)=>{const t=r.transactions||[];return s+t.filter(x=>x.dir==='for').reduce((a,x)=>a+Number(x.amount||0),0)-t.filter(x=>x.dir==='against').reduce((a,x)=>a+Number(x.amount||0),0);},0);
-  const dc=debtMode==='creditor'?'#e0b030':'#3ecf6a';
-  drawSideDonut('chart-debt-side',Math.max(0,dPaid),Math.max(0,dReq-dPaid),dc,'#3ecf6a','debt');
+  // ملاحظة: شارتات الكروت الأربعة الجانبية تُرسم الآن داخل updateRatioBars (تُستدعى من updateSummary)
 }
 function drawBarChart(id,vals,color){
   const svg=document.getElementById(id);
@@ -974,12 +1023,37 @@ function drawSideDonut(id,paid,remaining,colorPaid,colorRem,kind){
   svg.appendChild(txt);
 }
 // طوق واحد يعبّر عن نسبة مئوية مباشرة (مستخدم لكرت الدخل: نسبة النفقات/الدخل)
-function drawPercentRing(id,pct,color){
+function drawPercentRing(id,pct,color,opts){
+  opts=opts||{};
   const svg=document.getElementById(id);
   if(!svg)return;
   svg.innerHTML='';
-  const cx=27,cy=27,r=20,sw=8;
+  // تحديد حجم الرسم حسب viewBox الفعلي للـ SVG
+  const vb=svg.getAttribute('viewBox')||'0 0 54 54';
+  const parts=vb.split(/\s+/).map(Number);
+  const W=parts[2]||54, H=parts[3]||54;
+  const cx=W/2, cy=H/2;
+  const sw=opts.sw||Math.max(6, Math.round(W*0.11));
+  const r=(W/2)-sw-1;
   pct=Math.max(0,Math.min(100,pct));
+  let strokePaint=color;
+  if(opts.gradient){
+    const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const grad=document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    const gid=id+'-grad';
+    grad.setAttribute('id',gid);
+    grad.setAttribute('x1','0%');grad.setAttribute('y1','0%');
+    grad.setAttribute('x2','100%');grad.setAttribute('y2','100%');
+    opts.gradient.forEach((c,i)=>{
+      const stop=document.createElementNS('http://www.w3.org/2000/svg','stop');
+      stop.setAttribute('offset',(i/(opts.gradient.length-1)*100)+'%');
+      stop.setAttribute('stop-color',c);
+      grad.appendChild(stop);
+    });
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+    strokePaint=`url(#${gid})`;
+  }
   const bg=document.createElementNS('http://www.w3.org/2000/svg','circle');
   bg.setAttribute('cx',cx);bg.setAttribute('cy',cy);bg.setAttribute('r',r);
   bg.setAttribute('fill','none');bg.setAttribute('stroke','#2a3240');bg.setAttribute('stroke-width',sw);
@@ -988,18 +1062,25 @@ function drawPercentRing(id,pct,color){
   const dash=(pct/100)*circ;
   const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
   arc.setAttribute('cx',cx);arc.setAttribute('cy',cy);arc.setAttribute('r',r);
-  arc.setAttribute('fill','none');arc.setAttribute('stroke',color);arc.setAttribute('stroke-width',sw);
+  arc.setAttribute('fill','none');arc.setAttribute('stroke',strokePaint);arc.setAttribute('stroke-width',sw);
   arc.setAttribute('stroke-dasharray',`${dash} ${circ-dash}`);
-  arc.setAttribute('stroke-dashoffset',circ/4);
   arc.setAttribute('stroke-linecap','round');
+  arc.setAttribute('transform',`rotate(-90 ${cx} ${cy})`);
   svg.appendChild(arc);
-  const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
-  txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
-  txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size','12');
-  txt.setAttribute('font-family','Cairo,sans-serif');txt.setAttribute('font-weight','800');
-  txt.setAttribute('fill','#dde4ef');
-  txt.textContent=Math.round(pct)+'%';
-  svg.appendChild(txt);
+  // تحديث نص النسبة: إما داخل عنصر HTML خارجي (الكروت الجديدة stacked) أو كنص داخل الـ SVG نفسه (الالتزامات/الديون)
+  const pctId=opts.pctId;
+  if(pctId){
+    const el=document.getElementById(pctId);
+    if(el) el.textContent=Math.round(pct)+'%';
+  } else {
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',Math.max(10,Math.round(W*0.22)));
+    txt.setAttribute('font-family','Cairo,sans-serif');txt.setAttribute('font-weight','800');
+    txt.setAttribute('fill','#dde4ef');
+    txt.textContent=Math.round(pct)+'%';
+    svg.appendChild(txt);
+  }
 }
 // ٣ أطواق متداخلة لعرض عدة نسب معًا (مستخدم لكرت المصروفات: مصروفات/التزامات/سداد ديون)
 function drawTripleRing(id,rings){
@@ -1081,7 +1162,7 @@ function renderEM(type){
       const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
       const tr=document.createElement('tr');tr.dataset.idx=ri;
       tr.innerHTML=`<td class="td-m td-date" data-type="income" data-idx="${ri}">${fmtDate(r.date)}</td>
-        <td class="td-name">${r.name}</td>
+        <td class="td-name${r.fromDebt?' from-debt':''}">${r.fromDebt?'↩ ':''}${r.name}</td>
         <td class="td-g td-edit" data-type="income" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
         <td class="td-m">${r.pay||''}</td>`;
       bindEMLP(tr,'income');tb.appendChild(tr);
@@ -1097,6 +1178,7 @@ function renderEM(type){
       tr.innerHTML=`<td class="td-m td-date" data-type="expense" data-idx="${ri}">${fmtDate(r.date)}</td>
         <td class="td-name">${r.name}</td>
         <td class="td-b td-edit" data-type="expense" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
+        <td class="td-cat">${expenseCatSelectHTML(ri,r.cat)}</td>
         <td class="td-m">${r.pay||''}</td>`;
       bindEMLP(tr,'expense');tb.appendChild(tr);
     });
@@ -1143,13 +1225,13 @@ function renderEM(type){
 let emPressTimer=null;
 function bindEMLP(tr,type){
   if(!emSelected[type])emSelected[type]=new Set();
-  const start=()=>{emPressTimer=setTimeout(()=>selectEM(tr,type),500);};
-  const cancel=()=>clearTimeout(emPressTimer);
-  tr.addEventListener('mousedown',start);
-  tr.addEventListener('touchstart',start,{passive:true});
-  tr.addEventListener('mouseup',cancel);
-  tr.addEventListener('touchend',cancel);
-  tr.addEventListener('mouseleave',cancel);
+  let last=0;
+  tr.addEventListener('click',e=>{
+    if(e.target.classList.contains('dhb'))return;
+    const now=Date.now();
+    if(now-last<350)selectEM(tr,type);
+    last=now;
+  });
   tr.addEventListener('contextmenu',e=>e.preventDefault());
 }
 function selectEM(tr,type){
@@ -1184,6 +1266,7 @@ function autofitEmodalCells(){
   document.querySelectorAll('.emodal tbody tr').forEach(tr=>{
     tr.querySelectorAll('td').forEach(td=>{
       if(td.querySelector('input'))return;
+      if(td.querySelector('select'))return;
       if(td.classList.contains('td-name'))return; // البند لا يُصغّر، يبقى في سطر واحد
       // لف المحتوى في span لقياسه
       let span=td.querySelector('span.autofit');
@@ -1333,21 +1416,9 @@ function bindInlineEdit(){
 }
 
 // ══════════════════════════════════════════════
-//  LONG PRESS (ft tables — select for delete)
+//  DOUBLE-CLICK / DOUBLE-TAP (ft tables — select for delete)
 // ══════════════════════════════════════════════
-let _lpTimer=null;
 let _sel={};
-function bindLP(tr,type){
-  if(!_sel[type])_sel[type]=new Set();
-  const start=()=>{_lpTimer=setTimeout(()=>selectFT(tr,type),500);};
-  const cancel=()=>clearTimeout(_lpTimer);
-  tr.addEventListener('mousedown',start);
-  tr.addEventListener('touchstart',start,{passive:true});
-  tr.addEventListener('mouseup',cancel);
-  tr.addEventListener('touchend',cancel);
-  tr.addEventListener('mouseleave',cancel);
-  tr.addEventListener('contextmenu',e=>e.preventDefault());
-}
 function bindDblClick(tr,type){
   if(!_sel[type])_sel[type]=new Set();
   let last=0;
@@ -1393,7 +1464,29 @@ function toggleForm(type){
   if(f.classList.contains('show')){
     setupAutocomplete(type);
     if(type==='debt')refreshDebtCatSelect();
+    if(type==='expense')refreshExpenseCatSelect();
   }
+}
+function getExpenseCats(){
+  const s=getSettings();
+  return (s.expenseCats&&s.expenseCats.length)?s.expenseCats:[];
+}
+function refreshExpenseCatSelect(){
+  const sel=document.getElementById('fe-cat');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">الفئة</option>';
+  getExpenseCats().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  sel.value=cur;
+}
+function expenseCatSelectHTML(idx,selected){
+  const cats=getExpenseCats();
+  let opts='<option value=""'+(!selected?' selected':'')+'>بدون</option>';
+  cats.forEach(c=>{opts+=`<option value="${c}"${c===selected?' selected':''}>${c}</option>`;});
+  return `<select class="cat-sel" onclick="event.stopPropagation()" onchange="setExpenseCat(${idx},this.value)">${opts}</select>`;
+}
+function setExpenseCat(idx,val){
+  const arr=loadData('expense');
+  if(arr[idx]){arr[idx].cat=val;saveData('expense',arr);}
 }
 function refreshDebtCatSelect(){
   const sel=document.getElementById('fd-cat');if(!sel)return;
@@ -1417,9 +1510,10 @@ function saveRow(type){
     const name=document.getElementById('fe-name').value.trim();
     const amount=document.getElementById('fe-amount').value;
     const pay=document.getElementById('fe-pay').value;
+    const cat=document.getElementById('fe-cat')?.value||'';
     if(!name||!amount)return;
     const arr=loadData('expense');
-    arr.push({name,amount:Number(amount),pay,date:todayStr()});
+    arr.push({name,amount:Number(amount),pay,cat,date:todayStr()});
     saveData('expense',arr);
     document.getElementById('fe-name').value='';
     document.getElementById('fe-amount').value='';
@@ -1513,12 +1607,24 @@ function saveDebtTransaction(){
   if(!amount||debtHistIdx===null)return;
   const arr=loadData(debtKey());
   if(!arr[debtHistIdx].transactions)arr[debtHistIdx].transactions=[];
-  arr[debtHistIdx].transactions.push({amount,details,pay,dir,date:todayStr()});
+  const debtorName=arr[debtHistIdx].name;
+  const txnDate=todayStr();
+  arr[debtHistIdx].transactions.push({amount,details,pay,dir,date:txnDate});
   saveData(debtKey(),arr);
+  // عند سداد أحد المدينين (تصنيف دائن) لمبلغ من المديونية عليه: يُسجَّل تلقائيًا فى جدول الدخل
+  if(debtMode==='creditor'&&dir==='for'){
+    addAutoIncomeFromDebtPayment(debtorName,amount,pay,txnDate);
+  }
   document.getElementById('dhm-amount').value='';
   document.getElementById('dhm-details').value='';
   document.getElementById('dhm-pay').value='';
   updateHistHeader(arr[debtHistIdx]);renderStatementList(arr[debtHistIdx]);renderDebt();
+}
+function addAutoIncomeFromDebtPayment(debtorName,amount,pay,date){
+  const inc=loadData('income');
+  inc.push({name:`سداد دين — ${debtorName}`,amount,pay,date,fromDebt:true});
+  saveData('income',inc);
+  renderIncome();
 }
 function deleteDebtTransaction(di,ti){
   const arr=loadData(debtKey());
@@ -1713,6 +1819,7 @@ function seedDemo(){
 seedDemo();
 renderDebtCats();
 initDebtSwipe();
+initDebtCardSwipe();
 renderAll();
 applyTheme(getSettings().theme||'dark');
 document.getElementById('pg-home').style.display='flex';
