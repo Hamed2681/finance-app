@@ -50,7 +50,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .scard.has-side-chart{padding-left:60px;}
 .scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
 .scard-side-chart svg{width:54px;height:54px;opacity:.85;}
-.scard{position:relative;}
 
 /* عكس موضع الشارت: على اليمين (side-chart-right) — الشارت يمين، الـ accent يمين (من الطرف) */
 .scard.has-side-chart.side-chart-right{padding-left:0;padding-right:60px;}
@@ -77,7 +76,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 }
 
 /* ── SUMMARY CARD ── */
-.scard{border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .1s,box-shadow .2s;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);}
+.scard{position:relative;padding:0;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .1s,box-shadow .2s;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);}
 .scard:active{transform:scale(.99);}
 .scard-inner{display:flex;align-items:stretch;min-height:90px;border-radius:14px;}
 .scard.income  .scard-inner,
@@ -91,14 +90,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .scard.debt    .scard-accent{background:linear-gradient(180deg,#5a8fb5 0%,#3d6c8e 100%);}
 
 .scard-accent{width:5px;flex-shrink:0;border-radius:14px 0 0 14px;}
-/* الكرت نفسه: أصغر، والشارت يطلع برّا على اليمين */
-.scard{padding:0;}
 .scard-content{flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;}
-/* شارتس كارت الالتزامات والديون: خارج الكرت على اليسار */
-.scard.has-side-chart{padding-left:60px;}
-.scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
-.scard-side-chart svg{width:54px;height:54px;opacity:.85;}
-.scard{position:relative;}
 
 /* ── كرت الدخل/المصروفات بأسلوب كرت المخزون: العنوان فوق، دائرة كبيرة فى النص، الرقم تحت ── */
 .scard.stacked{display:flex;flex-direction:column;padding:10px 8px 12px;min-height:185px;}
@@ -169,14 +161,13 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 /* table body */
 .ftable-body{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg);}
 .tbl-wrap{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#2a3240 transparent;}
-tbody tr{vertical-align:bottom;}
+tbody tr{vertical-align:bottom;border-bottom:1px dotted #ffffff;}
 .tbl-wrap::-webkit-scrollbar{width:3px;}
 .tbl-wrap::-webkit-scrollbar-thumb{background:#2a3240;border-radius:3px;}
 table{width:100%;border-collapse:collapse;table-layout:fixed;}
 thead tr th{position:sticky;top:0;z-index:2;background:var(--card2);padding:4px 5px;font-size:10px;font-weight:700;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.08);text-align:center;white-space:nowrap;}
 thead tr th:first-child{text-align:right;padding-right:10px;}
 tbody tr td{padding:7px 5px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:34px;user-select:none;-webkit-user-select:none;background:var(--card);vertical-align:bottom;}
-tbody tr{border-bottom:1px dotted #ffffff;}
 tbody tr:nth-child(even) td{background:#1d2330;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover td{background:rgba(255,255,255,.05)!important;}
@@ -196,18 +187,23 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 .cat-sel{width:100%;max-width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:8.5px;padding:3px 2px;cursor:pointer;}
 .td-name.from-debt{color:var(--yellow);font-weight:800;}
 .td-date{cursor:pointer;}
-/* add form */
-.add-form{display:none;flex-shrink:0;background:rgba(0,0,0,.2);border-top:1px solid var(--border);padding:7px 9px;gap:5px;flex-direction:column;}
-.add-form.show{display:flex;}
-.add-form-row{display:flex;gap:4px;}
-.add-form input,.add-form select{background:var(--card2);border:1px solid var(--border);border-radius:5px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;padding:5px 6px;min-width:0;flex:1;}
-.add-form .btn-save{background:var(--blue);border:none;border-radius:5px;color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer;white-space:nowrap;}
-.add-form .btn-cancel{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:12px;padding:5px 8px;cursor:pointer;}
-/* delete bar */
-.del-bar{display:none;flex-shrink:0;background:rgba(248,81,73,.1);border-top:1px solid rgba(248,81,73,.25);padding:6px 10px;justify-content:space-between;align-items:center;}
+/* add/edit form — نافذة عائمة فى منتصف الشاشة */
+.add-form{display:flex;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);width:84vw;max-width:340px;background:var(--card);border-radius:14px;z-index:260;flex-direction:column;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.8);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,transform .25s cubic-bezier(.2,.8,.3,1),visibility .25s;}
+.add-form.show{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+.add-form-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--card2);}
+.add-form-title{font-size:13px;font-weight:800;color:var(--txt);}
+.add-form-body{padding:10px;gap:7px;display:flex;flex-direction:column;}
+.add-form-row{display:flex;gap:6px;}
+.add-form input,.add-form select{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:13px;padding:8px 8px;min-width:0;flex:1;}
+.add-form .btn-save{flex:1;background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:8px 12px;cursor:pointer;white-space:nowrap;}
+.add-form .btn-cancel{flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:13px;padding:8px 8px;cursor:pointer;}
+/* delete/edit bar */
+.del-bar{display:none;flex-shrink:0;background:rgba(248,81,73,.1);border-top:1px solid rgba(248,81,73,.25);padding:6px 10px;justify-content:space-between;align-items:center;gap:6px;}
 .del-bar.show{display:flex;}
-.btn-del{background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 14px;cursor:pointer;}
-.btn-del-cancel{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;}
+.del-bar-actions{display:flex;gap:6px;flex-shrink:0;}
+.btn-del{background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 14px;cursor:pointer;white-space:nowrap;}
+.btn-edit{background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;white-space:nowrap;}
+.btn-del-cancel{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;flex-shrink:0;}
 
 /* ── EXPANDED MODAL (level 2 — ⤢ button) ── */
 .emodal{display:flex;position:fixed;top:4vh;left:50%;transform:translateX(-50%) translateY(14px);width:90vw;max-width:460px;height:90vh;background:var(--bg);border-radius:14px;z-index:250;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
@@ -445,7 +441,8 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title">الدخل</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft btn-ft-add" onclick="toggleForm('income');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('income');event.stopPropagation()" id="sort-income-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('income');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('income');event.stopPropagation()" title="تكبير">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
@@ -457,18 +454,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-income"></tbody>
       </table>
     </div>
-    <div class="add-form" id="form-income">
-      <div class="add-form-row">
-        <input type="text" id="fi-name" placeholder="البند">
-        <input type="number" id="fi-amount" placeholder="المبلغ">
-        <select id="fi-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
-      </div>
-      <div class="add-form-row">
-        <button class="btn-cancel" onclick="toggleForm('income')">إلغاء</button>
-        <button class="btn-save" onclick="saveRow('income')">حفظ</button>
-      </div>
-    </div>
-    <div class="del-bar" id="del-income"><button class="btn-del-cancel" onclick="clearSelection('income')">إلغاء</button><span id="del-income-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelected('income')">🗑 حذف</button></div>
+    <div class="del-bar" id="del-income"><button class="btn-del-cancel" onclick="clearSelection('income')">إلغاء</button><span id="del-income-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('income')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('income')">🗑 حذف</button></div></div>
   </div>
 </div>
 
@@ -477,7 +463,8 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title">المصروفات</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft btn-ft-add" onclick="toggleForm('expense');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('expense');event.stopPropagation()" id="sort-expense-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('expense');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('expense');event.stopPropagation()">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
@@ -489,21 +476,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-expense"></tbody>
       </table>
     </div>
-    <div class="add-form" id="form-expense">
-      <div class="add-form-row">
-        <input type="text" id="fe-name" placeholder="البند">
-        <input type="number" id="fe-amount" placeholder="المبلغ">
-      </div>
-      <div class="add-form-row">
-        <select id="fe-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
-        <select id="fe-cat"><option value="">الفئة</option></select>
-      </div>
-      <div class="add-form-row">
-        <button class="btn-cancel" onclick="toggleForm('expense')">إلغاء</button>
-        <button class="btn-save" onclick="saveRow('expense')">حفظ</button>
-      </div>
-    </div>
-    <div class="del-bar" id="del-expense"><button class="btn-del-cancel" onclick="clearSelection('expense')">إلغاء</button><span id="del-expense-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelected('expense')">🗑 حذف</button></div>
+    <div class="del-bar" id="del-expense"><button class="btn-del-cancel" onclick="clearSelection('expense')">إلغاء</button><span id="del-expense-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('expense')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('expense')">🗑 حذف</button></div></div>
   </div>
 </div>
 
@@ -512,7 +485,8 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title">الالتزامات</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft btn-ft-add" onclick="toggleForm('commit');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('commit');event.stopPropagation()" id="sort-commit-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('commit');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('commit');event.stopPropagation()">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
@@ -524,19 +498,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-commit"></tbody>
       </table>
     </div>
-    <div class="add-form" id="form-commit">
-      <div class="add-form-row">
-        <input type="text" id="fc-name" placeholder="البند">
-        <input type="number" id="fc-req" placeholder="مطلوب">
-        <input type="number" id="fc-paid" placeholder="مدفوع">
-        <select id="fc-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
-      </div>
-      <div class="add-form-row">
-        <button class="btn-cancel" onclick="toggleForm('commit')">إلغاء</button>
-        <button class="btn-save" onclick="saveRow('commit')">حفظ</button>
-      </div>
-    </div>
-    <div class="del-bar" id="del-commit"><button class="btn-del-cancel" onclick="clearSelection('commit')">إلغاء</button><span id="del-commit-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelected('commit')">🗑 حذف</button></div>
+    <div class="del-bar" id="del-commit"><button class="btn-del-cancel" onclick="clearSelection('commit')">إلغاء</button><span id="del-commit-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('commit')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('commit')">🗑 حذف</button></div></div>
   </div>
 </div>
 
@@ -545,7 +507,8 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
   <div class="ftable-hdr">
     <span class="ftable-title" id="ft-debt-title">الديون — دائن</span>
     <div class="ftable-hdr-btns">
-      <button class="btn-ft btn-ft-add" onclick="toggleForm('debt');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('debt');event.stopPropagation()" id="sort-debt-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('debt');event.stopPropagation()" title="إضافة">+</button>
       <button class="btn-ft btn-ft-icon" onclick="openEModal('debt');event.stopPropagation()">⤢</button>
       <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
     </div>
@@ -557,19 +520,83 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-debt"></tbody>
       </table>
     </div>
-    <div class="add-form" id="form-debt">
-      <div class="add-form-row">
-        <input type="text" id="fd-name" placeholder="البند">
-        <input type="number" id="fd-req" placeholder="مطلوب">
-        <select id="fd-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
-        <select id="fd-cat"><option value="الكل">التصنيف</option></select>
-      </div>
-      <div class="add-form-row">
-        <button class="btn-cancel" onclick="toggleForm('debt')">إلغاء</button>
-        <button class="btn-save" onclick="saveRow('debt')">حفظ</button>
-      </div>
+    <div class="del-bar" id="del-debt"><button class="btn-del-cancel" onclick="clearSelection('debt')">إلغاء</button><span id="del-debt-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('debt')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('debt')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<!-- ════ ADD/EDIT FLOATING FORMS (نوافذ عائمة فى منتصف الشاشة) ════ -->
+<div class="add-form" id="form-income">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-income-title">إضافة دخل</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('income')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fi-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fi-amount" placeholder="المبلغ">
+      <select id="fi-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
     </div>
-    <div class="del-bar" id="del-debt"><button class="btn-del-cancel" onclick="clearSelection('debt')">إلغاء</button><span id="del-debt-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelected('debt')">🗑 حذف</button></div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('income')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('income')">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-form" id="form-expense">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-expense-title">إضافة مصروف</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('expense')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fe-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fe-amount" placeholder="المبلغ">
+      <select id="fe-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+    </div>
+    <div class="add-form-row"><select id="fe-cat"><option value="">الفئة</option></select></div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('expense')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('expense')">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-form" id="form-commit">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-commit-title">إضافة التزام</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('commit')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fc-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fc-req" placeholder="مطلوب">
+      <input type="number" id="fc-paid" placeholder="مدفوع">
+    </div>
+    <div class="add-form-row"><select id="fc-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select></div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('commit')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('commit')">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-form" id="form-debt">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-debt-title">إضافة دين</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('debt')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fd-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fd-req" placeholder="مطلوب">
+      <select id="fd-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+    </div>
+    <div class="add-form-row"><select id="fd-cat"><option value="الكل">التصنيف</option></select></div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('debt')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('debt')">حفظ</button>
+    </div>
   </div>
 </div>
 
@@ -577,6 +604,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 <div class="emodal income" id="em-income">
   <div class="emodal-hdr">
     <span class="emodal-title">الدخل — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('income')" id="sort-income-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
     <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
   </div>
   <div class="emodal-body">
@@ -586,13 +614,14 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-income-em"></tbody>
       </table>
     </div>
-    <div class="del-bar" id="del-income-em"><button class="btn-del-cancel" onclick="clearSelectionEM('income')">إلغاء</button><span id="del-income-em-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelectedEM('income')">🗑 حذف</button></div>
+    <div class="del-bar" id="del-income-em"><button class="btn-del-cancel" onclick="clearSelectionEM('income')">إلغاء</button><span id="del-income-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('income')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('income')">🗑 حذف</button></div></div>
   </div>
 </div>
 
 <div class="emodal expense" id="em-expense">
   <div class="emodal-hdr">
     <span class="emodal-title">المصروفات — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('expense')" id="sort-expense-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
     <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
   </div>
   <div class="emodal-body">
@@ -602,13 +631,14 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-expense-em"></tbody>
       </table>
     </div>
-    <div class="del-bar" id="del-expense-em"><button class="btn-del-cancel" onclick="clearSelectionEM('expense')">إلغاء</button><span id="del-expense-em-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelectedEM('expense')">🗑 حذف</button></div>
+    <div class="del-bar" id="del-expense-em"><button class="btn-del-cancel" onclick="clearSelectionEM('expense')">إلغاء</button><span id="del-expense-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('expense')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('expense')">🗑 حذف</button></div></div>
   </div>
 </div>
 
 <div class="emodal commit" id="em-commit">
   <div class="emodal-hdr">
     <span class="emodal-title">الالتزامات — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('commit')" id="sort-commit-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
     <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
   </div>
   <div class="emodal-body">
@@ -618,13 +648,14 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-commit-em"></tbody>
       </table>
     </div>
-    <div class="del-bar" id="del-commit-em"><button class="btn-del-cancel" onclick="clearSelectionEM('commit')">إلغاء</button><span id="del-commit-em-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelectedEM('commit')">🗑 حذف</button></div>
+    <div class="del-bar" id="del-commit-em"><button class="btn-del-cancel" onclick="clearSelectionEM('commit')">إلغاء</button><span id="del-commit-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('commit')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('commit')">🗑 حذف</button></div></div>
   </div>
 </div>
 
 <div class="emodal debt" id="em-debt">
   <div class="emodal-hdr">
     <span class="emodal-title" id="em-debt-title">الديون — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('debt')" id="sort-debt-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
     <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
   </div>
   <div class="emodal-body">
@@ -634,7 +665,7 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
         <tbody id="tbody-debt-em"></tbody>
       </table>
     </div>
-    <div class="del-bar" id="del-debt-em"><button class="btn-del-cancel" onclick="clearSelectionEM('debt')">إلغاء</button><span id="del-debt-em-lbl">تم تحديد سطر</span><button class="btn-del" onclick="deleteSelectedEM('debt')">🗑 حذف</button></div>
+    <div class="del-bar" id="del-debt-em"><button class="btn-del-cancel" onclick="clearSelectionEM('debt')">إلغاء</button><span id="del-debt-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('debt')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('debt')">🗑 حذف</button></div></div>
   </div>
 </div>
 
@@ -705,14 +736,73 @@ tbody tr.selected td{background:rgba(248,81,73,.15)!important;}
 </div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════
+   ملخص مواصفات سريع — لأي تعديل مستقبلي يحتاج فهم القرارات الحالية
+   (آخر تحديث: إعادة تصميم كروت الدخل/المصروفات + تنضيف الكود)
+   ───────────────────────────────────────────────────────────────
+   • شبكة الكروت: الدخل + المصروفات دايمًا جنب بعض فى صف ثابت
+     (.ie-row) فى كل أحجام الشاشات. الالتزامات والديون تتدفق
+     طبيعيًا تحتهم (عمود واحد على الموبايل، جنب بعض على الشاشة
+     الواسعة) — بدون الحاجة لـ grid-template-areas أو ترتيب يدوي.
+   • تصميم الكروت: الدخل/المصروفات بأسلوب "دائرة كبيرة فى النص"
+     (stacked) لأن كل واحد منهم رقم واحد بس. الالتزامات/الديون
+     بأسلوب "شارت جانبى + 3 أرقام" (has-side-chart) لأنهم محتاجين
+     يعرضوا مطلوب/مدفوع/متبقي مع بعض.
+   • معنى كل شارت (نسبة إلى الدخل):
+       - الدخل: % المتبقى من الدخل بعد كل النفقات (إجمالي)
+       - المصروفات: % المصروفات بس (بدون التزامات/ديون) من الدخل
+       - الالتزامات: % المدفوع من الالتزامات من الدخل
+       - الديون: % المدفوع فى التصنيف الحالى (دائن/مدين) من الدخل
+   • دائن/مدين: التبديل بالسحب يمين/يسار على كرت الديون فقط
+     (لا توجد أزرار)، الوضع الحالى يظهر كشارة نص بجانب العنوان.
+   • سداد دين فى وضع "مدين" (dir='for') يُسجَّل تلقائيًا كصف فى
+     جدول الدخل (fromDebt:true) ويتلون مميز فى الجدول.
+   • الحذف فى كل الجداول بالضغط المزدوج على الصف، مش بالضغط الطويل.
+   • drawPercentRing(id,pct,color,opts) دالة عامة لكل الأطواق
+     الأربعة: تقرأ حجم viewBox من الـ SVG نفسه (مش مقاس ثابت)،
+     وتكتب النص إما داخل عنصر HTML خارجى (opts.pctId — مستخدم فى
+     كروت الدخل/المصروفات) أو كنص داخل الـ SVG (لو مفيش pctId —
+     مستخدم فى الالتزامات/الديون). opts.gradient لتدرج لونى اختيارى.
+   ═══════════════════════════════════════════════════════════════ */
 // ══════════════════════════════════════════════
 //  DATA STORE
+//  طبقة تخزين آمنة: بعض متصفحات الموبايل (خصوصًا Safari على iOS)
+//  بتمنع الوصول لـ localStorage مع ملفات مفتوحة بصيغة file://، وده
+//  كان بيكسر التطبيق بالكامل (شاشة فاضية). الحل: لو localStorage
+//  مش متاح، نستخدم تخزين مؤقت بالذاكرة بدل ما نوقف التطبيق.
 // ══════════════════════════════════════════════
 const KEYS={income:'fm_income',expense:'fm_expense',commit:'fm_commit',
   debt_creditor:'fm_debt_creditor',debt_debtor:'fm_debt_debtor',
   debt_cats:'fm_debt_cats',settings:'fm_settings'};
-function loadData(k){return JSON.parse(localStorage.getItem(KEYS[k])||'[]');}
-function saveData(k,v){localStorage.setItem(KEYS[k],JSON.stringify(v));}
+let _memStore={};
+let _storageAvailable=true;
+try{
+  const _t='__fm_probe__';
+  localStorage.setItem(_t,'1');
+  localStorage.removeItem(_t);
+}catch(e){
+  _storageAvailable=false;
+}
+function _getItem(key){
+  if(_storageAvailable){
+    try{return localStorage.getItem(key);}catch(e){_storageAvailable=false;}
+  }
+  return Object.prototype.hasOwnProperty.call(_memStore,key)?_memStore[key]:null;
+}
+function _setItem(key,val){
+  if(_storageAvailable){
+    try{localStorage.setItem(key,val);return;}catch(e){_storageAvailable=false;}
+  }
+  _memStore[key]=val;
+}
+function _removeItem(key){
+  if(_storageAvailable){
+    try{localStorage.removeItem(key);}catch(e){_storageAvailable=false;}
+  }
+  delete _memStore[key];
+}
+function loadData(k){return JSON.parse(_getItem(KEYS[k])||'[]');}
+function saveData(k,v){_setItem(KEYS[k],JSON.stringify(v));}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function fmtDate(d){if(!d)return'';const[,m,day]=d.split('-');return day+'/'+m;}
 function fmt(n){return Number(n||0).toLocaleString('en-US');}
@@ -737,12 +827,27 @@ function inRange(iso,from,to){
   if(to&&d>to)return false;
   return true;
 }
+let sortDir={income:'desc',expense:'desc',commit:'desc',debt:'desc'};
 function filteredData(type){
   const key=type==='debt'?debtKey():type;
   const all=loadData(key);
   const{from,to}=getRange(currentPeriod);
-  const dateFiltered=(!from&&!to)?all:all.filter(r=>inRange(r.date,from,to));
-  return type==='debt'?filterByCat(dateFiltered):dateFiltered;
+  const dateFiltered=(!from&&!to)?all.slice():all.filter(r=>inRange(r.date,from,to));
+  let rows=type==='debt'?filterByCat(dateFiltered):dateFiltered;
+  const dir=sortDir[type]==='asc'?1:-1;
+  rows=rows.slice().sort((a,b)=>{
+    if(a.date<b.date)return -1*dir;
+    if(a.date>b.date)return 1*dir;
+    return 0;
+  });
+  return rows;
+}
+function toggleSort(type){
+  sortDir[type]=sortDir[type]==='asc'?'desc':'asc';
+  const icon=sortDir[type]==='asc'?'⬆️':'⬇️';
+  const b1=document.getElementById('sort-'+type+'-btn');if(b1)b1.textContent=icon;
+  const b2=document.getElementById('sort-'+type+'-em-btn');if(b2)b2.textContent=icon;
+  renderAll();
 }
 function filterByCat(rows){
   if(debtCat==='الكل')return rows;
@@ -767,7 +872,7 @@ function applyCustom(){
 let debtMode='creditor',debtCat='الكل';
 function debtKey(){return debtMode==='creditor'?'debt_creditor':'debt_debtor';}
 function getDebtCats(mode){
-  const s=JSON.parse(localStorage.getItem(KEYS['settings'])||'{}');
+  const s=JSON.parse(_getItem(KEYS['settings'])||'{}');
   const k=mode==='creditor'?'creditorCats':'debtorCats';
   return(s[k]&&s[k].length)?s[k].filter(c=>c!=='الكل'):[];
 }
@@ -850,7 +955,7 @@ function renderIncome(){
   document.getElementById('ct-income-amount').textContent=fmt(total);
   // expanded modal table
   if(currentEM==='income') renderEM('income');
-  bindInlineEdit();updateSummary();drawCharts();
+  bindInlineEdit();updateSummary();
 }
 function renderExpense(){
   const rows=filteredData('expense');
@@ -869,7 +974,7 @@ function renderExpense(){
   });
   document.getElementById('ct-expense-amount').textContent=fmt(total);
   if(currentEM==='expense') renderEM('expense');
-  bindInlineEdit();updateSummary();drawCharts();
+  bindInlineEdit();updateSummary();
 }
 function renderCommit(){
   const rows=filteredData('commit');
@@ -891,7 +996,7 @@ function renderCommit(){
   document.getElementById('ct-commit-paid').textContent=fmt(tPaid);
   document.getElementById('ct-commit-rem').textContent=fmt(tReq-tPaid);
   if(currentEM==='commit') renderEM('commit');
-  bindInlineEdit();updateSummary();drawCharts();
+  bindInlineEdit();updateSummary();
 }
 function renderDebt(){
   const rows=filteredData('debt');
@@ -918,7 +1023,7 @@ function renderDebt(){
   document.getElementById('ct-debt-paid').textContent=fmt(tPaid);
   document.getElementById('ct-debt-rem').textContent=fmt(tReq-tPaid);
   if(currentEM==='debt') renderEM('debt');
-  updateSummary();drawCharts();
+  updateSummary();
 }
 function renderAll(){renderIncome();renderExpense();renderCommit();renderDebt();}
 
@@ -942,6 +1047,13 @@ function updateSummary(){
   const debPaid=Math.max(0,debtNet('debt_debtor'));
   updateRatioBars(income,expense,commitP,credPaid,debPaid,totalExp);
 }
+// ══════════════════════════════════════════════
+//  الدوائر الأربعة بالكروت — كل واحدة بتجاوب على سؤال مختلف:
+//  • الدخل:        كام % فاضل من الدخل لسه (بعد خصم كل النفقات: مصروفات + التزامات + ديون)
+//  • المصروفات:    كام % من الدخل راح على بند "المصروفات" بس (مايشملش التزامات/ديون)
+//  • الالتزامات:   كام % من الدخل اتدفع فى الالتزامات
+//  • الديون:       كام % من الدخل اتحصّل/اتسدد فى التصنيف الحالى (دائن أو مدين، حسب debtMode)
+// ══════════════════════════════════════════════
 function updateRatioBars(income,exp,commitPaid,credPaid,debPaid,totalExp){
   const pct=(v)=>income>0?Math.min(100,Math.round((v/income)*100)):0;
   // كرت الدخل (stacked): نسبة المتبقى من الدخل بعد النفقات
@@ -959,69 +1071,9 @@ function updateRatioBars(income,exp,commitPaid,credPaid,debPaid,totalExp){
 
 // ══════════════════════════════════════════════
 //  MINI CHARTS (SVG)
+//  ملاحظة: شارتات الكروت الأربعة الجانبية تُرسم داخل updateRatioBars
+//  (تُستدعى تلقائيًا من updateSummary، فلا حاجة لدالة drawCharts منفصلة)
 // ══════════════════════════════════════════════
-function drawCharts(){
-  // ملاحظة: شارتات الكروت الأربعة الجانبية تُرسم الآن داخل updateRatioBars (تُستدعى من updateSummary)
-}
-function drawBarChart(id,vals,color){
-  const svg=document.getElementById(id);
-  if(!svg)return;
-  svg.innerHTML='';
-  if(!vals.length){return;}
-  const max=Math.max(...vals,1);
-  const W=70,H=44,gap=2;
-  const bw=Math.max(3,Math.floor((W-(vals.length-1)*gap)/vals.length));
-  vals.forEach((v,i)=>{
-    const bh=Math.max(2,Math.round((v/max)*(H-4)));
-    const x=i*(bw+gap),y=H-bh;
-    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    rect.setAttribute('x',x);rect.setAttribute('y',y);
-    rect.setAttribute('width',bw);rect.setAttribute('height',bh);
-    rect.setAttribute('fill',color);rect.setAttribute('opacity','0.7');
-    rect.setAttribute('rx','2');
-    svg.appendChild(rect);
-  });
-}
-function drawSideDonut(id,paid,remaining,colorPaid,colorRem,kind){
-  const svg=document.getElementById(id);
-  if(!svg)return;
-  svg.innerHTML='';
-  const total=paid+remaining;
-  const cx=27,cy=27,r=20,sw=8;
-  if(total<=0){
-    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);
-    c.setAttribute('fill','none');c.setAttribute('stroke','#2a3240');c.setAttribute('stroke-width',sw);
-    svg.appendChild(c);
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',cx);t.setAttribute('y',cy+4);t.setAttribute('text-anchor','middle');
-    t.setAttribute('font-size','11');t.setAttribute('font-family','Cairo,sans-serif');
-    t.setAttribute('font-weight','700');t.setAttribute('fill','#7a8a9e');
-    t.textContent='—';svg.appendChild(t);
-    return;
-  }
-  const bg=document.createElementNS('http://www.w3.org/2000/svg','circle');
-  bg.setAttribute('cx',cx);bg.setAttribute('cy',cy);bg.setAttribute('r',r);
-  bg.setAttribute('fill','none');bg.setAttribute('stroke','#2a3240');bg.setAttribute('stroke-width',sw);
-  svg.appendChild(bg);
-  const pct=paid/total;
-  const circ=2*Math.PI*r;
-  const dash=pct*circ;
-  const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
-  arc.setAttribute('cx',cx);arc.setAttribute('cy',cy);arc.setAttribute('r',r);
-  arc.setAttribute('fill','none');arc.setAttribute('stroke',colorPaid);arc.setAttribute('stroke-width',sw);
-  arc.setAttribute('stroke-dasharray',`${dash} ${circ-dash}`);
-  arc.setAttribute('stroke-dashoffset',circ/4);
-  arc.setAttribute('stroke-linecap','round');
-  svg.appendChild(arc);
-  const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
-  txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
-  txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size','12');
-  txt.setAttribute('font-family','Cairo,sans-serif');txt.setAttribute('font-weight','800');
-  txt.setAttribute('fill','#dde4ef');
-  txt.textContent=Math.round(pct*100)+'%';
-  svg.appendChild(txt);
-}
 // طوق واحد يعبّر عن نسبة مئوية مباشرة (مستخدم لكرت الدخل: نسبة النفقات/الدخل)
 function drawPercentRing(id,pct,color,opts){
   opts=opts||{};
@@ -1082,30 +1134,9 @@ function drawPercentRing(id,pct,color,opts){
     svg.appendChild(txt);
   }
 }
-// ٣ أطواق متداخلة لعرض عدة نسب معًا (مستخدم لكرت المصروفات: مصروفات/التزامات/سداد ديون)
-function drawTripleRing(id,rings){
-  const svg=document.getElementById(id);
-  if(!svg)return;
-  svg.innerHTML='';
-  const cx=27,cy=27,sw=4.5;
-  rings.forEach(ring=>{
-    const p=Math.max(0,Math.min(100,ring.pct));
-    const bg=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    bg.setAttribute('cx',cx);bg.setAttribute('cy',cy);bg.setAttribute('r',ring.r);
-    bg.setAttribute('fill','none');bg.setAttribute('stroke','#2a3240');bg.setAttribute('stroke-width',sw);
-    svg.appendChild(bg);
-    const circ=2*Math.PI*ring.r;
-    const dash=(p/100)*circ;
-    const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    arc.setAttribute('cx',cx);arc.setAttribute('cy',cy);arc.setAttribute('r',ring.r);
-    arc.setAttribute('fill','none');arc.setAttribute('stroke',ring.color);arc.setAttribute('stroke-width',sw);
-    arc.setAttribute('stroke-dasharray',`${dash} ${circ-dash}`);
-    arc.setAttribute('stroke-dashoffset',circ/4);
-    arc.setAttribute('stroke-linecap','round');
-    svg.appendChild(arc);
-  });
-}
-// (تم حذف drawDonut القديم — استُبدل بـ drawSideDonut)
+// ══════════════════════════════════════════════
+//  RATIO BARS UPDATE
+// ══════════════════════════════════════════════
 
 // ══════════════════════════════════════════════
 //  FLOATING TABLE (level 1)
@@ -1221,8 +1252,7 @@ function renderEM(type){
   setTimeout(bindInlineEdit,50);
 }
 
-// EM long press → select → delete
-let emPressTimer=null;
+// EM: ضغط مزدوج على الصف → تحديد → حذف
 function bindEMLP(tr,type){
   if(!emSelected[type])emSelected[type]=new Set();
   let last=0;
@@ -1456,16 +1486,80 @@ function deleteSelected(type){
 }
 
 // ══════════════════════════════════════════════
-//  ADD ROW
+//  ADD / EDIT ROW (نافذة عائمة فى منتصف الشاشة)
 // ══════════════════════════════════════════════
-function toggleForm(type){
-  const f=document.getElementById('form-'+type);
-  f.classList.toggle('show');
-  if(f.classList.contains('show')){
-    setupAutocomplete(type);
-    if(type==='debt')refreshDebtCatSelect();
-    if(type==='expense')refreshExpenseCatSelect();
+let _editIdx={income:null,expense:null,commit:null,debt:null};
+const FORM_FIELDS={
+  income:['fi-name','fi-amount','fi-pay'],
+  expense:['fe-name','fe-amount','fe-pay','fe-cat'],
+  commit:['fc-name','fc-req','fc-paid','fc-pay'],
+  debt:['fd-name','fd-req','fd-pay','fd-cat']
+};
+const FORM_ADD_TITLE={income:'إضافة دخل',expense:'إضافة مصروف',commit:'إضافة التزام',debt:'إضافة دين'};
+const FORM_EDIT_TITLE={income:'تعديل دخل',expense:'تعديل مصروف',commit:'تعديل التزام',debt:'تعديل دين'};
+function clearFormFields(type){
+  (FORM_FIELDS[type]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function showForm(type){
+  document.getElementById('form-'+type).classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+  setupAutocomplete(type);
+  if(type==='debt')refreshDebtCatSelect();
+  if(type==='expense')refreshExpenseCatSelect();
+}
+function closeForm(type){
+  document.getElementById('form-'+type).classList.remove('show');
+  _editIdx[type]=null;
+  if(!currentFT&&!currentEM&&debtHistIdx===null)document.getElementById('overlay').classList.remove('show');
+}
+function openAddForm(type){
+  _editIdx[type]=null;
+  clearFormFields(type);
+  const title=document.getElementById('form-'+type+'-title');
+  if(title)title.textContent=FORM_ADD_TITLE[type]||'إضافة';
+  showForm(type);
+}
+function populateFormForEdit(type,idx){
+  const key=type==='debt'?debtKey():type;
+  const arr=loadData(key);
+  const r=arr[idx];
+  if(!r)return;
+  _editIdx[type]=idx;
+  showForm(type);
+  if(type==='income'){
+    document.getElementById('fi-name').value=r.name||'';
+    document.getElementById('fi-amount').value=r.amount||'';
+    document.getElementById('fi-pay').value=r.pay||'';
+  } else if(type==='expense'){
+    document.getElementById('fe-name').value=r.name||'';
+    document.getElementById('fe-amount').value=r.amount||'';
+    document.getElementById('fe-pay').value=r.pay||'';
+    document.getElementById('fe-cat').value=r.cat||'';
+  } else if(type==='commit'){
+    document.getElementById('fc-name').value=r.name||'';
+    document.getElementById('fc-req').value=r.req||'';
+    document.getElementById('fc-paid').value=r.paid||'';
+    document.getElementById('fc-pay').value=r.pay||'';
+  } else if(type==='debt'){
+    document.getElementById('fd-name').value=r.name||'';
+    document.getElementById('fd-req').value=r.req||'';
+    document.getElementById('fd-pay').value=r.pay||'';
+    document.getElementById('fd-cat').value=r.cat||'الكل';
   }
+  const title=document.getElementById('form-'+type+'-title');
+  if(title)title.textContent=FORM_EDIT_TITLE[type]||'تعديل';
+}
+function editSelected(type){
+  if(!_sel[type]||_sel[type].size!==1){alert('اختر سطر واحد بس للتعديل');return;}
+  const idx=[..._sel[type]][0];
+  clearSelection(type);
+  populateFormForEdit(type,idx);
+}
+function editSelectedEM(type){
+  if(!emSelected[type]||emSelected[type].size!==1){alert('اختر سطر واحد بس للتعديل');return;}
+  const idx=[...emSelected[type]][0];
+  clearSelectionEM(type);
+  populateFormForEdit(type,idx);
 }
 function getExpenseCats(){
   const s=getSettings();
@@ -1501,10 +1595,12 @@ function saveRow(type){
     const pay=document.getElementById('fi-pay').value;
     if(!name||!amount)return;
     const arr=loadData('income');
-    arr.push({name,amount:Number(amount),pay,date:todayStr()});
+    if(_editIdx.income!=null&&arr[_editIdx.income]){
+      arr[_editIdx.income]={...arr[_editIdx.income],name,amount:Number(amount),pay};
+    } else {
+      arr.push({name,amount:Number(amount),pay,date:todayStr()});
+    }
     saveData('income',arr);
-    document.getElementById('fi-name').value='';
-    document.getElementById('fi-amount').value='';
     renderIncome();
   } else if(type==='expense'){
     const name=document.getElementById('fe-name').value.trim();
@@ -1513,10 +1609,12 @@ function saveRow(type){
     const cat=document.getElementById('fe-cat')?.value||'';
     if(!name||!amount)return;
     const arr=loadData('expense');
-    arr.push({name,amount:Number(amount),pay,cat,date:todayStr()});
+    if(_editIdx.expense!=null&&arr[_editIdx.expense]){
+      arr[_editIdx.expense]={...arr[_editIdx.expense],name,amount:Number(amount),pay,cat};
+    } else {
+      arr.push({name,amount:Number(amount),pay,cat,date:todayStr()});
+    }
     saveData('expense',arr);
-    document.getElementById('fe-name').value='';
-    document.getElementById('fe-amount').value='';
     renderExpense();
   } else if(type==='commit'){
     const name=document.getElementById('fc-name').value.trim();
@@ -1525,11 +1623,12 @@ function saveRow(type){
     const pay=document.getElementById('fc-pay').value;
     if(!name||!req)return;
     const arr=loadData('commit');
-    arr.push({name,req:Number(req),paid:Number(paid),pay,date:todayStr()});
+    if(_editIdx.commit!=null&&arr[_editIdx.commit]){
+      arr[_editIdx.commit]={...arr[_editIdx.commit],name,req:Number(req),paid:Number(paid),pay};
+    } else {
+      arr.push({name,req:Number(req),paid:Number(paid),pay,date:todayStr()});
+    }
     saveData('commit',arr);
-    document.getElementById('fc-name').value='';
-    document.getElementById('fc-req').value='';
-    document.getElementById('fc-paid').value='';
     renderCommit();
   } else if(type==='debt'){
     const name=document.getElementById('fd-name').value.trim();
@@ -1538,12 +1637,15 @@ function saveRow(type){
     const cat=document.getElementById('fd-cat')?.value||'الكل';
     if(!name||!req)return;
     const arr=loadData(debtKey());
-    arr.push({name,req:Number(req),transactions:[],pay,cat,date:todayStr()});
+    if(_editIdx.debt!=null&&arr[_editIdx.debt]){
+      arr[_editIdx.debt]={...arr[_editIdx.debt],name,req:Number(req),pay,cat};
+    } else {
+      arr.push({name,req:Number(req),transactions:[],pay,cat,date:todayStr()});
+    }
     saveData(debtKey(),arr);
-    document.getElementById('fd-name').value='';
-    document.getElementById('fd-req').value='';
     renderDebt();
   }
+  closeForm(type);
 }
 
 // ══════════════════════════════════════════════
@@ -1611,8 +1713,8 @@ function saveDebtTransaction(){
   const txnDate=todayStr();
   arr[debtHistIdx].transactions.push({amount,details,pay,dir,date:txnDate});
   saveData(debtKey(),arr);
-  // عند سداد أحد المدينين (تصنيف دائن) لمبلغ من المديونية عليه: يُسجَّل تلقائيًا فى جدول الدخل
-  if(debtMode==='creditor'&&dir==='for'){
+  // عند تسجيل سداد (dir='for') فى قسم "مدين": يُسجَّل تلقائيًا فى جدول الدخل
+  if(debtMode==='debtor'&&dir==='for'){
     addAutoIncomeFromDebtPayment(debtorName,amount,pay,txnDate);
   }
   document.getElementById('dhm-amount').value='';
@@ -1620,6 +1722,9 @@ function saveDebtTransaction(){
   document.getElementById('dhm-pay').value='';
   updateHistHeader(arr[debtHistIdx]);renderStatementList(arr[debtHistIdx]);renderDebt();
 }
+// ملحوظة: بتتنفذ فقط لما debtMode==='debtor' و dir==='for' (شوف saveDebtTransaction).
+// ملحوظة مهمة: لو اتحذفت معاملة السداد دى من سجل الدين بعد كده، صف الدخل المرتبط بيها
+// مش بيتحذف تلقائيًا معاها — لسه مفيش ربط ثنائى الاتجاه بين الاتنين.
 function addAutoIncomeFromDebtPayment(debtorName,amount,pay,date){
   const inc=loadData('income');
   inc.push({name:`سداد دين — ${debtorName}`,amount,pay,date,fromDebt:true});
@@ -1650,8 +1755,8 @@ function overlayClick(){
 // ══════════════════════════════════════════════
 //  SETTINGS
 // ══════════════════════════════════════════════
-function getSettings(){return JSON.parse(localStorage.getItem(KEYS['settings'])||'{}');}
-function saveAllSettings(s){localStorage.setItem(KEYS['settings'],JSON.stringify(s));}
+function getSettings(){return JSON.parse(_getItem(KEYS['settings'])||'{}');}
+function saveAllSettings(s){_setItem(KEYS['settings'],JSON.stringify(s));}
 function saveSetting(k,v){const s=getSettings();s[k]=v;saveAllSettings(s);}
 function showPage(page){
   document.getElementById('pg-home').style.display='none';
@@ -1780,8 +1885,8 @@ function importData(e){
   reader.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);
-      Object.keys(KEYS).forEach(k=>{const v=data[k]||data[KEYS[k]];if(v)localStorage.setItem(KEYS[k],JSON.stringify(v));});
-      if(data['fm_settings'])localStorage.setItem('fm_settings',JSON.stringify(data['fm_settings']));
+      Object.keys(KEYS).forEach(k=>{const v=data[k]||data[KEYS[k]];if(v)_setItem(KEYS[k],JSON.stringify(v));});
+      if(data['fm_settings'])_setItem('fm_settings',JSON.stringify(data['fm_settings']));
       alert('تم الاستيراد بنجاح ✅');location.reload();
     }catch(err){alert('خطأ في الملف ❌');}
   };
@@ -1789,7 +1894,7 @@ function importData(e){
 }
 function clearAllData(){
   if(!confirm('هل أنت متأكد؟'))return;
-  Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
+  Object.values(KEYS).forEach(k=>_removeItem(k));
   location.reload();
 }
 
@@ -1803,18 +1908,18 @@ function seedDemo(){
   if(!loadData('commit').length)saveData('commit',[{name:'إيجار المنزل',req:2500,paid:2500,pay:'تحويل بنكي',date:d(1)},{name:'كهرباء',req:350,paid:350,pay:'تحويل بنكي',date:d(2)},{name:'مياه',req:200,paid:200,pay:'تحويل بنكي',date:d(2)},{name:'إنترنت',req:250,paid:250,pay:'بطاقة',date:d(3)},{name:'تأمين طبي',req:600,paid:600,pay:'تحويل بنكي',date:d(5)},{name:'أقساط سيارة',req:1800,paid:1800,pay:'تحويل بنكي',date:d(7)},{name:'قرض شخصي',req:1200,paid:1200,pay:'تحويل بنكي',date:d(10)},{name:'صيانة دورية',req:400,paid:400,pay:'كاش',date:d(20)}]);
   if(!loadData('debt_creditor').length)saveData('debt_creditor',[{name:'أحمد',req:1500,transactions:[{amount:1500,pay:'كاش',dir:'for',date:d(2)}],cat:'مجدولة',date:d(2)},{name:'محمد',req:700,transactions:[{amount:500,pay:'تحويل بنكي',dir:'for',date:d(4)}],cat:'مجدولة',date:d(4)},{name:'شركة X',req:2000,transactions:[],cat:'غير مجدولة',date:d(10)}]);
   if(!loadData('debt_debtor').length)saveData('debt_debtor',[{name:'علي',req:1200,transactions:[{amount:1200,pay:'كاش',dir:'for',date:d(6)}],cat:'مجدولة',date:d(6)},{name:'محمود',req:950,transactions:[{amount:400,pay:'تحويل',dir:'for',date:d(8)}],cat:'غير مجدولة',date:d(8)}]);
-  let s=JSON.parse(localStorage.getItem('fm_settings')||'{}');
+  let s=JSON.parse(_getItem('fm_settings')||'{}');
   if(!s.creditorCats)s.creditorCats=['مجدولة','غير مجدولة'];
   if(!s.debtorCats)s.debtorCats=['مجدولة','غير مجدولة'];
   if(!s.payMethods)s.payMethods=['كاش','تحويل بنكي','بطاقة','instapay'];
   if(!s.expenseCats)s.expenseCats=['طعام','مواصلات','فواتير','ترفيه','صحة','ملابس','أخرى'];
-  localStorage.setItem('fm_settings',JSON.stringify(s));
+  _setItem('fm_settings',JSON.stringify(s));
 }
 
 // ── INIT ──
 (function migrate(){
-  const old=localStorage.getItem('fm_debt');
-  if(old&&!localStorage.getItem('fm_debt_creditor')){localStorage.setItem('fm_debt_creditor',old);localStorage.removeItem('fm_debt');}
+  const old=_getItem('fm_debt');
+  if(old&&!_getItem('fm_debt_creditor')){_setItem('fm_debt_creditor',old);_removeItem('fm_debt');}
 })();
 seedDemo();
 renderDebtCats();
@@ -1826,7 +1931,7 @@ document.getElementById('pg-home').style.display='flex';
 
 // Auto backup reminder every 7 days
 (function checkBackupReminder(){
-  const last=localStorage.getItem('fm_last_backup');
+  const last=_getItem('fm_last_backup');
   const now=Date.now();
   if(!last||now-Number(last)>7*24*60*60*1000){
     setTimeout(()=>{
@@ -1838,7 +1943,7 @@ document.getElementById('pg-home').style.display='flex';
 </script>
 <!-- BACKUP REMINDER FAB -->
 <div id="backup-fab" style="display:none;position:fixed;bottom:70px;left:12px;z-index:150;flex-direction:column;align-items:flex-start;gap:5px;">
-  <div style="background:#1a73e8;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(26,115,232,.4);cursor:pointer;" onclick="exportAndShare();localStorage.setItem('fm_last_backup',Date.now());document.getElementById('backup-fab').style.display='none';">
+  <div style="background:#1a73e8;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(26,115,232,.4);cursor:pointer;" onclick="exportAndShare();_setItem('fm_last_backup',Date.now());document.getElementById('backup-fab').style.display='none';">
     <span style="font-size:18px;">☁️</span>
     <div>
       <div style="font-size:11px;font-weight:800;color:#fff;">احفظ على Drive</div>
