@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>المدير المالي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1318;--card:#181e26;--card2:#1e2530;
+  --hi:#1f4028;--he:#1a2c42;--hc:#3d1c1c;--hd:#352c08;
+  --border:#2a3240;
+  --green:#3ecf6a;--red:#f05454;--yellow:#e0b030;--blue:#4da8f0;
+  --txt:#dde4ef;--muted:#7a8a9e;--row:rgba(255,255,255,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;display:flex;flex-direction:column;}
+
+/* ── TOP SUMMARY ── */
+.top-bar{flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:6px 8px;position:relative;}
+.sum3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;}
+.sum-box{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 6px;text-align:center;}
+.sum-box .lbl{font-size:9px;color:var(--muted);}
+.sum-box .val{font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:3px;}
+.ico{font-size:12px;}
+.cv-g{color:var(--green);}.cv-r{color:var(--red);}.cv-b{color:var(--blue);}.cv-y{color:var(--yellow);}.cv-m{color:var(--muted);}
+
+/* period tabs */
+.ptabs{display:flex;gap:3px;position:relative;}
+.ptab{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 1px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;}
+.ptab.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.custom-picker{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;z-index:400;flex-direction:column;gap:7px;}
+.custom-picker.show{display:flex;}
+.custom-picker label{font-size:11px;color:var(--muted);display:block;margin-bottom:2px;}
+.custom-picker input[type=date]{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;}
+.custom-picker .btn-apply{background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:6px;cursor:pointer;}
+
+/* ── CARDS GRID: الدخل/المصروفات صف ثابت دايمًا، الباقى يتدفق طبيعيًا ── */
+.cards-grid-2col{flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:1fr;grid-auto-rows:min-content;gap:8px;padding-bottom:100px;scrollbar-width:none;align-content:start;}
+.cards-grid-2col::-webkit-scrollbar{display:none;}
+/* صف الدخل/المصروفات: عمودين دايمًا فى كل أحجام الشاشات */
+.ie-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media (min-width:521px){
+  .cards-grid-2col{grid-template-columns:1fr 1fr;}
+  .ie-row{grid-column:1/-1;}
+}
+
+/* شارت على يسار الكرت (commit/debt) — موضع افتراضي */
+.scard.has-side-chart{padding-left:60px;}
+.scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
+.scard-side-chart svg{width:54px;height:54px;opacity:.85;}
+
+/* عكس موضع الشارت: على اليمين (side-chart-right) — الشارت يمين، الـ accent يمين (من الطرف) */
+.scard.has-side-chart.side-chart-right{padding-left:0;padding-right:60px;}
+.scard.has-side-chart.side-chart-right .scard-side-chart{left:auto;right:0;}
+/* في RTL: الـ accent هو أول عنصر فيزيائياً في الـ inner، فيظهر يمين. للحفاظ على مظهره عند قلب ترتيب المحتوى للـ chart يمين، نعكس ترتيب الـ inner */
+.scard.has-side-chart.side-chart-right .scard-inner{flex-direction:row-reverse;}
+.scard.has-side-chart.side-chart-right .scard-accent{border-radius:14px 0 0 14px;}
+
+/* ── CHART PANEL: نسبة للدخل ── */
+.chart-panel{background:linear-gradient(180deg,#1a2230 0%,var(--card) 100%);border:1px solid var(--border);border-radius:16px;padding:10px 8px;display:flex;flex-direction:column;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);}
+.chart-panel-title{font-size:10px;font-weight:800;color:var(--txt);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.chart-bars{display:flex;flex-direction:column;gap:14px;}
+.chart-bar-item{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.chart-bar-item .cbl{font-size:9px;color:var(--muted);text-align:center;line-height:1.2;min-height:22px;display:flex;align-items:center;justify-content:center;}
+.chart-bar-item .cbv{font-size:11px;font-weight:800;}
+.chart-bar-track{width:100%;height:10px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.05);}
+.chart-bar-fill{height:100%;border-radius:5px;transition:width .4s ease;min-width:0;}
+
+@media (max-width:520px){
+  .cards-grid-2col{grid-template-columns:1fr;}
+  .scard.has-side-chart{padding-left:55px;}
+  .scard-side-chart{width:50px;}
+  .scard-side-chart svg{width:46px;height:46px;}
+}
+
+/* ── SUMMARY CARD ── */
+.scard{position:relative;padding:0;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .1s,box-shadow .2s;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);}
+.scard:active{transform:scale(.99);}
+.scard-inner{display:flex;align-items:stretch;min-height:90px;border-radius:14px;}
+.scard.income  .scard-inner,
+.scard.expense .scard-inner,
+.scard.commit  .scard-inner,
+.scard.debt    .scard-inner{background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(120,140,170,.18);}
+/* left accent bar */
+.scard.income  .scard-accent,
+.scard.expense .scard-accent,
+.scard.commit  .scard-accent,
+.scard.debt    .scard-accent{background:linear-gradient(180deg,#5a8fb5 0%,#3d6c8e 100%);}
+
+.scard-accent{width:5px;flex-shrink:0;border-radius:14px 0 0 14px;}
+.scard-content{flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;}
+
+/* ── كرت الدخل/المصروفات بأسلوب كرت المخزون: العنوان فوق، دائرة كبيرة فى النص، الرقم تحت ── */
+.scard.stacked{display:flex;flex-direction:column;padding:10px 8px 12px;min-height:185px;}
+.scard.stacked .scard-inner{background:transparent;border:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;border-radius:0;min-height:0;}
+.scard.stacked .scard-accent{display:none;}
+.scard.stacked .scard-content{padding:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;background:transparent;}
+.scard.stacked .scard-top{width:100%;justify-content:flex-start;margin-bottom:0;}
+.scard.stacked .scard-title{background:none;border:none;padding:0;font-size:13px;}
+.scard.stacked .scard-title .scard-ico{width:26px;height:26px;border-radius:9px;background:rgba(120,140,170,.15);color:#9bb4cf;}
+.scard.stacked .scard-title .scard-ico svg{width:15px;height:15px;}
+.scard.income.stacked .scard-title .scard-ico{background:rgba(62,207,106,.16);color:#3ecf6a;}
+.scard.expense.stacked .scard-title .scard-ico{background:rgba(77,168,240,.16);color:#4da8f0;}
+.scard.stacked .scard-center{width:88px;height:88px;display:flex;align-items:center;justify-content:center;position:relative;margin:2px 0;}
+.scard.stacked .scard-center svg{width:88px;height:88px;}
+.scard.stacked .scard-center .ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;}
+.scard.stacked .scard-center .ring-pct{font-size:17px;font-weight:800;color:#dde4ef;}
+.scard.stacked .scard-center .ring-sub{font-size:8px;color:rgba(255,255,255,.45);font-weight:600;margin-top:2px;}
+.scard.stacked .scard-nums{justify-content:center;align-items:center;gap:2px;flex-direction:column;width:100%;}
+.scard.stacked .scard-num{align-items:center;gap:0px;text-align:center;}
+.scard.stacked .scard-num-lbl{font-size:9px;color:rgba(255,255,255,.5);}
+.scard.stacked .scard-num-val{font-size:18px;font-weight:800;color:#e6edf7;}
+
+/* كرت الدخل+المصروفات: مدمجين مع شارت واحد يمثّل الدخل/النفقات */
+.income-expense-row{display:flex;gap:6px;align-items:stretch;}
+.income-expense-row .scard{flex:1;min-width:0;}
+.ie-shared-chart{flex:0 0 auto;width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.03);border:1px solid rgba(120,140,170,.15);border-radius:13px;padding:6px 4px;gap:3px;}
+.ie-shared-chart svg{width:54px;height:54px;opacity:.85;}
+.ie-shared-chart .ie-lbl{font-size:8px;color:var(--muted);text-align:center;line-height:1.1;}
+
+/* شارت خاص داخل scard.commit / scard.debt — مقلّص */
+.scard.commit .scard-chart,
+.scard.debt .scard-chart{width:42px;height:32px;}
+.scard-chart{width:42px;height:32px;}/* SVG chart area */
+.scard-nums{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
+.scard-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;}
+.scard-title{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#dde4ef;background:rgba(120,140,170,.1);border:1px solid rgba(120,140,170,.18);border-radius:7px;padding:3px 8px 3px 6px;line-height:1;}
+.scard-title .scard-ico{width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;color:#9bb4cf;flex-shrink:0;}
+.scard-title .scard-ico svg{width:14px;height:14px;display:block;}
+.scard-num{display:flex;flex-direction:column;}
+.scard-num-lbl{font-size:9px;color:rgba(255,255,255,.5);line-height:1;font-weight:600;}
+.scard-num-val{font-size:16px;font-weight:800;line-height:1.1;color:#e6edf7;}
+.cv-num-red{color:var(--red)!important;}
+.cv-num-green{color:var(--green)!important;}
+.cv-num-yellow{color:var(--yellow)!important;}
+.cv-num-blue{color:var(--blue)!important;}
+/* debt extra: mode label (badge — not clickable, التبديل بالتمرير) */
+.debt-mode-label{display:inline-block;font-size:10px;font-weight:800;padding:2px 9px;border-radius:6px;background:rgba(120,140,170,.25);color:#a8c0d8;border:1px solid rgba(120,140,170,.4);}
+.scard.debt.debtor-mode .debt-mode-label{background:rgba(120,140,170,.45);color:#cfdcec;}
+
+/* ── OVERLAY ── */
+.overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:199;backdrop-filter:blur(3px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,visibility .28s;}
+.overlay.show{opacity:1;visibility:visible;pointer-events:auto;}
+
+/* ── FLOATING TABLE WINDOW (level 1 — card tap) ── */
+.ftable{display:flex;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);width:84vw;max-width:380px;max-height:75vh;background:var(--card);border-radius:14px;z-index:200;flex-direction:column;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.8);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
+.ftable.debt{height:75vh;}
+.ftable.show{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+.ftable-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;}
+.ftable.income  .ftable-hdr{background:var(--hi);}
+.ftable.expense .ftable-hdr{background:var(--he);}
+.ftable.commit  .ftable-hdr{background:var(--hc);}
+.ftable.debt    .ftable-hdr{background:var(--hd);}
+.ftable.debt.debtor-mode .ftable-hdr{background:var(--hi);}
+.ftable-title{font-size:14px;font-weight:800;color:#fff;}
+.ftable-hdr-btns{display:flex;gap:5px;align-items:center;}
+.btn-ft{height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:0 8px;display:flex;align-items:center;gap:3px;}
+.btn-ft-icon{width:24px;padding:0;justify-content:center;font-size:17px;font-weight:800;}
+.btn-ft-add{width:24px;padding:0;justify-content:center;font-size:19px;font-weight:800;line-height:1;}
+/* table body */
+.ftable-body{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg);}
+.tbl-wrap{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#2a3240 transparent;}
+tbody tr{vertical-align:bottom;border-bottom:1px dotted #ffffff;}
+.tbl-wrap::-webkit-scrollbar{width:3px;}
+.tbl-wrap::-webkit-scrollbar-thumb{background:#2a3240;border-radius:3px;}
+table{width:100%;border-collapse:collapse;table-layout:fixed;}
+thead tr th{position:sticky;top:0;z-index:2;background:#253445;padding:4px 5px;font-size:10px;font-weight:700;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.08);text-align:center;white-space:nowrap;}
+thead tr th:first-child{text-align:right;padding-right:10px;}
+tbody tr td{padding:7px 5px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:34px;user-select:none;-webkit-user-select:none;background:#2d3f52;vertical-align:bottom;}
+tbody tr:nth-child(even) td{background:#253445;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(255,255,255,.07)!important;}
+tbody tr.selected td{background:rgba(248,81,73,.2)!important;}
+.td-name{color:var(--txt);font-size:13px;font-weight:400;text-align:right;padding-right:10px!important;display:flex;align-items:center;justify-content:space-between;gap:3px;}
+.td-name.from-debt,.td-name.is-loan{font-weight:600;}
+.td-g,.td-b,.td-r,.td-y,.td-rp,.td-rn,.scard-num-val,.cv-num-green,.cv-num-red,.cv-num-yellow,.cv-num-blue{font-weight:800!important;}
+.td-g{color:var(--green);font-weight:700;text-align:center;}
+.td-b{color:var(--blue);font-weight:700;text-align:center;}
+.td-r{color:var(--red);font-weight:700;text-align:center;}
+.td-y{color:var(--yellow);font-weight:700;text-align:center;}
+.td-m{color:var(--muted);font-size:11px;text-align:center;}
+.td-z{color:#3a4455;font-weight:700;text-align:center;}
+.td-rp{color:var(--green);font-weight:700;text-align:center;}
+.td-rn{color:var(--red);font-weight:700;text-align:center;}
+.td-edit{cursor:text;}
+.td-edit:hover td,.td-edit:hover{background:rgba(77,168,240,.08)!important;}
+.td-cat{padding:1px 2px!important;vertical-align:middle;}
+.cat-sel{width:100%;background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:3px;color:rgba(255,255,255,.65);font-family:'Cairo',sans-serif;font-size:9px;padding:0;cursor:pointer;height:16px;line-height:16px;overflow-y:auto;appearance:none;-webkit-appearance:none;text-align:center;}
+.td-name.from-debt{color:var(--yellow);font-weight:800;}
+.td-name.is-loan{color:#ff6b6b;font-weight:800;}
+.td-date{cursor:pointer;}
+/* add/edit form — نافذة عائمة فى منتصف الشاشة */
+.add-form{display:flex;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);width:84vw;max-width:340px;background:var(--card);border-radius:14px;z-index:260;flex-direction:column;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.8);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,transform .25s cubic-bezier(.2,.8,.3,1),visibility .25s;}
+.add-form.show{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+.add-form-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--card2);}
+.add-form-title{font-size:13px;font-weight:800;color:var(--txt);}
+.add-form-body{padding:10px;gap:7px;display:flex;flex-direction:column;}
+.add-form-row{display:flex;gap:6px;}
+.add-form input,.add-form select{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:13px;padding:8px 8px;min-width:0;flex:1;}
+.add-form .btn-save{flex:1;background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:8px 12px;cursor:pointer;white-space:nowrap;}
+.add-form .btn-cancel{flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:13px;padding:8px 8px;cursor:pointer;}
+.btn-loan-toggle{flex:1;background:rgba(179,136,255,.1);border:1px solid rgba(179,136,255,.35);border-radius:6px;color:#b388ff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:8px;cursor:pointer;transition:all .15s;}
+.btn-loan-toggle.active{background:#b388ff;border-color:#b388ff;color:#1a1a2e;}
+/* delete/edit bar */
+.del-bar{display:none;flex-shrink:0;background:rgba(248,81,73,.1);border-top:1px solid rgba(248,81,73,.25);padding:6px 10px;justify-content:space-between;align-items:center;gap:6px;}
+.del-bar.show{display:flex;}
+.del-bar-actions{display:flex;gap:6px;flex-shrink:0;}
+.btn-del{background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 14px;cursor:pointer;white-space:nowrap;}
+.btn-edit{background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;white-space:nowrap;}
+.btn-del-cancel{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;flex-shrink:0;}
+
+/* ── EXPANDED MODAL (level 2 — ⤢ button) ── */
+.emodal{display:flex;position:fixed;top:2vh;left:50%;transform:translateX(-50%) translateY(14px);width:96vw;max-width:600px;height:96vh;background:var(--bg);border-radius:14px;z-index:250;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
+.emodal.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+.emodal-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 13px;}
+.emodal.income  .emodal-hdr{background:var(--hi);}
+.emodal.expense .emodal-hdr{background:var(--he);}
+.emodal.commit  .emodal-hdr{background:var(--hc);}
+.emodal.debt    .emodal-hdr{background:var(--hd);}
+.emodal.debt.debtor-mode .emodal-hdr{background:var(--hi);}
+.emodal-title{font-size:15px;font-weight:800;color:#fff;}
+.emodal-body{flex:1;display:flex;flex-direction:column;min-height:0;}
+.emodal .tbl-wrap{max-height:calc(90vh - 120px);}
+/* emodal: البند في سطر واحد + باقي الأعمدة مضغوطة */
+.emodal table{table-layout:auto;}
+#em-expense table{table-layout:fixed;}
+.emodal tbody td:nth-child(2){white-space:nowrap;overflow:visible;text-overflow:clip;word-break:normal;vertical-align:bottom;}
+/* ضغط أعمدة الأرقام + التاريخ + طريقة الدفع، وتمدد البند */
+.emodal table colgroup col:nth-child(1){width:auto;}     /* التاريخ */
+.emodal table colgroup col:nth-child(2){width:100%;}     /* البند — يتمدد */
+.emodal table colgroup col:nth-child(3){width:1%;}      /* أرقام — تضيق لأقصى حد */
+.emodal table colgroup col:nth-child(4){width:1%;}      /* أرقام — تضيق لأقصى حد */
+.emodal table colgroup col:nth-child(5){width:auto;}     /* طريقة الدفع */
+/* تقليص الخط تلقائي للأرقام + التاريخ + الدفع حتى تبقى في سطر واحد */
+.emodal tbody td{font-size:12px;}
+.emodal tbody td.td-edit,
+.emodal tbody td.td-g,
+.emodal tbody td.td-b,
+.emodal tbody td.td-r,
+.emodal tbody td.td-y,
+.emodal tbody td.td-m,
+.emodal tbody td.td-z{padding-left:4px;padding-right:4px;white-space:nowrap;overflow:hidden;}
+.emodal tbody td.td-m{font-size:10px;}
+
+/* debt hist btn */
+.dhb{background:none;border:none;color:rgba(255,255,255,.35);font-size:10px;width:17px;height:17px;cursor:pointer;padding:0;flex-shrink:0;}
+.dhb:hover{color:var(--yellow);}
+
+/* ── AUTOFIT-FONT: تصغير تلقائي للخط حسب طول المحتوى ── */
+.emodal tbody td.fit-font{position:relative;}
+.emodal tbody td.fit-font > span.autofit{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:clip;}
+
+/* ── DEBT HISTORY MODAL ── */
+#dhm{display:flex;position:fixed;top:5vh;left:50%;transform:translateX(-50%) translateY(14px);width:86vw;max-width:380px;height:88vh;background:var(--card);border:1px solid var(--border);border-radius:14px;z-index:300;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
+#dhm.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+
+/* ── SETTINGS ── */
+.page{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+#pg-home{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+#pg-settings{display:none;}
+.s-scroll{flex:1;overflow-y:auto;padding:8px 10px 70px;}
+.commit-add-form{margin-top:8px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:8px;}
+.commit-item-row{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);gap:4px;}
+.commit-item-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.commit-item-name{font-size:12px;color:var(--txt);font-weight:600;}
+.commit-item-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+.commit-badge{font-size:9px;border-radius:4px;padding:1px 5px;font-weight:700;}
+.commit-badge.permanent{background:rgba(77,168,240,.15);color:var(--blue);}
+.commit-badge.recurring{background:rgba(62,207,106,.15);color:var(--green);}
+.commit-item-req{font-size:11px;color:var(--muted);}
+.commit-item-due{font-size:10px;color:var(--yellow);}
+.s-sec{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.s-sec-title{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;}
+.s-lbl{font-size:13px;color:var(--txt);}
+.s-sub{font-size:12px;color:var(--muted);font-weight:600;}
+.s-sel,.s-inp{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:4px 8px;}
+.s-inp{flex:1;}
+.s-tgl-g{display:flex;gap:4px;}
+.s-tgl{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:10px;font-weight:600;padding:4px 10px;cursor:pointer;transition:all .15s;}
+.s-tgl.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.s-tags{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0;}
+.s-tag{display:flex;align-items:center;gap:4px;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--txt);}
+.s-tag .td{background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;line-height:1;padding:0 2px;}
+.s-add-row{display:flex;gap:6px;align-items:center;margin-top:4px;}
+.s-btn-add{background:var(--blue);border:none;border-radius:6px;color:#fff;font-size:16px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.s-btn-act{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;}
+.s-btn-dng{background:rgba(240,84,84,.15);border:1px solid rgba(240,84,84,.3);border-radius:6px;color:var(--red);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;}
+.sw{position:relative;display:inline-block;width:38px;height:21px;}
+.sw input{opacity:0;width:0;height:0;}
+.sw-sl{position:absolute;inset:0;background:#2a3240;border-radius:21px;transition:.3s;cursor:pointer;}
+.sw-sl::before{content:'';position:absolute;width:15px;height:15px;right:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+.sw input:checked+.sw-sl{background:var(--blue);}
+.sw input:checked+.sw-sl::before{transform:translateX(-17px);}
+
+/* ── BOTTOM NAV ── */
+/* ══ DRAWER ══ */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;}
+.drawer-overlay.show{opacity:1;visibility:visible;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:72vw;max-width:260px;background:var(--card);z-index:501;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.8,.3,1);box-shadow:-8px 0 30px rgba(0,0,0,.5);}
+.drawer.show{transform:translateX(0);}
+.drawer-header{padding:14px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.drawer-app-name{font-size:15px;font-weight:900;color:var(--txt);margin-bottom:2px;}
+.drawer-app-sub{font-size:10px;color:var(--muted);}
+.drawer-list{flex:1;overflow-y:auto;padding:8px 0;}
+.drawer-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s;}
+.drawer-item:hover{background:rgba(255,255,255,.05);}
+.drawer-item.active{background:rgba(77,168,240,.12);color:var(--blue);}
+.drawer-item-ico{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+.drawer-divider{height:1px;background:var(--border);margin:6px 14px;}
+.drawer-add-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--green);cursor:pointer;}
+.drawer-add-btn:hover{background:rgba(62,207,106,.08);}
+/* منسدلة إضافة نشاط */
+.add-workspace-popover{position:fixed;z-index:600;background:#0a0d12;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.8);padding:6px;min-width:140px;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .15s,transform .15s,visibility .15s;}
+.add-workspace-popover.show{opacity:1;visibility:visible;transform:translateY(0);}
+.add-ws-opt{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer;border-radius:7px;}
+.add-ws-opt:hover{background:rgba(255,255,255,.07);}
+/* نافذة اسم النشاط */
+.ws-name-modal{position:fixed;inset:0;z-index:700;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
+.ws-name-modal.show{opacity:1;visibility:visible;}
+.ws-name-box{background:var(--card);border-radius:14px;padding:20px;width:80vw;max-width:300px;display:flex;flex-direction:column;gap:12px;box-shadow:0 15px 50px rgba(0,0,0,.8);}
+.ws-name-title{font-size:14px;font-weight:800;color:var(--txt);}
+.ws-name-inp{background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:14px;padding:10px 12px;outline:none;width:100%;}
+.ws-name-inp:focus{border-color:var(--blue);}
+.ws-name-btns{display:flex;gap:8px;}
+.ws-name-btns button{flex:1;padding:9px;border-radius:8px;border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.ws-name-cancel{background:var(--card2);color:var(--muted);}
+.ws-name-save{background:var(--blue);color:#fff;}
+/* ══ WORKSPACE SCROLL BAR (أسفل الشاشة فوق الـ bnav) ══ */
+.ws-bar{position:fixed;bottom:52px;left:0;right:0;z-index:99;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;padding:0 4px;height:36px;}
+.ws-bar::-webkit-scrollbar{display:none;}
+.ws-tab{flex-shrink:0;padding:0 14px;height:100%;display:flex;align-items:center;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;}
+.ws-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+/* زيادة padding-bottom للـ cards-grid بسبب ws-bar */
+/* زر فتح الدرور */
+.drawer-toggle{background:transparent;border:none;color:var(--txt);font-size:20px;cursor:pointer;padding:2px 4px;line-height:1;position:absolute;right:8px;top:8px;z-index:10;}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:6px 0 10px;z-index:100;}
+.ni.active{color:var(--blue);}
+.ni-ico{font-size:17px;}
+
+/* ====== Category Floating Popover Dropdown ====== */
+.cat-cell-trigger{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%;min-height:28px;
+  font-family:'Cairo',sans-serif;font-size:11px;font-weight:600;
+  color:var(--txt);background:var(--card2);
+  border:1px solid var(--border);border-radius:4px;
+  cursor:pointer;padding:2px 4px;
+  transition:background .15s,border-color .15s;
+}
+.cat-cell-trigger:hover{background:var(--row);border-color:var(--blue);}
+.cat-cell-trigger.empty{color:var(--muted);font-weight:400;}
+.cat-cell-trigger .arr{font-size:8px;color:var(--muted);margin-right:3px;}
+
+.cat-popover{
+  position:fixed;z-index:550;
+  background:#0a0d12;
+  border:1px solid var(--border);
+  border-radius:8px;
+  box-shadow:0 10px 30px rgba(0,0,0,.75),0 0 0 1px rgba(0,0,0,.4);
+  display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transform:translateY(-4px) scale(.98);
+  transition:opacity .15s ease,transform .15s ease,visibility .15s;
+}
+.cat-popover.open{opacity:1;visibility:visible;transform:translateY(0) scale(1);}
+
+.cat-popover-hdr{
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:6px 10px;background:#060810;
+  border-bottom:1px solid var(--border);
+  border-radius:8px 8px 0 0;
+}
+.cat-popover-title{font-size:11px;font-weight:700;color:var(--muted);}
+.cat-popover-close{
+  background:transparent;border:none;
+  color:var(--muted);font-size:13px;line-height:1;
+  width:18px;height:18px;border-radius:4px;cursor:pointer;padding:0;
+}
+.cat-popover-close:hover{color:var(--txt);background:rgba(255,255,255,.06);}
+
+.cat-popover-list{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:4px 0;background:#0a0d12;
+  border-radius:0 0 8px 8px;
+  min-height:0;
+}
+.cat-popover-list::-webkit-scrollbar{width:6px;}
+.cat-popover-list::-webkit-scrollbar-track{background:#060810;border-radius:0 0 8px 0;}
+.cat-popover-list::-webkit-scrollbar-thumb{background:#2a3240;border-radius:3px;}
+.cat-popover-list::-webkit-scrollbar-thumb:hover{background:#3a4452;}
+
+.cat-popover-item{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+  width:100%;text-align:right;
+  padding:7px 10px;font-family:'Cairo',sans-serif;
+  font-size:12px;font-weight:600;color:var(--txt);
+  background:transparent;border:none;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  cursor:pointer;transition:background .12s;
+}
+.cat-popover-item:last-child{border-bottom:none;}
+.cat-popover-item:hover{background:rgba(77,168,240,.12);color:var(--blue);}
+.cat-popover-item.active{background:rgba(77,168,240,.18);color:var(--blue);}
+.cat-popover-item.empty{color:var(--muted);font-weight:400;justify-content:center;}
+.cat-popover-item.empty:hover{color:var(--txt);background:rgba(255,255,255,.04);}
+.cat-popover-item .check{font-size:10px;color:var(--blue);visibility:hidden;}
+.cat-popover-item.active .check{visibility:visible;}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="overlayClick()"></div>
+
+<!-- ════ HOME PAGE ════ -->
+<div id="pg-home" class="page">
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <button class="drawer-toggle" onclick="openDrawer()">☰</button>
+  <div class="sum3" style="margin-top:2px;">
+    <div class="sum-box">
+      <div class="lbl">إجمالي الدخل</div>
+      <div class="val cv-g" id="sum-income"><span class="ico">👛</span><span>0</span></div>
+    </div>
+    <div class="sum-box">
+      <div class="lbl">إجمالي النفقات</div>
+      <div class="val cv-r" id="sum-expense"><span class="ico">⬇️</span><span>0</span></div>
+    </div>
+    <div class="sum-box">
+      <div class="lbl">المتبقي</div>
+      <div class="val cv-b" id="sum-remain"><span class="ico">🪙</span><span>0</span></div>
+    </div>
+  </div>
+  <div class="ptabs">
+    <button class="ptab" onclick="setPeriod(this,'day')">يوم</button>
+    <button class="ptab" onclick="setPeriod(this,'week')">أسبوع</button>
+    <button class="ptab active" onclick="setPeriod(this,'month')">شهر</button>
+    <button class="ptab" onclick="setPeriod(this,'year')">سنة</button>
+    <button class="ptab" onclick="setPeriod(this,'custom')">مخصص</button>
+    <div class="custom-picker" id="custom-picker">
+      <div><label>من</label><input type="date" id="date-from"></div>
+      <div><label>إلى</label><input type="date" id="date-to"></div>
+      <button class="btn-apply" onclick="applyCustom()">تطبيق</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY CARDS — تقسيم ٢ أعمدة -->
+<div class="cards-grid-2col">
+
+  <!-- صف ثابت: الدخل والمصروفات جنب بعض دايمًا (حتى على الموبايل الضيق) -->
+  <div class="ie-row">
+    <!-- الدخل -->
+    <div class="scard income stacked" onclick="openFTable('income')">
+      <div class="scard-inner">
+        <div class="scard-content">
+          <div class="scard-top">
+            <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>الدخل</span>
+          </div>
+          <div class="scard-center">
+            <svg id="chart-income-side" viewBox="0 0 84 84"></svg>
+            <div class="ring-text"><span class="ring-pct" id="ct-income-pct">0%</span><span class="ring-sub">من الدخل</span></div>
+          </div>
+          <div class="scard-nums">
+            <div class="scard-num">
+              <span class="scard-num-lbl">الإجمالي</span>
+              <span class="scard-num-val" id="ct-income-amount">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- المصروفات -->
+    <div class="scard expense stacked" onclick="openFTable('expense')">
+      <div class="scard-inner">
+        <div class="scard-content">
+          <div class="scard-top">
+            <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18l-2 13H5L3 3z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg></span>المصروفات</span>
+          </div>
+          <div class="scard-center">
+            <svg id="chart-expense-side" viewBox="0 0 84 84"></svg>
+            <div class="ring-text"><span class="ring-pct" id="ct-expense-pct">0%</span><span class="ring-sub">من الدخل</span></div>
+          </div>
+          <div class="scard-nums">
+            <div class="scard-num">
+              <span class="scard-num-lbl">الإجمالي</span>
+              <span class="scard-num-val" id="ct-expense-amount">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- الالتزامات -->
+    <div class="scard commit has-side-chart" onclick="openFTable('commit')">
+      <div class="scard-side-chart">
+        <svg id="chart-commit-side" viewBox="0 0 54 54"></svg>
+      </div>
+      <div class="scard-inner">
+        <div class="scard-accent"></div>
+        <div class="scard-content">
+          <div class="scard-top">
+            <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3M13 14h3M8 18h3M13 18h3"/></svg></span>الالتزامات</span>
+          </div>
+          <div class="scard-nums">
+            <div class="scard-num">
+              <span class="scard-num-lbl">مطلوب</span>
+              <span class="scard-num-val cv-num-red" id="ct-commit-req">0</span>
+            </div>
+            <div class="scard-num">
+              <span class="scard-num-lbl">مدفوع</span>
+              <span class="scard-num-val cv-num-yellow" id="ct-commit-paid">0</span>
+            </div>
+            <div class="scard-num">
+              <span class="scard-num-lbl">متبقي</span>
+              <span class="scard-num-val cv-num-green" id="ct-commit-rem">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- الديون: الرسم البياني على اليمين (تبادل مع الالتزامات) -->
+    <div class="scard debt has-side-chart side-chart-right" id="scard-debt" onclick="debtCardClick()">
+      <div class="scard-side-chart">
+        <svg id="chart-debt-side" viewBox="0 0 54 54"></svg>
+      </div>
+      <div class="scard-inner">
+        <div class="scard-accent"></div>
+        <div class="scard-content">
+          <div class="scard-top">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+              <span class="scard-title"><span class="scard-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 11h20"/><path d="M6 16h3"/></svg></span>الديون</span>
+              <span class="debt-mode-label" id="debt-mode-label">دائن</span>
+              <span style="font-size:10px;color:rgba(255,255,255,.28);">⇄</span>
+            </div>
+            <span id="debt-cat-label" style="font-size:9px;color:rgba(255,255,255,.4);"></span>
+          </div>
+          <div class="scard-nums">
+            <div class="scard-num">
+              <span class="scard-num-lbl">مطلوب</span>
+              <span class="scard-num-val cv-num-yellow" id="ct-debt-req">0</span>
+            </div>
+            <div class="scard-num">
+              <span class="scard-num-lbl">مدفوع</span>
+              <span class="scard-num-val cv-num-blue" id="ct-debt-paid">0</span>
+            </div>
+            <div class="scard-num">
+              <span class="scard-num-lbl">متبقي</span>
+              <span class="scard-num-val cv-num-green" id="ct-debt-rem">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+</div><!-- /cards-grid-2col -->
+</div><!-- /pg-home -->
+
+<!-- ════ FLOATING TABLE (tap card) ════ -->
+<div class="ftable income" id="ft-income">
+  <div class="ftable-hdr">
+    <span class="ftable-title">الدخل</span>
+    <div class="ftable-hdr-btns">
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('income');event.stopPropagation()" id="sort-income-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('income');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="openEModal('income');event.stopPropagation()" title="تكبير">⤢</button>
+      <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
+    </div>
+  </div>
+  <div class="ftable-body">
+    <div class="tbl-wrap" id="tbl-income">
+      <table><colgroup><col style="width:55%"><col style="width:45%"></colgroup>
+        <thead><tr><th>البند</th><th>المبلغ</th></tr></thead>
+        <tbody id="tbody-income"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-income"><button class="btn-del-cancel" onclick="clearSelection('income')">إلغاء</button><span id="del-income-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('income')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('income')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<!-- المصروفات -->
+<div class="ftable expense" id="ft-expense">
+  <div class="ftable-hdr">
+    <span class="ftable-title">المصروفات</span>
+    <div class="ftable-hdr-btns">
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('expense');event.stopPropagation()" id="sort-expense-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('expense');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="openEModal('expense');event.stopPropagation()">⤢</button>
+      <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
+    </div>
+  </div>
+  <div class="ftable-body">
+    <div class="tbl-wrap" id="tbl-expense">
+      <table><colgroup><col style="width:36%"><col style="width:32%"><col style="width:32%"></colgroup>
+        <thead><tr><th>البند</th><th>المبلغ</th><th>الفئة</th></tr></thead>
+        <tbody id="tbody-expense"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-expense"><button class="btn-del-cancel" onclick="clearSelection('expense')">إلغاء</button><span id="del-expense-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('expense')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('expense')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<!-- الالتزامات -->
+<div class="ftable commit" id="ft-commit">
+  <div class="ftable-hdr">
+    <span class="ftable-title">الالتزامات</span>
+    <div class="ftable-hdr-btns">
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('commit');event.stopPropagation()" id="sort-commit-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('commit');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="openEModal('commit');event.stopPropagation()">⤢</button>
+      <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
+    </div>
+  </div>
+  <div class="ftable-body">
+    <div class="tbl-wrap" id="tbl-commit">
+      <table><colgroup><col style="width:65%"><col style="width:17.5%"><col style="width:17.5%"></colgroup>
+        <thead><tr><th>البند</th><th>مطلوب</th><th>مدفوع</th></tr></thead>
+        <tbody id="tbody-commit"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-commit"><button class="btn-del-cancel" onclick="clearSelection('commit')">إلغاء</button><span id="del-commit-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('commit')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('commit')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<!-- الديون -->
+<div class="ftable debt" id="ft-debt">
+  <div class="ftable-hdr">
+    <span class="ftable-title" id="ft-debt-title">الديون — دائن</span>
+    <div class="ftable-hdr-btns">
+      <button class="btn-ft btn-ft-icon" onclick="toggleSort('debt');event.stopPropagation()" id="sort-debt-btn" title="ترتيب حسب التاريخ">⬇️</button>
+      <button class="btn-ft btn-ft-add" onclick="openAddForm('debt');event.stopPropagation()" title="إضافة">+</button>
+      <button class="btn-ft btn-ft-icon" onclick="openEModal('debt');event.stopPropagation()">⤢</button>
+      <button class="btn-ft btn-ft-icon" onclick="closeFTable()">×</button>
+    </div>
+  </div>
+  <div class="ftable-body">
+    <div class="tbl-wrap" id="tbl-debt">
+      <table><colgroup><col style="width:55%"><col style="width:22.5%"><col style="width:22.5%"></colgroup>
+        <thead><tr><th>البند</th><th>مطلوب</th><th>مدفوع</th></tr></thead>
+        <tbody id="tbody-debt"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-debt"><button class="btn-del-cancel" onclick="clearSelection('debt')">إلغاء</button><span id="del-debt-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelected('debt')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelected('debt')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<!-- ════ ADD/EDIT FLOATING FORMS (نوافذ عائمة فى منتصف الشاشة) ════ -->
+<div class="add-form" id="form-income">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-income-title">إضافة دخل</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('income')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fi-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fi-amount" placeholder="المبلغ">
+      <select id="fi-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+    </div>
+    <div class="add-form-row" id="fi-loan-row">
+      <button type="button" class="btn-loan-toggle" id="fi-loan-toggle" onclick="toggleLoanField()">💰 قرض مستلم</button>
+    </div>
+    <div class="add-form-row" id="fi-loan-cat-row" style="display:none;">
+      <select id="fi-loan-cat"><option value="">اختر تصنيف "دائن"</option></select>
+    </div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('income')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('income')">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-form" id="form-expense">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-expense-title">إضافة مصروف</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('expense')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fe-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fe-amount" placeholder="المبلغ">
+      <select id="fe-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+    </div>
+    <div class="add-form-row"><select id="fe-cat"><option value="">الفئة</option></select></div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('expense')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('expense')">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-form" id="form-commit">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-commit-title">إضافة التزام</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('commit')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fc-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fc-req" placeholder="مطلوب">
+      <input type="number" id="fc-paid" placeholder="مدفوع">
+    </div>
+    <div class="add-form-row"><select id="fc-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select></div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('commit')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('commit')">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-form" id="form-debt">
+  <div class="add-form-hdr">
+    <span class="add-form-title" id="form-debt-title">إضافة دين</span>
+    <button class="btn-ft btn-ft-icon" onclick="closeForm('debt')">×</button>
+  </div>
+  <div class="add-form-body">
+    <div class="add-form-row"><input type="text" id="fd-name" placeholder="البند"></div>
+    <div class="add-form-row">
+      <input type="number" id="fd-req" placeholder="مطلوب">
+      <select id="fd-pay"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+    </div>
+    <div class="add-form-row"><select id="fd-cat"><option value="الكل">التصنيف</option></select></div>
+    <div class="add-form-row">
+      <button class="btn-cancel" onclick="closeForm('debt')">إلغاء</button>
+      <button class="btn-save" onclick="saveRow('debt')">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ EXPANDED MODALS (⤢) ════ -->
+<div class="emodal income" id="em-income">
+  <div class="emodal-hdr">
+    <span class="emodal-title">الدخل — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('income')" id="sort-income-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
+    <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
+  </div>
+  <div class="emodal-body">
+    <div class="tbl-wrap">
+      <table><colgroup><col><col><col><col></colgroup>
+        <thead><tr><th>التاريخ</th><th>البند</th><th>المبلغ</th><th>طريقة الدفع</th></tr></thead>
+        <tbody id="tbody-income-em"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-income-em"><button class="btn-del-cancel" onclick="clearSelectionEM('income')">إلغاء</button><span id="del-income-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('income')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('income')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<div class="emodal expense" id="em-expense">
+  <div class="emodal-hdr">
+    <span class="emodal-title">المصروفات — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('expense')" id="sort-expense-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
+    <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
+  </div>
+  <div class="emodal-body">
+    <div class="tbl-wrap">
+      <table><colgroup><col style="width:12%"><col style="width:22%"><col style="width:28%"><col style="width:18%"><col style="width:20%"></colgroup>
+        <thead><tr><th>التاريخ</th><th>الفئة</th><th>البند</th><th>المبلغ</th><th>طريقة الدفع</th></tr></thead>
+        <tbody id="tbody-expense-em"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-expense-em"><button class="btn-del-cancel" onclick="clearSelectionEM('expense')">إلغاء</button><span id="del-expense-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('expense')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('expense')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<div class="emodal commit" id="em-commit">
+  <div class="emodal-hdr">
+    <span class="emodal-title">الالتزامات — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('commit')" id="sort-commit-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
+    <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
+  </div>
+  <div class="emodal-body">
+    <div class="tbl-wrap">
+      <table><colgroup><col><col><col><col><col></colgroup>
+        <thead><tr><th>التاريخ</th><th>البند</th><th>مطلوب</th><th>مدفوع</th><th>طريقة الدفع</th></tr></thead>
+        <tbody id="tbody-commit-em"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-commit-em"><button class="btn-del-cancel" onclick="clearSelectionEM('commit')">إلغاء</button><span id="del-commit-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('commit')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('commit')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<div class="emodal debt" id="em-debt">
+  <div class="emodal-hdr">
+    <span class="emodal-title" id="em-debt-title">الديون — تفاصيل</span>
+    <button class="btn-ft btn-ft-icon" onclick="toggleSort('debt')" id="sort-debt-em-btn" title="ترتيب حسب التاريخ">⬇️</button>
+    <button class="btn-ft btn-ft-icon" onclick="closeEModal()">×</button>
+  </div>
+  <div class="emodal-body">
+    <div class="tbl-wrap">
+      <table><colgroup><col><col><col><col><col></colgroup>
+        <thead><tr><th>التاريخ</th><th>البند</th><th>مطلوب</th><th>مدفوع</th><th>طريقة الدفع</th></tr></thead>
+        <tbody id="tbody-debt-em"></tbody>
+      </table>
+    </div>
+    <div class="del-bar" id="del-debt-em"><button class="btn-del-cancel" onclick="clearSelectionEM('debt')">إلغاء</button><span id="del-debt-em-lbl">تم تحديد سطر</span><div class="del-bar-actions"><button class="btn-edit" onclick="editSelectedEM('debt')">✏️ تعديل</button><button class="btn-del" onclick="deleteSelectedEM('debt')">🗑 حذف</button></div></div>
+  </div>
+</div>
+
+<!-- ════ DEBT HISTORY MODAL ════ -->
+<div id="dhm">
+  <div id="dhm-main-header" style="flex-shrink:0;background:var(--hc);padding:10px 14px 8px;border-radius:14px 14px 0 0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:15px;font-weight:800;color:#fff;" id="dhm-name"></div>
+        <div style="font-size:9px;color:rgba(255,255,255,.5);" id="dhm-cat-label"></div>
+      </div>
+      <button onclick="closeDebtHistory()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:7px;color:#fff;font-size:18px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <div style="flex:1;background:rgba(0,0,0,.25);border-radius:8px;padding:5px 6px;text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,.5);">الإجمالي</div><div style="font-size:13px;font-weight:800;color:var(--red);" id="dhm-req"></div></div>
+      <div style="flex:1;background:rgba(0,0,0,.25);border-radius:8px;padding:5px 6px;text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,.5);">المدفوع</div><div style="font-size:13px;font-weight:800;color:var(--green);" id="dhm-paid"></div></div>
+      <div style="flex:1;background:rgba(0,0,0,.25);border-radius:8px;padding:5px 6px;text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,.5);">المتبقي</div><div style="font-size:13px;font-weight:800;" id="dhm-rem"></div></div>
+    </div>
+  </div>
+  <div id="dhm-col-header" style="flex-shrink:0;display:grid;grid-template-columns:22% 20% 28% 22% 8%;background:var(--hc);padding:5px 10px;border-bottom:2px solid rgba(255,255,255,.15);">
+    <div style="font-size:10px;font-weight:800;color:#fff;">تاريخ ↓</div>
+    <div style="font-size:10px;font-weight:800;color:#fff;text-align:center;">المبلغ</div>
+    <div style="font-size:10px;font-weight:800;color:#fff;text-align:center;">التفاصيل</div>
+    <div style="font-size:10px;font-weight:800;color:#fff;text-align:center;">الرصيد</div>
+    <div></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;min-height:0;background:var(--bg);" id="dhm-list"></div>
+  <div style="flex-shrink:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;">
+    <div style="display:flex;gap:5px;">
+      <input type="number" id="dhm-amount" placeholder="المبلغ" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;padding:6px 8px;min-width:0;">
+      <input type="text" id="dhm-details" placeholder="التفاصيل" style="flex:1.4;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 7px;min-width:0;">
+      <select id="dhm-dir" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 4px;min-width:0;"><option value="for">سداد ▲</option><option value="against">إضافة ▼</option></select>
+    </div>
+    <div style="display:flex;gap:5px;margin-top:5px;">
+      <select id="dhm-pay" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 4px;min-width:0;"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+      <button id="dhm-save-btn" onclick="saveDebtTransaction()" style="flex:1;background:var(--yellow);border:none;border-radius:6px;color:#000;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;padding:7px;cursor:pointer;">+ تسجيل</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SETTINGS PAGE ════ -->
+<div id="pg-settings" class="page" style="display:none;">
+  <div class="s-scroll">
+    <div class="s-sec"><div class="s-sec-title">🌐 اللغة</div><div class="s-row"><span class="s-lbl">لغة التطبيق</span><select class="s-sel" id="s-lang" onchange="saveSetting('lang',this.value)"><option value="ar">العربية</option><option value="en">English</option></select></div></div>
+    <div class="s-sec"><div class="s-sec-title">💰 العملة</div><div class="s-row"><span class="s-lbl">العملة</span><select class="s-sel" id="s-currency" onchange="saveSetting('currency',this.value)"><option value="EGP">جنيه مصري</option><option value="SAR">ريال سعودي</option><option value="AED">درهم</option><option value="USD">دولار</option><option value="EUR">يورو</option></select></div><div class="s-row"><span class="s-lbl">رمز العملة</span><input class="s-inp" id="s-currency-sym" placeholder="ج.م" onchange="saveSetting('currencySym',this.value)" style="max-width:80px;"></div></div>
+    <div class="s-sec"><div class="s-sec-title">🎨 السمة</div><div class="s-row"><span class="s-lbl">وضع العرض</span><div class="s-tgl-g"><button class="s-tgl active" id="theme-dark" onclick="setTheme('dark')">🌙 داكن</button><button class="s-tgl" id="theme-light" onclick="setTheme('light')">☀️ فاتح</button></div></div></div>
+    <div class="s-sec"><div class="s-sec-title">🔖 تصنيف الديون</div><div class="s-row"><span class="s-sub">تصنيفات الدائن</span></div><div class="s-tags" id="tags-creditor"></div><div class="s-add-row"><input class="s-inp" id="new-creditor-cat" placeholder="تصنيف جديد..."><button class="s-btn-add" onclick="addCat('creditorCats','new-creditor-cat','tags-creditor')">+</button></div><div class="s-row" style="margin-top:8px;"><span class="s-sub">تصنيفات المدين</span></div><div class="s-tags" id="tags-debtor"></div><div class="s-add-row"><input class="s-inp" id="new-debtor-cat" placeholder="تصنيف جديد..."><button class="s-btn-add" onclick="addCat('debtorCats','new-debtor-cat','tags-debtor')">+</button></div></div>
+    <div class="s-sec">
+      <div class="s-sec-title">📋 قائمة الالتزامات</div>
+      <div id="commit-list-settings"></div>
+      <div class="commit-add-form">
+        <div class="s-add-row">
+          <input class="s-inp" id="new-commit-name" placeholder="البند">
+          <input class="s-inp" id="new-commit-req" placeholder="المبلغ" type="number" style="max-width:75px;">
+        </div>
+        <div class="s-add-row">
+          <input class="s-inp" id="new-commit-due" placeholder="ت. الاستحقاق" type="date" style="max-width:145px;">
+          <select class="s-sel" id="new-commit-type" onchange="toggleRecurringField()">
+            <option value="permanent">دائم</option>
+            <option value="recurring">متكرر</option>
+          </select>
+        </div>
+        <div class="s-add-row" id="recurring-count-row" style="display:none;">
+          <span style="font-size:11px;color:var(--muted);white-space:nowrap;">عدد مرات التكرار</span>
+          <input class="s-inp" id="new-commit-count" placeholder="مثال: 12" type="number" min="1" style="max-width:90px;">
+        </div>
+        <div class="s-add-row">
+          <button class="s-btn-add" onclick="addCommitItem()" style="width:auto;padding:0 14px;font-size:12px;font-family:'Cairo',sans-serif;">+ إضافة</button>
+        </div>
+      </div>
+    </div>
+    <div class="s-sec"><div class="s-sec-title">💳 طرق الدفع</div><div class="s-tags" id="tags-pay"></div><div class="s-add-row"><input class="s-inp" id="new-pay" placeholder="طريقة دفع جديدة..."><button class="s-btn-add" onclick="addCat('payMethods','new-pay','tags-pay')">+</button></div></div>
+    <div class="s-sec"><div class="s-sec-title">🏷️ فئات المصروفات</div><div class="s-tags" id="tags-expense-cats"></div><div class="s-add-row"><input class="s-inp" id="new-expense-cat" placeholder="فئة جديدة..."><button class="s-btn-add" onclick="addCat('expenseCats','new-expense-cat','tags-expense-cats')">+</button></div></div>
+    <div class="s-sec"><div class="s-sec-title">💾 حفظ البيانات</div><div style="background:rgba(77,168,240,.08);border:1px solid rgba(77,168,240,.2);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.7;"><div style="color:var(--blue);font-weight:700;margin-bottom:4px;">☁️ الحفظ على Google Drive</div><div>١. اضغط <strong style="color:var(--txt);">تصدير + مشاركة</strong></div><div>٢. من قائمة المشاركة اختر <strong style="color:var(--txt);">Drive</strong> أو <strong style="color:var(--txt);">حفظ في Drive</strong></div><div>٣. لاستعادة البيانات اضغط <strong style="color:var(--txt);">استيراد</strong> واختر الملف من Drive</div><div style="color:var(--yellow);margin-top:4px;">⚠️ يُنصح بالحفظ بانتظام</div></div>
+      <div class="s-row"><span class="s-lbl">تصدير + مشاركة</span><button class="s-btn-act" onclick="exportAndShare()" style="background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;border-color:#1a73e8;">☁️ Drive</button></div>
+      <div class="s-row"><span class="s-lbl">تصدير JSON فقط</span><button class="s-btn-act" onclick="exportData()">📤 تصدير</button></div>
+      <div class="s-row"><span class="s-lbl">استيراد البيانات</span><label class="s-btn-act" style="cursor:pointer;">📥 استيراد<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label></div>
+      <div class="s-row" style="margin-top:4px;"><span class="s-lbl" style="color:var(--red)">مسح كل البيانات</span><button class="s-btn-dng" onclick="clearAllData()">🗑 مسح</button></div></div>
+    <div class="s-sec"><div class="s-sec-title">🔔 التنبيهات</div><div class="s-row"><span class="s-lbl">تنبيهات الالتزامات</span><label class="sw"><input type="checkbox" id="s-notif-commit" onchange="saveSetting('notifCommit',this.checked)"><span class="sw-sl"></span></label></div><div class="s-row"><span class="s-lbl">تنبيهات الديون</span><label class="sw"><input type="checkbox" id="s-notif-debt" onchange="saveSetting('notifDebt',this.checked)"><span class="sw-sl"></span></label></div><div class="s-row"><span class="s-lbl">تذكير يومي</span><label class="sw"><input type="checkbox" id="s-notif-daily" onchange="saveSetting('notifDaily',this.checked)"><span class="sw-sl"></span></label></div></div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<!-- ══ WORKSPACE PAGE (فارغة — للأنشطة المضافة) ══ -->
+<div id="pg-workspace" class="page" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+  <div style="font-size:48px;" id="ws-page-ico">🏪</div>
+  <div style="font-size:16px;font-weight:800;color:var(--txt);" id="ws-page-name"></div>
+  <div style="font-size:12px;color:var(--muted);text-align:center;padding:0 30px;">هذا النشاط قيد الإعداد<br>سيتم إضافة وظائفه قريباً</div>
+</div>
+
+<!-- ══ DRAWER OVERLAY ══ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- ══ DRAWER ══ -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-app-name">💼 المدير المالي</div>
+    <div class="drawer-app-sub">إدارة الحسابات والأنشطة</div>
+  </div>
+  <div class="drawer-list" id="drawer-list">
+    <div class="drawer-item active" id="dw-personal" onclick="switchWorkspace('personal');closeDrawer()">
+      <span class="drawer-item-ico">👤</span>
+      <span>شخصي</span>
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-add-btn" id="drawer-add-btn" onclick="toggleAddWorkspacePopover(event)">
+      <span class="drawer-item-ico">＋</span>
+      <span>إضافة نشاط</span>
+    </div>
+  </div>
+</div>
+
+<!-- منسدلة نوع النشاط -->
+<div class="add-workspace-popover" id="add-ws-popover">
+  <div class="add-ws-opt" onclick="startAddWorkspace('business')">🏪 تجاري</div>
+  <div class="add-ws-opt" onclick="startAddWorkspace('service')">🔧 خدمي</div>
+</div>
+
+<!-- نافذة اسم النشاط -->
+<div class="ws-name-modal" id="ws-name-modal">
+  <div class="ws-name-box">
+    <div class="ws-name-title" id="ws-name-title">اسم النشاط</div>
+    <input class="ws-name-inp" id="ws-name-inp" placeholder="مثال: محل الملابس" onkeydown="if(event.key==='Enter')saveNewWorkspace()">
+    <div class="ws-name-btns">
+      <button class="ws-name-cancel" onclick="closeWsNameModal()">إلغاء</button>
+      <button class="ws-name-save" onclick="saveNewWorkspace()">حفظ وانتقال</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WORKSPACE SCROLL BAR ══ -->
+<div class="ws-bar" id="ws-bar">
+  <div class="ws-tab active" id="wstab-personal" onclick="switchWorkspace('personal')">👤 شخصي</div>
+</div>
+
+<div class="bnav">
+  <div class="ni" onclick="showPage('reports')"><span class="ni-ico">📊</span><span>تقارير</span></div>
+  <div class="ni" onclick="showPage('log')"><span class="ni-ico">📋</span><span>سجل</span></div>
+  <div class="ni active" id="nav-home" onclick="showPage('home')"><span class="ni-ico">🏠</span><span>الرئيسية</span></div>
+  <div class="ni" onclick="showPage('data')"><span class="ni-ico">🗄️</span><span>البيانات</span></div>
+  <div class="ni" id="nav-settings" onclick="showPage('settings')"><span class="ni-ico">⚙️</span><span>الإعدادات</span></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ملخص مواصفات سريع — لأي تعديل مستقبلي يحتاج فهم القرارات الحالية
+   (آخر تحديث: إعادة تصميم كروت الدخل/المصروفات + تنضيف الكود)
+   ───────────────────────────────────────────────────────────────
+   • شبكة الكروت: الدخل + المصروفات دايمًا جنب بعض فى صف ثابت
+     (.ie-row) فى كل أحجام الشاشات. الالتزامات والديون تتدفق
+     طبيعيًا تحتهم (عمود واحد على الموبايل، جنب بعض على الشاشة
+     الواسعة) — بدون الحاجة لـ grid-template-areas أو ترتيب يدوي.
+   • تصميم الكروت: الدخل/المصروفات بأسلوب "دائرة كبيرة فى النص"
+     (stacked) لأن كل واحد منهم رقم واحد بس. الالتزامات/الديون
+     بأسلوب "شارت جانبى + 3 أرقام" (has-side-chart) لأنهم محتاجين
+     يعرضوا مطلوب/مدفوع/متبقي مع بعض.
+   • معنى كل شارت (نسبة إلى الدخل):
+       - الدخل: % المتبقى من الدخل بعد كل النفقات (إجمالي)
+       - المصروفات: % المصروفات بس (بدون التزامات/ديون) من الدخل
+       - الالتزامات: % المدفوع من الالتزامات من الدخل
+       - الديون: % المدفوع فى التصنيف الحالى (دائن/مدين) من الدخل
+   • دائن/مدين: التبديل بالسحب يمين/يسار على كرت الديون فقط
+     (لا توجد أزرار)، الوضع الحالى يظهر كشارة نص بجانب العنوان.
+   • سداد دين فى وضع "مدين" (dir='for') يُسجَّل تلقائيًا كصف فى
+     جدول الدخل (fromDebt:true) ويتلون مميز فى الجدول.
+   • الحذف فى كل الجداول بالضغط المزدوج على الصف، مش بالضغط الطويل.
+   • drawPercentRing(id,pct,color,opts) دالة عامة لكل الأطواق
+     الأربعة: تقرأ حجم viewBox من الـ SVG نفسه (مش مقاس ثابت)،
+     وتكتب النص إما داخل عنصر HTML خارجى (opts.pctId — مستخدم فى
+     كروت الدخل/المصروفات) أو كنص داخل الـ SVG (لو مفيش pctId —
+     مستخدم فى الالتزامات/الديون). opts.gradient لتدرج لونى اختيارى.
+   ═══════════════════════════════════════════════════════════════ */
+// ══════════════════════════════════════════════
+//  DATA STORE
+//  طبقة تخزين آمنة: بعض متصفحات الموبايل (خصوصًا Safari على iOS)
+//  بتمنع الوصول لـ localStorage مع ملفات مفتوحة بصيغة file://، وده
+//  كان بيكسر التطبيق بالكامل (شاشة فاضية). الحل: لو localStorage
+//  مش متاح، نستخدم تخزين مؤقت بالذاكرة بدل ما نوقف التطبيق.
+// ══════════════════════════════════════════════
+const KEYS={income:'fm_income',expense:'fm_expense',commit:'fm_commit',
+  debt_creditor:'fm_debt_creditor',debt_debtor:'fm_debt_debtor',
+  debt_cats:'fm_debt_cats',settings:'fm_settings'};
+let _memStore={};
+let _storageAvailable=true;
+try{
+  const _t='__fm_probe__';
+  localStorage.setItem(_t,'1');
+  localStorage.removeItem(_t);
+}catch(e){
+  _storageAvailable=false;
+}
+function _getItem(key){
+  if(_storageAvailable){
+    try{return localStorage.getItem(key);}catch(e){_storageAvailable=false;}
+  }
+  return Object.prototype.hasOwnProperty.call(_memStore,key)?_memStore[key]:null;
+}
+function _setItem(key,val){
+  if(_storageAvailable){
+    try{localStorage.setItem(key,val);return;}catch(e){_storageAvailable=false;}
+  }
+  _memStore[key]=val;
+}
+function _removeItem(key){
+  if(_storageAvailable){
+    try{localStorage.removeItem(key);}catch(e){_storageAvailable=false;}
+  }
+  delete _memStore[key];
+}
+function loadData(k){return JSON.parse(_getItem(KEYS[k])||'[]');}
+function saveData(k,v){_setItem(KEYS[k],JSON.stringify(v));}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function fmtDate(d){if(!d)return'';const[,m,day]=d.split('-');return day+'/'+m;}
+function fmt(n){return Number(n||0).toLocaleString('en-US');}
+
+// ══════════════════════════════════════════════
+//  PERIOD FILTER
+// ══════════════════════════════════════════════
+let currentPeriod='month',filterFrom=null,filterTo=null;
+function getRange(p){
+  const n=new Date(),y=n.getFullYear(),m=n.getMonth(),d=n.getDate();
+  if(p==='day') return{from:new Date(y,m,d),to:new Date(y,m,d)};
+  if(p==='week'){const dw=n.getDay();return{from:new Date(y,m,d-dw),to:new Date(y,m,d+(6-dw))};}
+  if(p==='month') return{from:new Date(y,m,1),to:new Date(y,m+1,0)};
+  if(p==='year') return{from:new Date(y,0,1),to:new Date(y,11,31)};
+  if(p==='custom') return{from:filterFrom?new Date(filterFrom):null,to:filterTo?new Date(filterTo):null};
+  return{from:null,to:null};
+}
+function inRange(iso,from,to){
+  if(!from&&!to)return true;
+  const d=new Date(iso);
+  if(from&&d<from)return false;
+  if(to&&d>to)return false;
+  return true;
+}
+let sortDir={income:'desc',expense:'desc',commit:'desc',debt:'desc'};
+function filteredData(type){
+  const key=type==='debt'?debtKey():type;
+  const all=loadData(key);
+  const{from,to}=getRange(currentPeriod);
+  const dateFiltered=(!from&&!to)?all.slice():all.filter(r=>inRange(r.date,from,to));
+  let rows=type==='debt'?filterByCat(dateFiltered):dateFiltered;
+  const dir=sortDir[type]==='asc'?1:-1;
+  rows=rows.slice().sort((a,b)=>{
+    if(a.date<b.date)return -1*dir;
+    if(a.date>b.date)return 1*dir;
+    return 0;
+  });
+  return rows;
+}
+function toggleSort(type){
+  sortDir[type]=sortDir[type]==='asc'?'desc':'asc';
+  const icon=sortDir[type]==='asc'?'⬆️':'⬇️';
+  const b1=document.getElementById('sort-'+type+'-btn');if(b1)b1.textContent=icon;
+  const b2=document.getElementById('sort-'+type+'-em-btn');if(b2)b2.textContent=icon;
+  renderAll();
+}
+function filterByCat(rows){
+  if(debtCat==='الكل')return rows;
+  return rows.filter(r=>r.cat===debtCat);
+}
+function setPeriod(btn,p){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');currentPeriod=p;
+  if(p==='custom'){document.getElementById('custom-picker').classList.toggle('show');}
+  else{document.getElementById('custom-picker').classList.remove('show');renderAll();}
+}
+function applyCustom(){
+  filterFrom=document.getElementById('date-from').value;
+  filterTo=document.getElementById('date-to').value;
+  document.getElementById('custom-picker').classList.remove('show');
+  renderAll();
+}
+
+// ══════════════════════════════════════════════
+//  DEBT MODE & CATEGORIES
+// ══════════════════════════════════════════════
+let debtMode='creditor',debtCat='الكل';
+function debtKey(){return debtMode==='creditor'?'debt_creditor':'debt_debtor';}
+function getDebtCats(mode){
+  const s=JSON.parse(_getItem(KEYS['settings'])||'{}');
+  const k=mode==='creditor'?'creditorCats':'debtorCats';
+  return(s[k]&&s[k].length)?s[k].filter(c=>c!=='الكل'):[];
+}
+function allDebtCats(){return['الكل',...getDebtCats(debtMode)];}
+function renderDebtCats(){
+  const cats=allDebtCats(),idx=Math.max(0,cats.indexOf(debtCat));
+  const lbl=document.getElementById('debt-cat-label');
+  if(lbl)lbl.textContent=cats[idx]||'الكل';
+}
+function setDebtMode(mode){
+  debtMode=mode;debtCat='الكل';
+  const card=document.getElementById('scard-debt');
+  card.classList.toggle('debtor-mode',mode==='debtor');
+  const ft=document.getElementById('ft-debt');
+  ft.classList.toggle('debtor-mode',mode==='debtor');
+  const em=document.getElementById('em-debt');
+  em.classList.toggle('debtor-mode',mode==='debtor');
+  const mlbl=document.getElementById('debt-mode-label');
+  if(mlbl)mlbl.textContent=mode==='creditor'?'دائن':'مدين';
+  const t='الديون — '+(mode==='creditor'?'دائن':'مدين');
+  document.getElementById('ft-debt-title').textContent=t;
+  const edt=document.getElementById('em-debt-title');
+  if(edt)edt.textContent=t+' — تفاصيل';
+  renderDebtCats();renderDebt();
+}
+// تبديل دائن/مدين بالتمرير يمين/يسار على كرت الديون
+let _debtCardSwiped=false;
+function debtCardClick(){
+  if(_debtCardSwiped){_debtCardSwiped=false;return;}
+  openFTable('debt');
+}
+function initDebtCardSwipe(){
+  const card=document.getElementById('scard-debt');
+  if(!card)return;
+  let sx=null;
+  card.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  card.addEventListener('touchend',e=>{
+    if(sx===null)return;
+    const dx=e.changedTouches[0].clientX-sx;sx=null;
+    if(Math.abs(dx)<40)return;
+    _debtCardSwiped=true;
+    setDebtMode(debtMode==='creditor'?'debtor':'creditor');
+  });
+}
+// swipe on ft-debt
+let _sx=null;
+function initDebtSwipe(){
+  const w=document.getElementById('tbl-debt');
+  if(!w)return;
+  w.addEventListener('touchstart',e=>{_sx=e.touches[0].clientX;},{passive:true});
+  w.addEventListener('touchend',e=>{
+    if(_sx===null)return;
+    const dx=e.changedTouches[0].clientX-_sx;_sx=null;
+    if(Math.abs(dx)<40)return;
+    const cats=allDebtCats();let idx=cats.indexOf(debtCat);
+    idx=dx>0?Math.max(0,idx-1):Math.min(cats.length-1,idx+1);
+    debtCat=cats[idx];renderDebtCats();renderDebt();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  RENDER FUNCTIONS
+// ══════════════════════════════════════════════
+// تحديد لون/أيقونة خلية الاسم للصفوف المرتبطة تلقائيًا (سداد دين→دخل / قرض مستلم↔دائن)
+function nameCellMeta(r){
+  if(r.fromDebt)return{cls:' from-debt',prefix:''};
+  const handSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" style="vertical-align:middle;flex-shrink:0;display:inline-block;"><rect x="4" y="2" width="13" height="4" rx="1.5" fill="#388e3c"/><rect x="4" y="5" width="13" height="4" rx="1.5" fill="#66bb6a"/><rect x="4" y="8" width="13" height="3" rx="1" fill="#388e3c"/><path d="M3 14 C3 11 5 10 7 10 L17 10 C20 10 21 12 21 14 L21 16 C21 19 18 21 15 21 L8 21 C5 21 3 19 3 17 Z" fill="#f0c090" stroke="#c9956a" stroke-width="1"/></svg>`;
+  if(r.isLoan)return{cls:' is-loan',prefix:handSvg};
+  if(r.fromIncome)return{cls:' is-loan',prefix:handSvg};
+  return{cls:'',prefix:''};
+}
+function renderIncome(){
+  const rows=filteredData('income');
+  const all=loadData('income');
+  let total=0;
+  // card table (simple)
+  const tb=document.getElementById('tbody-income');
+  tb.innerHTML='';
+  rows.forEach(r=>{
+    total+=Number(r.amount||0);
+    const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
+    const tr=document.createElement('tr');
+    tr.dataset.idx=ri;
+    tr.innerHTML=`<td class="td-name${nameCellMeta(r).cls}"><span style="display:inline-flex;align-items:center;gap:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nameCellMeta(r).prefix}${r.name}</span></td>
+      <td class="td-g td-edit" data-type="income" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>`;
+    bindDblClick(tr,'income');tb.appendChild(tr);
+  });
+  document.getElementById('ct-income-amount').textContent=fmt(total);
+  // expanded modal table
+  if(currentEM==='income') renderEM('income');
+  bindInlineEdit();updateSummary();
+}
+function renderExpense(){
+  const rows=filteredData('expense');
+  const all=loadData('expense');
+  let total=0;
+  const tb=document.getElementById('tbody-expense');
+  tb.innerHTML='';
+  rows.forEach(r=>{
+    total+=Number(r.amount||0);
+    const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
+    const tr=document.createElement('tr');tr.dataset.idx=ri;
+    tr.innerHTML=`<td class="td-name">${r.name}</td>
+      <td class="td-b td-edit" data-type="expense" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
+      <td class="td-cat">${expenseCatSelectHTML(ri,r.cat)}</td>`;
+    bindDblClick(tr,'expense');tb.appendChild(tr);
+  });
+  document.getElementById('ct-expense-amount').textContent=fmt(total);
+  if(currentEM==='expense') renderEM('expense');
+  bindInlineEdit();updateSummary();
+}
+function renderCommit(){
+  const rows=filteredData('commit');
+  const all=loadData('commit');
+  let tReq=0,tPaid=0;
+  const tb=document.getElementById('tbody-commit');
+  tb.innerHTML='';
+  rows.forEach(r=>{
+    const req=Number(r.req||0),paid=Number(r.paid||0);
+    tReq+=req;tPaid+=paid;
+    const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
+    const tr=document.createElement('tr');tr.dataset.idx=ri;
+    tr.innerHTML=`<td class="td-name">${r.name}</td>
+      <td class="td-r">${fmt(r.req)}</td>
+      <td class="td-y td-edit" data-type="commit" data-idx="${ri}" data-field="paid">${fmt(r.paid)}</td>`;
+    bindDblClick(tr,'commit');tb.appendChild(tr);
+  });
+  document.getElementById('ct-commit-req').textContent=fmt(tReq);
+  document.getElementById('ct-commit-paid').textContent=fmt(tPaid);
+  document.getElementById('ct-commit-rem').textContent=fmt(tReq-tPaid);
+  if(currentEM==='commit') renderEM('commit');
+  bindInlineEdit();updateSummary();
+}
+function renderDebt(){
+  const rows=filteredData('debt');
+  const all=loadData(debtKey());
+  let tReq=0,tPaid=0;
+  const tb=document.getElementById('tbody-debt');
+  tb.innerHTML='';
+  rows.forEach(r=>{
+    const txns=r.transactions||[];
+    const pFor=txns.filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+    const pAg=txns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
+    const net=pFor-pAg,req=Number(r.req||0);
+    tReq+=req;tPaid+=net;
+    const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date&&x.req===r.req);
+    const tr=document.createElement('tr');tr.dataset.idx=ri;
+    tr.innerHTML=`<td class="td-name${nameCellMeta(r).cls}">
+      <span style="overflow:hidden;text-overflow:ellipsis;">${nameCellMeta(r).prefix}${r.name}</span>
+      <button class="dhb" onclick="openDebtHistory(${ri})">🔻</button></td>
+      <td class="td-y">${fmt(r.req)}</td>
+      <td class="td-b">${fmt(net)}</td>`;
+    bindDblClick(tr,'debt');tb.appendChild(tr);
+  });
+  document.getElementById('ct-debt-req').textContent=fmt(tReq);
+  document.getElementById('ct-debt-paid').textContent=fmt(tPaid);
+  document.getElementById('ct-debt-rem').textContent=fmt(tReq-tPaid);
+  if(currentEM==='debt') renderEM('debt');
+  updateSummary();
+}
+function renderAll(){renderIncome();renderExpense();renderCommit();renderDebt();}
+
+// ══════════════════════════════════════════════
+//  SUMMARY
+// ══════════════════════════════════════════════
+function updateSummary(){
+  const income=filteredData('income').reduce((s,r)=>s+Number(r.amount||0),0);
+  const expense=filteredData('expense').reduce((s,r)=>s+Number(r.amount||0),0);
+  const commitP=filteredData('commit').reduce((s,r)=>s+Number(r.paid||0),0);
+  function debtNet(k){return loadData(k).reduce((s,r)=>{const t=r.transactions||[];return s+t.filter(x=>x.dir==='for').reduce((a,x)=>a+Number(x.amount||0),0)-t.filter(x=>x.dir==='against').reduce((a,x)=>a+Number(x.amount||0),0);},0);}
+  const totalExp=expense+commitP+Math.max(0,debtNet('debt_creditor'))+Math.max(0,debtNet('debt_debtor'));
+  const rem=income-totalExp;
+  document.getElementById('sum-income').querySelector('span:last-child').textContent=fmt(income);
+  document.getElementById('sum-expense').querySelector('span:last-child').textContent=fmt(totalExp);
+  const re=document.getElementById('sum-remain');
+  re.querySelector('span:last-child').textContent=fmt(Math.abs(rem));
+  re.className='val '+(rem>=0?'cv-b':'cv-r');
+  // تحديث شارتات الكروت الأربعة الجانبية (كل شارت = نسبته إلى الدخل)
+  const credPaid=Math.max(0,debtNet('debt_creditor'));
+  const debPaid=Math.max(0,debtNet('debt_debtor'));
+  updateRatioBars(income,expense,commitP,credPaid,debPaid,totalExp);
+}
+// ══════════════════════════════════════════════
+//  الدوائر الأربعة بالكروت — كل واحدة بتجاوب على سؤال مختلف:
+//  • الدخل:        كام % فاضل من الدخل لسه (بعد خصم كل النفقات: مصروفات + التزامات + ديون)
+//  • المصروفات:    كام % من الدخل راح على بند "المصروفات" بس (مايشملش التزامات/ديون)
+//  • الالتزامات:   كام % من الدخل اتدفع فى الالتزامات
+//  • الديون:       كام % من الدخل اتحصّل/اتسدد فى التصنيف الحالى (دائن أو مدين، حسب debtMode)
+// ══════════════════════════════════════════════
+function updateRatioBars(income,exp,commitPaid,credPaid,debPaid,totalExp){
+  const pct=(v)=>income>0?Math.min(100,Math.round((v/income)*100)):0;
+  // كرت الدخل: نسبة النفقات الإجمالية إلى الدخل (الطوق يملأ بقدر ما أنفقت)
+  drawPercentRing('chart-income-side',pct(totalExp),'#f05454',{pctId:'ct-income-pct',gradient:['#f05454','#e0b030']});
+  // كرت المصروفات (stacked): نسبة المصروفات إلى الدخل
+  drawPercentRing('chart-expense-side',pct(exp),'#7eb8e0',{pctId:'ct-expense-pct',gradient:['#9fd4ff','#4da8f0']});
+  // كرت الالتزامات: نسبة المدفوع من الالتزامات إلى الدخل
+  drawPercentRing('chart-commit-side',pct(commitPaid),'#7eb8e0');
+  // كرت الديون: نسبة المدفوع فى التصنيف الحالى (دائن/مدين) إلى الدخل
+  const debtPct=debtMode==='creditor'?pct(credPaid):pct(debPaid);
+  const debtColor='#7eb8e0';
+  drawPercentRing('chart-debt-side',debtPct,debtColor);
+}
+
+// ══════════════════════════════════════════════
+//  MINI CHARTS (SVG)
+//  ملاحظة: شارتات الكروت الأربعة الجانبية تُرسم داخل updateRatioBars
+//  (تُستدعى تلقائيًا من updateSummary، فلا حاجة لدالة drawCharts منفصلة)
+// ══════════════════════════════════════════════
+// طوق واحد يعبّر عن نسبة مئوية مباشرة (مستخدم لكرت الدخل: نسبة النفقات/الدخل)
+function drawPercentRing(id,pct,color,opts){
+  opts=opts||{};
+  const svg=document.getElementById(id);
+  if(!svg)return;
+  svg.innerHTML='';
+  // تحديد حجم الرسم حسب viewBox الفعلي للـ SVG
+  const vb=svg.getAttribute('viewBox')||'0 0 54 54';
+  const parts=vb.split(/\s+/).map(Number);
+  const W=parts[2]||54, H=parts[3]||54;
+  const cx=W/2, cy=H/2;
+  const sw=opts.sw||Math.max(6, Math.round(W*0.11));
+  const r=(W/2)-sw-1;
+  pct=Math.max(0,Math.min(100,pct));
+  let strokePaint=color;
+  if(opts.gradient){
+    const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const grad=document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    const gid=id+'-grad';
+    grad.setAttribute('id',gid);
+    grad.setAttribute('x1','0%');grad.setAttribute('y1','0%');
+    grad.setAttribute('x2','100%');grad.setAttribute('y2','100%');
+    opts.gradient.forEach((c,i)=>{
+      const stop=document.createElementNS('http://www.w3.org/2000/svg','stop');
+      stop.setAttribute('offset',(i/(opts.gradient.length-1)*100)+'%');
+      stop.setAttribute('stop-color',c);
+      grad.appendChild(stop);
+    });
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+    strokePaint=`url(#${gid})`;
+  }
+  const bg=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  bg.setAttribute('cx',cx);bg.setAttribute('cy',cy);bg.setAttribute('r',r);
+  bg.setAttribute('fill','none');bg.setAttribute('stroke','#2a3240');bg.setAttribute('stroke-width',sw);
+  svg.appendChild(bg);
+  const circ=2*Math.PI*r;
+  const dash=(pct/100)*circ;
+  const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  arc.setAttribute('cx',cx);arc.setAttribute('cy',cy);arc.setAttribute('r',r);
+  arc.setAttribute('fill','none');arc.setAttribute('stroke',strokePaint);arc.setAttribute('stroke-width',sw);
+  arc.setAttribute('stroke-dasharray',`${dash} ${circ-dash}`);
+  arc.setAttribute('stroke-linecap','round');
+  arc.setAttribute('transform',`rotate(-90 ${cx} ${cy})`);
+  svg.appendChild(arc);
+  // تحديث نص النسبة: إما داخل عنصر HTML خارجي (الكروت الجديدة stacked) أو كنص داخل الـ SVG نفسه (الالتزامات/الديون)
+  const pctId=opts.pctId;
+  if(pctId){
+    const el=document.getElementById(pctId);
+    if(el) el.textContent=Math.round(pct)+'%';
+  } else {
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',Math.max(10,Math.round(W*0.22)));
+    txt.setAttribute('font-family','Cairo,sans-serif');txt.setAttribute('font-weight','800');
+    txt.setAttribute('fill','#dde4ef');
+    txt.textContent=Math.round(pct)+'%';
+    svg.appendChild(txt);
+  }
+}
+// ══════════════════════════════════════════════
+//  RATIO BARS UPDATE
+// ══════════════════════════════════════════════
+
+// ══════════════════════════════════════════════
+//  FLOATING TABLE (level 1)
+// ══════════════════════════════════════════════
+let currentFT=null;
+function openFTable(type){
+  closeFTable();closeEModal();
+  currentFT=type;
+  document.getElementById('ft-'+type).classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeFTable(){
+  if(currentFT){
+    document.getElementById('ft-'+currentFT).classList.remove('show');
+    currentFT=null;
+  }
+  if(!currentEM&&!document.getElementById('dhm').classList.contains('show'))
+    document.getElementById('overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  EXPANDED MODAL (level 2)
+// ══════════════════════════════════════════════
+let currentEM=null;
+let emSelected={};
+function openEModal(type){
+  closeEModal();
+  currentEM=type;
+  const em=document.getElementById('em-'+type);
+  em.classList.add('show');
+  // update debt title
+  if(type==='debt'){
+    em.classList.toggle('debtor-mode',debtMode==='debtor');
+    document.getElementById('em-debt-title').textContent='الديون — '+(debtMode==='creditor'?'دائن':'مدين')+' — تفاصيل';
+  }
+  document.getElementById('overlay').classList.add('show');
+  renderEM(type);
+}
+function closeEModal(){
+  if(currentEM){
+    document.getElementById('em-'+currentEM).classList.remove('show');
+    currentEM=null;
+  }
+  if(!currentFT&&!document.getElementById('dhm').classList.contains('show'))
+    document.getElementById('overlay').classList.remove('show');
+}
+function renderEM(type){
+  if(type==='income'){
+    const all=loadData('income');
+    const rows=filteredData('income');
+    const tb=document.getElementById('tbody-income-em');
+    tb.innerHTML='';
+    rows.forEach(r=>{
+      const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
+      const tr=document.createElement('tr');tr.dataset.idx=ri;
+      tr.innerHTML=`<td class="td-m td-date" data-type="income" data-idx="${ri}">${fmtDate(r.date)}</td>
+        <td class="td-name${nameCellMeta(r).cls}"><span style="display:inline-flex;align-items:center;gap:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nameCellMeta(r).prefix}${r.name}</span></td>
+        <td class="td-g td-edit" data-type="income" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
+        <td class="td-m">${r.pay||''}</td>`;
+      bindEMLP(tr,'income');tb.appendChild(tr);
+    });
+  } else if(type==='expense'){
+    const all=loadData('expense');
+    const rows=filteredData('expense');
+    const tb=document.getElementById('tbody-expense-em');
+    tb.innerHTML='';
+    rows.forEach(r=>{
+      const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
+      const tr=document.createElement('tr');tr.dataset.idx=ri;
+      tr.innerHTML=`<td class="td-m td-date" data-type="expense" data-idx="${ri}">${fmtDate(r.date)}</td>
+        <td class="td-cat">${expenseCatSelectHTML(ri,r.cat,'em')}</td>
+        <td class="td-name">${r.name}</td>
+        <td class="td-b td-edit" data-type="expense" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
+        <td class="td-m">${r.pay||''}</td>`;
+      bindEMLP(tr,'expense');tb.appendChild(tr);
+    });
+  } else if(type==='commit'){
+    const all=loadData('commit');
+    const rows=filteredData('commit');
+    const tb=document.getElementById('tbody-commit-em');
+    tb.innerHTML='';
+    rows.forEach(r=>{
+      const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
+      const tr=document.createElement('tr');tr.dataset.idx=ri;
+      tr.innerHTML=`<td class="td-m td-date" data-type="commit" data-idx="${ri}">${fmtDate(r.paidDate||r.date)}</td>
+        <td class="td-name">${r.name}</td>
+        <td class="td-r">${fmt(r.req)}</td>
+        <td class="td-y td-edit" data-type="commit" data-idx="${ri}" data-field="paid">${fmt(r.paid)}</td>
+        <td class="td-m">${r.pay||''}</td>`;
+      bindEMLP(tr,'commit');tb.appendChild(tr);
+    });
+  } else if(type==='debt'){
+    const all=loadData(debtKey());
+    const rows=filteredData('debt');
+    const tb=document.getElementById('tbody-debt-em');
+    tb.innerHTML='';
+    rows.forEach(r=>{
+      const txns=r.transactions||[];
+      const pFor=txns.filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+      const pAg=txns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
+      const net=pFor-pAg;
+      const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date&&x.req===r.req);
+      const tr=document.createElement('tr');tr.dataset.idx=ri;
+      tr.innerHTML=`<td class="td-m">${fmtDate(r.date)}</td>
+        <td class="td-name${nameCellMeta(r).cls}"><span>${nameCellMeta(r).prefix}${r.name}</span>
+          <button class="dhb" onclick="openDebtHistory(${ri})">🔻</button></td>
+        <td class="td-y">${fmt(r.req)}</td>
+        <td class="td-b">${fmt(net)}</td>
+        <td class="td-m">${r.pay||''}</td>`;
+      bindEMLP(tr,'debt');tb.appendChild(tr);
+    });
+  }
+  setTimeout(bindInlineEdit,50);
+}
+
+// EM: ضغط مزدوج على الصف → تحديد → حذف
+function bindEMLP(tr,type){
+  if(!emSelected[type])emSelected[type]=new Set();
+  let last=0;
+  tr.addEventListener('click',e=>{
+    if(e.target.classList.contains('dhb'))return;
+    const now=Date.now();
+    if(now-last<350)selectEM(tr,type);
+    last=now;
+  });
+  tr.addEventListener('contextmenu',e=>e.preventDefault());
+}
+function selectEM(tr,type){
+  if(!emSelected[type])emSelected[type]=new Set();
+  const idx=Number(tr.dataset.idx);
+  if(emSelected[type].has(idx)){emSelected[type].delete(idx);tr.classList.remove('selected');}
+  else{emSelected[type].add(idx);tr.classList.add('selected');}
+  const bar=document.getElementById('del-'+type+'-em');
+  const lbl=document.getElementById('del-'+type+'-em-lbl');
+  if(emSelected[type].size>0){bar.classList.add('show');lbl.textContent='تم تحديد '+emSelected[type].size+' سطر';}
+  else bar.classList.remove('show');
+}
+function clearSelectionEM(type){
+  emSelected[type]=new Set();
+  document.querySelectorAll('#tbody-'+type+'-em tr').forEach(t=>t.classList.remove('selected'));
+  document.getElementById('del-'+type+'-em').classList.remove('show');
+}
+function deleteSelectedEM(type){
+  if(!emSelected[type]||!emSelected[type].size)return;
+  const key=type==='debt'?debtKey():type;
+  const arr=loadData(key);
+  [...emSelected[type]].sort((a,b)=>b-a).forEach(i=>arr.splice(i,1));
+  saveData(key,arr);emSelected[type]=new Set();
+  document.getElementById('del-'+type+'-em').classList.remove('show');
+  renderAll();
+}
+
+// ══════════════════════════════════════════════
+//  AUTOFIT-FONT: تقلبص الخط تلقائيًا حسب طول الخلية في emodal
+// ══════════════════════════════════════════════
+function autofitEmodalCells(){
+  document.querySelectorAll('.emodal tbody tr').forEach(tr=>{
+    tr.querySelectorAll('td').forEach(td=>{
+      if(td.querySelector('input'))return;
+      if(td.querySelector('select'))return;
+      if(td.querySelector('.cat-cell-trigger'))return; // خلية الفئة تحوي زر تفاعلي، لا تستبدله
+      if(td.querySelector('button'))return;             // أي زر تفاعلي آخر محمي
+      if(td.classList.contains('td-name'))return; // البند لا يُصغّر، يبقى في سطر واحد
+      // لف المحتوى في span لقياسه
+      let span=td.querySelector('span.autofit');
+      if(!span){span=document.createElement('span');span.className='autofit';span.textContent=td.textContent;td.textContent='';td.appendChild(span);}
+      const maxFs=parseFloat(getComputedStyle(td).fontSize)||12;
+      const minFs=8;
+      let fs=maxFs;
+      span.style.fontSize=fs+'px';
+      // قياس العرض المتاح داخل الخلية
+      const availW=td.clientWidth-8;
+      if(availW<=0)return;
+      span.style.fontSize=fs+'px';
+      // تقلبص تدريجي حتى يدخل في العرض
+      while(span.scrollWidth>availW&&fs>minFs){fs-=0.5;span.style.fontSize=fs+'px';}
+    });
+  });
+}
+// شغّل autofit بعد رسم emodal
+const _origRenderEM=renderEM;
+renderEM=function(type){_origRenderEM(type);setTimeout(autofitEmodalCells,10);};
+window.addEventListener('resize',()=>{if(currentEM)autofitEmodalCells();});
+
+// ══════════════════════════════════════════════
+//  AUTOCOMPLETE DROPDOWN: اقتراحات البند من البيانات السابقة
+// ══════════════════════════════════════════════
+const AC_FIELDS={income:'fi-name',expense:'fe-name',commit:'fc-name',debt:'fd-name'};
+const AC_HISTORY_KEY='fm_name_history';
+function getNameHistory(type){
+  const key=type==='debt'?debtKey():type;
+  const arr=loadData(key);
+  const counts={};
+  arr.forEach(r=>{const n=(r.name||'').trim();if(!n)return;counts[n]=(counts[n]||0)+1;});
+  return Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ar'));
+}
+let _acTarget=null,_acList=[],_acIdx=-1;
+function setupAutocomplete(type){
+  const inpId=AC_FIELDS[type];if(!inpId)return;
+  const inp=document.getElementById(inpId);if(!inp||inp.dataset.acSetup)return;
+  inp.dataset.acSetup='1';
+  // لف الحقل بـ container نسبي ليستقبل القائمة المنسدلة
+  const wrap=document.createElement('div');wrap.style.cssText='position:relative;flex:1;min-width:0;';
+  inp.parentNode.insertBefore(wrap,inp);wrap.appendChild(inp);
+  inp.classList.add('ac-target');
+  // dropdown
+  const dd=document.createElement('div');dd.className='ac-suggest';wrap.appendChild(dd);
+  const close=()=>{dd.classList.remove('show');_acIdx=-1;};
+  const renderDD=(items)=>{
+    if(!items.length){close();return;}
+    dd.innerHTML='';
+    items.slice(0,8).forEach(it=>{
+      const row=document.createElement('div');row.className='ac-suggest-item';
+      row.innerHTML=`<span class="ac-count">${it.count}×</span>${escapeHtml(it.name)}`;
+      row.addEventListener('mousedown',e=>{e.preventDefault();inp.value=it.name;close();inp.focus();});
+      dd.appendChild(row);
+    });
+    dd.classList.add('show');
+  };
+  inp.addEventListener('input',()=>{
+    const q=inp.value.trim();
+    const hist=getNameHistory(type);
+    _acList=q?hist.filter(h=>h.name.includes(q)):hist;
+    _acIdx=-1;
+    renderDD(_acList);
+  });
+  inp.addEventListener('focus',()=>{
+    const q=inp.value.trim();
+    const hist=getNameHistory(type);
+    _acList=q?hist.filter(h=>h.name.includes(q)):hist;
+    _acIdx=-1;
+    renderDD(_acList);
+  });
+  inp.addEventListener('blur',()=>setTimeout(close,150));
+  inp.addEventListener('keydown',e=>{
+    const items=dd.querySelectorAll('.ac-suggest-item');
+    if(e.key==='ArrowDown'){e.preventDefault();_acIdx=Math.min(items.length-1,_acIdx+1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();_acIdx=Math.max(0,_acIdx-1);}
+    else if(e.key==='Enter'&&_acIdx>=0&&items[_acIdx]){e.preventDefault();inp.value=_acList[_acIdx].name;close();return;}
+    else if(e.key==='Escape'){close();return;}
+    items.forEach((it,i)=>it.classList.toggle('active',i===_acIdx));
+    if(_acIdx>=0&&items[_acIdx])items[_acIdx].scrollIntoView({block:'nearest'});
+  });
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ══════════════════════════════════════════════
+//  INLINE EDIT (amount/paid cells)
+// ══════════════════════════════════════════════
+function bindInlineEdit(){
+  document.querySelectorAll('.td-edit').forEach(td=>{
+    if(td.dataset.bound)return;td.dataset.bound='1';
+    td.addEventListener('click',function(){
+      if(this.querySelector('input'))return;
+      const type=this.dataset.type,idx=Number(this.dataset.idx),field=this.dataset.field;
+      const key=type==='debt'?debtKey():type;
+      const arr=loadData(key);const cur=Number(arr[idx]?.[field]||0);
+      const inp=document.createElement('input');
+      inp.type='number';inp.value=cur||'';
+      inp.style.cssText='width:100%;background:transparent;border:none;border-bottom:1px solid #4da8f0;color:inherit;font-family:Cairo,sans-serif;font-size:inherit;font-weight:700;text-align:center;outline:none;padding:0;';
+      this.textContent='';this.appendChild(inp);inp.focus();inp.select();
+      const save=()=>{
+        const val=Number(inp.value||0);
+        if(!isNaN(val)&&arr[idx]){
+          arr[idx][field]=val;
+          if(field==='paid')arr[idx].paidDate=todayStr();
+          if(field==='amount')arr[idx].date=todayStr();
+          saveData(key,arr);
+        }
+        if(type==='income')renderIncome();
+        else if(type==='expense')renderExpense();
+        else if(type==='commit')renderCommit();
+        else renderDebt();
+      };
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}if(e.key==='Escape'){inp.value=cur;inp.blur();}});
+      inp.addEventListener('blur',save);
+    });
+  });
+  // date cells
+  document.querySelectorAll('.td-date').forEach(td=>{
+    if(td.dataset.db)return;td.dataset.db='1';
+    td.style.cursor='pointer';
+    td.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(this.querySelector('input'))return;
+      const type=this.dataset.type,idx=Number(this.dataset.idx);
+      const key=type==='debt'?debtKey():type;
+      const arr=loadData(key);
+      const df=(type==='commit'||type==='debt')?(arr[idx]?.paidDate||arr[idx]?.date):arr[idx]?.date;
+      const inp=document.createElement('input');inp.type='date';inp.value=df||todayStr();
+      inp.style.cssText='width:88px;background:var(--card);border:1px solid #4da8f0;border-radius:4px;color:var(--txt);font-family:Cairo,sans-serif;font-size:10px;padding:1px 2px;outline:none;';
+      this.textContent='';this.appendChild(inp);inp.focus();
+      try{inp.showPicker();}catch(e){}
+      const save=()=>{
+        if(inp.value&&arr[idx]){
+          if(type==='commit'||type==='debt')arr[idx].paidDate=inp.value;
+          else arr[idx].date=inp.value;
+          saveData(key,arr);
+        }
+        if(type==='income')renderIncome();
+        else if(type==='expense')renderExpense();
+        else if(type==='commit')renderCommit();
+        else renderDebt();
+      };
+      inp.addEventListener('change',()=>inp.blur());
+      inp.addEventListener('blur',save);
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+//  DOUBLE-CLICK / DOUBLE-TAP (ft tables — select for delete)
+// ══════════════════════════════════════════════
+let _sel={};
+function bindDblClick(tr,type){
+  if(!_sel[type])_sel[type]=new Set();
+  let last=0;
+  tr.addEventListener('click',e=>{
+    if(e.target.classList.contains('dhb'))return;
+    const now=Date.now();
+    if(now-last<350)selectFT(tr,type);
+    last=now;
+  });
+  tr.addEventListener('contextmenu',e=>e.preventDefault());
+}
+function selectFT(tr,type){
+  if(!_sel[type])_sel[type]=new Set();
+  const idx=Number(tr.dataset.idx);
+  if(_sel[type].has(idx)){_sel[type].delete(idx);tr.classList.remove('selected');}
+  else{_sel[type].add(idx);tr.classList.add('selected');}
+  const bar=document.getElementById('del-'+type);
+  const lbl=document.getElementById('del-'+type+'-lbl');
+  if(_sel[type].size>0){bar.classList.add('show');lbl.textContent='تم تحديد '+_sel[type].size+' سطر';}
+  else bar.classList.remove('show');
+}
+function clearSelection(type){
+  _sel[type]=new Set();
+  document.querySelectorAll('#tbody-'+type+' tr').forEach(t=>t.classList.remove('selected'));
+  document.getElementById('del-'+type).classList.remove('show');
+}
+function deleteSelected(type){
+  if(!_sel[type]||!_sel[type].size)return;
+  const key=type==='debt'?debtKey():type;
+  const arr=loadData(key);
+  [..._sel[type]].sort((a,b)=>b-a).forEach(i=>arr.splice(i,1));
+  saveData(key,arr);_sel[type]=new Set();
+  document.getElementById('del-'+type).classList.remove('show');
+  renderAll();
+}
+
+// ══════════════════════════════════════════════
+//  ADD / EDIT ROW (نافذة عائمة فى منتصف الشاشة)
+// ══════════════════════════════════════════════
+let _editIdx={income:null,expense:null,commit:null,debt:null};
+const FORM_FIELDS={
+  income:['fi-name','fi-amount','fi-pay'],
+  expense:['fe-name','fe-amount','fe-pay','fe-cat'],
+  commit:['fc-name','fc-req','fc-paid','fc-pay'],
+  debt:['fd-name','fd-req','fd-pay','fd-cat']
+};
+const FORM_ADD_TITLE={income:'إضافة دخل',expense:'إضافة مصروف',commit:'إضافة التزام',debt:'إضافة دين'};
+const FORM_EDIT_TITLE={income:'تعديل دخل',expense:'تعديل مصروف',commit:'تعديل التزام',debt:'تعديل دين'};
+function clearFormFields(type){
+  (FORM_FIELDS[type]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function showForm(type){
+  document.getElementById('form-'+type).classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+  setupAutocomplete(type);
+  if(type==='debt')refreshDebtCatSelect();
+  if(type==='expense')refreshExpenseCatSelect();
+}
+function closeForm(type){
+  document.getElementById('form-'+type).classList.remove('show');
+  _editIdx[type]=null;
+  if(type==='income')resetLoanField();
+  if(!currentFT&&!currentEM&&debtHistIdx===null)document.getElementById('overlay').classList.remove('show');
+}
+function openAddForm(type){
+  _editIdx[type]=null;
+  clearFormFields(type);
+  if(type==='income'){resetLoanField();setLoanRowVisible(true);}
+  const title=document.getElementById('form-'+type+'-title');
+  if(title)title.textContent=FORM_ADD_TITLE[type]||'إضافة';
+  showForm(type);
+}
+function populateFormForEdit(type,idx){
+  const key=type==='debt'?debtKey():type;
+  const arr=loadData(key);
+  const r=arr[idx];
+  if(!r)return;
+  _editIdx[type]=idx;
+  showForm(type);
+  if(type==='income'){
+    document.getElementById('fi-name').value=r.name||'';
+    document.getElementById('fi-amount').value=r.amount||'';
+    document.getElementById('fi-pay').value=r.pay||'';
+    resetLoanField();setLoanRowVisible(false);
+  } else if(type==='expense'){
+    document.getElementById('fe-name').value=r.name||'';
+    document.getElementById('fe-amount').value=r.amount||'';
+    document.getElementById('fe-pay').value=r.pay||'';
+    document.getElementById('fe-cat').value=r.cat||'';
+  } else if(type==='commit'){
+    document.getElementById('fc-name').value=r.name||'';
+    document.getElementById('fc-req').value=r.req||'';
+    document.getElementById('fc-paid').value=r.paid||'';
+    document.getElementById('fc-pay').value=r.pay||'';
+  } else if(type==='debt'){
+    document.getElementById('fd-name').value=r.name||'';
+    document.getElementById('fd-req').value=r.req||'';
+    document.getElementById('fd-pay').value=r.pay||'';
+    document.getElementById('fd-cat').value=r.cat||'الكل';
+  }
+  const title=document.getElementById('form-'+type+'-title');
+  if(title)title.textContent=FORM_EDIT_TITLE[type]||'تعديل';
+}
+// ──── قرض مستلم: ربط دخل بتصنيف "دائن" تلقائيًا ────
+let _loanMode=false;
+function resetLoanField(){
+  _loanMode=false;
+  const btn=document.getElementById('fi-loan-toggle');
+  const row=document.getElementById('fi-loan-cat-row');
+  if(btn)btn.classList.remove('active');
+  if(row)row.style.display='none';
+}
+function setLoanRowVisible(visible){
+  const row=document.getElementById('fi-loan-row');
+  if(row)row.style.display=visible?'flex':'none';
+}
+function toggleLoanField(){
+  _loanMode=!_loanMode;
+  const btn=document.getElementById('fi-loan-toggle');
+  const row=document.getElementById('fi-loan-cat-row');
+  if(btn)btn.classList.toggle('active',_loanMode);
+  if(row)row.style.display=_loanMode?'flex':'none';
+  if(_loanMode)refreshLoanCatSelect();
+}
+function refreshLoanCatSelect(){
+  const sel=document.getElementById('fi-loan-cat');if(!sel)return;
+  sel.innerHTML='<option value="">اختر تصنيف "دائن"</option>';
+  getDebtCats('creditor').forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+}
+function addCreditorDebtFromLoan(name,amount,pay,cat){
+  const arr=loadData('debt_creditor');
+  arr.push({name,req:amount,transactions:[],pay,cat,date:todayStr(),fromIncome:true});
+  saveData('debt_creditor',arr);
+  renderDebt();
+}
+function editSelected(type){
+  if(!_sel[type]||_sel[type].size!==1){alert('اختر سطر واحد بس للتعديل');return;}
+  const idx=[..._sel[type]][0];
+  clearSelection(type);
+  populateFormForEdit(type,idx);
+}
+function editSelectedEM(type){
+  if(!emSelected[type]||emSelected[type].size!==1){alert('اختر سطر واحد بس للتعديل');return;}
+  const idx=[...emSelected[type]][0];
+  clearSelectionEM(type);
+  populateFormForEdit(type,idx);
+}
+function getExpenseCats(){
+  const s=getSettings();
+  return (s.expenseCats&&s.expenseCats.length)?s.expenseCats:[];
+}
+function refreshExpenseCatSelect(){
+  const sel=document.getElementById('fe-cat');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">الفئة</option>';
+  getExpenseCats().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  sel.value=cur;
+}
+function expenseCatSelectHTML(idx,selected,ctx){
+  const label = selected || 'بدون';
+  const emptyCls = selected ? '' : ' empty';
+  const c = ctx || 'main';
+  return `<div class="cat-cell-trigger${emptyCls}" data-idx="${idx}" data-ctx="${c}" onclick="openCatPopover(${idx},'${c}',event)" title="اختر الفئة"><span class="arr">▼</span><span>${label}</span></div>`;
+}
+function setExpenseCat(idx,val){
+  const arr=loadData('expense');
+  if(arr[idx]){arr[idx].cat=val;saveData('expense',arr);}
+}
+
+// ===== Floating Category Popover =====
+let _catPopoverIdx = null;
+let _catPopoverCtx = null;
+let _catPopoverTrigger = null;
+
+function buildCatPopoverItems(current, cats){
+  let html = `<button type="button" class="cat-popover-item empty${!current?' active':''}" data-val=""><span>بدون فئة</span><span class="check">✓</span></button>`;
+  cats.forEach(c=>{
+    const safe = c.replace(/"/g,'&quot;');
+    html += `<button type="button" class="cat-popover-item${c===current?' active':''}" data-val="${safe}"><span>${c}</span><span class="check">✓</span></button>`;
+  });
+  return html;
+}
+
+function positionCatPopover(){
+  const pop = document.getElementById('cat-popover');
+  const list = document.getElementById('cat-popover-list');
+  const trg = _catPopoverTrigger;
+  if(!trg) return;
+  const r = trg.getBoundingClientRect();
+  const popW = Math.min(Math.max(r.width + 20, 110), 170); // word/2 words width
+  const margin = 6;
+  // Compute ideal top/bottom (below the cell preferred)
+  let top = r.bottom + margin;
+  const cats = getExpenseCats();
+  const itemH = 30;            // approximate row height incl. border
+  const hdrH = 30;             // header height
+  const desiredH = hdrH + (cats.length + 1) * itemH + 8; // +1 for "بدون"
+  // Find a containing table to limit height (must be less than table)
+  const tableEl = trg.closest('table');
+  let maxAllowed = Math.min(window.innerHeight - 40, 320);
+  if(tableEl){
+    const tr = tableEl.getBoundingClientRect();
+    const availBelow = tr.bottom - r.bottom - margin;
+    const availAbove = r.top - tr.top - margin;
+    // prefer side that has more room, but stay below if possible
+    if(availBelow >= 80){
+      maxAllowed = Math.max(80, Math.min(availBelow, tr.height - 60));
+    } else if(availAbove >= 80){
+      // place above
+      top = r.top - margin;
+      maxAllowed = Math.max(80, Math.min(availAbove, tr.height - 60));
+    } else {
+      // tiny room: place below and let scroll handle
+      maxAllowed = Math.max(120, Math.min(window.innerHeight - r.bottom - margin, 240));
+    }
+  }
+  const listH = Math.max(80, Math.min(desiredH - hdrH - 8, maxAllowed - hdrH - 8));
+  pop.style.width = popW + 'px';
+  pop.style.top = top + 'px';
+  pop.style.maxHeight = (listH + hdrH + 12) + 'px';
+  list.style.maxHeight = listH + 'px';
+
+  // Horizontal: prefer centered on the trigger, but clamp inside viewport
+  let left = r.left + (r.width - popW) / 2;
+  left = Math.max(6, Math.min(left, window.innerWidth - popW - 6));
+  pop.style.left = left + 'px';
+  // small arrow offset so popover points near the trigger (visual cue)
+  pop.setAttribute('data-anchor-x', Math.round((r.left + r.width/2) - left));
+}
+
+function openCatPopover(idx, ctx, ev){
+  ev && ev.stopPropagation();
+  const trg = ev && ev.currentTarget ? ev.currentTarget : (function(){
+    const tbId = (ctx==='em') ? 'tbody-expense-em' : 'tbody-expense';
+    return document.querySelector('#'+tbId+' .cat-cell-trigger[data-idx="'+idx+'"]');
+  })();
+  _catPopoverIdx = idx;
+  _catPopoverCtx = ctx || 'main';
+  _catPopoverTrigger = trg || _catPopoverTrigger;
+
+  const cats = getExpenseCats();
+  const arr = loadData('expense');
+  const current = (arr[idx] && arr[idx].cat) || '';
+
+  const pop = document.getElementById('cat-popover');
+  document.getElementById('cat-popover-list').innerHTML = buildCatPopoverItems(current, cats);
+  document.getElementById('cat-popover-title').textContent = 'اختر الفئة';
+  pop.setAttribute('aria-hidden','false');
+
+  // bind items
+  document.querySelectorAll('#cat-popover-list .cat-popover-item').forEach(b=>{
+    b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const v = b.getAttribute('data-val') || '';
+      setExpenseCat(_catPopoverIdx, v);
+      closeCatPopover();
+      if(_catPopoverCtx==='em'){ if(typeof renderEM==='function') renderEM('expense'); }
+      else { if(typeof renderExpense==='function') renderExpense(); }
+    });
+  });
+
+  // open then position (after layout)
+  pop.classList.add('open');
+  positionCatPopover();
+
+  // close button
+  const closeBtn = document.getElementById('cat-popover-close');
+  closeBtn.onclick = (e)=>{ e.stopPropagation(); closeCatPopover(); };
+}
+
+function closeCatPopover(){
+  const pop = document.getElementById('cat-popover');
+  if(!pop) return;
+  pop.classList.remove('open');
+  pop.setAttribute('aria-hidden','true');
+  _catPopoverIdx = null;
+  _catPopoverCtx = null;
+  _catPopoverTrigger = null;
+}
+
+// Outside click closes
+document.addEventListener('click', e=>{
+  const pop = document.getElementById('cat-popover');
+  if(!pop || !pop.classList.contains('open')) return;
+  if(e.target.closest('#cat-popover')) return;
+  if(e.target.closest('.cat-cell-trigger')) return; // toggling handled in trigger
+  closeCatPopover();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeCatPopover();
+});
+window.addEventListener('resize', ()=>{
+  const pop = document.getElementById('cat-popover');
+  if(pop && pop.classList.contains('open')) positionCatPopover();
+});
+window.addEventListener('scroll', ()=>{
+  const pop = document.getElementById('cat-popover');
+  if(pop && pop.classList.contains('open')) positionCatPopover();
+}, true);
+function refreshDebtCatSelect(){
+  const sel=document.getElementById('fd-cat');if(!sel)return;
+  const cats=getDebtCats(debtMode);
+  sel.innerHTML='<option value="الكل">التصنيف (الكل)</option>';
+  cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+}
+function saveRow(type){
+  if(type==='income'){
+    const name=document.getElementById('fi-name').value.trim();
+    const amount=document.getElementById('fi-amount').value;
+    const pay=document.getElementById('fi-pay').value;
+    if(!name||!amount)return;
+    const arr=loadData('income');
+    const isNewEntry=_editIdx.income==null;
+    const loanCat=isNewEntry&&_loanMode?(document.getElementById('fi-loan-cat')?.value||''):'';
+    if(!isNewEntry&&arr[_editIdx.income]){
+      arr[_editIdx.income]={...arr[_editIdx.income],name,amount:Number(amount),pay};
+    } else {
+      const row={name,amount:Number(amount),pay,date:todayStr()};
+      if(loanCat)row.isLoan=true;
+      arr.push(row);
+    }
+    saveData('income',arr);
+    if(loanCat)addCreditorDebtFromLoan(name,Number(amount),pay,loanCat);
+    renderIncome();
+  } else if(type==='expense'){
+    const name=document.getElementById('fe-name').value.trim();
+    const amount=document.getElementById('fe-amount').value;
+    const pay=document.getElementById('fe-pay').value;
+    const cat=document.getElementById('fe-cat')?.value||'';
+    if(!name||!amount)return;
+    const arr=loadData('expense');
+    if(_editIdx.expense!=null&&arr[_editIdx.expense]){
+      arr[_editIdx.expense]={...arr[_editIdx.expense],name,amount:Number(amount),pay,cat};
+    } else {
+      arr.push({name,amount:Number(amount),pay,cat,date:todayStr()});
+    }
+    saveData('expense',arr);
+    renderExpense();
+  } else if(type==='commit'){
+    const name=document.getElementById('fc-name').value.trim();
+    const req=document.getElementById('fc-req').value;
+    const paid=document.getElementById('fc-paid').value||0;
+    const pay=document.getElementById('fc-pay').value;
+    if(!name||!req)return;
+    const arr=loadData('commit');
+    if(_editIdx.commit!=null&&arr[_editIdx.commit]){
+      arr[_editIdx.commit]={...arr[_editIdx.commit],name,req:Number(req),paid:Number(paid),pay};
+    } else {
+      arr.push({name,req:Number(req),paid:Number(paid),pay,date:todayStr()});
+    }
+    saveData('commit',arr);
+    renderCommit();
+  } else if(type==='debt'){
+    const name=document.getElementById('fd-name').value.trim();
+    const req=document.getElementById('fd-req').value;
+    const pay=document.getElementById('fd-pay').value;
+    const cat=document.getElementById('fd-cat')?.value||'الكل';
+    if(!name||!req)return;
+    const arr=loadData(debtKey());
+    if(_editIdx.debt!=null&&arr[_editIdx.debt]){
+      arr[_editIdx.debt]={...arr[_editIdx.debt],name,req:Number(req),pay,cat};
+    } else {
+      arr.push({name,req:Number(req),transactions:[],pay,cat,date:todayStr()});
+    }
+    saveData(debtKey(),arr);
+    renderDebt();
+  }
+  closeForm(type);
+}
+
+// ══════════════════════════════════════════════
+//  DEBT HISTORY MODAL
+// ══════════════════════════════════════════════
+let debtHistIdx=null;
+function openDebtHistory(ri){
+  debtHistIdx=ri;
+  const arr=loadData(debtKey());const r=arr[ri];if(!r)return;
+  if(!r.transactions)r.transactions=[];
+  const hdrBg=debtMode==='creditor'?'var(--hc)':'var(--hi)';
+  document.getElementById('dhm-main-header').style.background=hdrBg;
+  document.getElementById('dhm-col-header').style.background=hdrBg;
+  document.getElementById('dhm-name').textContent=r.name;
+  document.getElementById('dhm-cat-label').textContent=r.cat||'';
+  updateHistHeader(r);renderStatementList(r);
+  document.getElementById('dhm-save-btn').style.background=debtMode==='creditor'?'var(--yellow)':'var(--green)';
+  document.getElementById('dhm').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+function updateHistHeader(r){
+  const txns=r.transactions||[];
+  const pF=txns.filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+  const pA=txns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
+  const net=pF-pA,rem=Number(r.req||0)-net;
+  document.getElementById('dhm-req').textContent=fmt(r.req);
+  document.getElementById('dhm-paid').textContent=fmt(net);
+  const re=document.getElementById('dhm-rem');
+  re.textContent=fmt(rem);
+  re.style.color=rem>0?'var(--red)':rem===0?'rgba(255,255,255,.5)':'var(--green)';
+}
+function renderStatementList(r){
+  const container=document.getElementById('dhm-list');
+  container.innerHTML='';
+  const ordered=r.transactions||[];
+  if(!ordered.length){container.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px;">لا توجد معاملات بعد</div>';return;}
+  let bal=Number(r.req||0);
+  const bals=[];
+  ordered.forEach(t=>{if(t.dir==='for')bal-=Number(t.amount||0);else bal+=Number(t.amount||0);bals.push(bal);});
+  [...ordered].reverse().forEach((t,vi)=>{
+    const ri2=ordered.length-1-vi;
+    const b=bals[ri2];
+    const isFor=t.dir==='for';
+    const ac=isFor?'var(--green)':'var(--red)';
+    const bc=b>0?'var(--red)':b<0?'var(--green)':'var(--muted)';
+    const row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:22% 20% 28% 22% 8%;align-items:center;padding:9px 10px;border-bottom:1px solid var(--row);background:var(--card);margin-bottom:2px;';
+    row.innerHTML=`<div style="font-size:11px;color:var(--muted);">${fmtDate(t.date)||t.date||''}</div>
+      <div style="text-align:center;font-size:13px;font-weight:800;color:${ac};"><span style="font-size:10px;">${isFor?'▲':'▼'}</span> ${fmt(t.amount)}</div>
+      <div style="text-align:center;font-size:11px;color:var(--txt);">${t.details||t.pay||'—'}</div>
+      <div style="text-align:center;font-size:13px;font-weight:800;color:${bc};">${fmt(b)}</div>
+      <div style="text-align:center;"><button onclick="deleteDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0;line-height:1;">×</button></div>`;
+    container.appendChild(row);
+  });
+}
+function saveDebtTransaction(){
+  const amount=Number(document.getElementById('dhm-amount').value||0);
+  const details=document.getElementById('dhm-details').value.trim();
+  const pay=document.getElementById('dhm-pay').value;
+  const dir=document.getElementById('dhm-dir').value;
+  if(!amount||debtHistIdx===null)return;
+  const arr=loadData(debtKey());
+  if(!arr[debtHistIdx].transactions)arr[debtHistIdx].transactions=[];
+  const debtorName=arr[debtHistIdx].name;
+  const txnDate=todayStr();
+  arr[debtHistIdx].transactions.push({amount,details,pay,dir,date:txnDate});
+  saveData(debtKey(),arr);
+  // عند تسجيل سداد (dir='for') فى قسم "مدين": يُسجَّل تلقائيًا فى جدول الدخل
+  if(debtMode==='debtor'&&dir==='for'){
+    addAutoIncomeFromDebtPayment(debtorName,amount,pay,txnDate);
+  }
+  document.getElementById('dhm-amount').value='';
+  document.getElementById('dhm-details').value='';
+  document.getElementById('dhm-pay').value='';
+  updateHistHeader(arr[debtHistIdx]);renderStatementList(arr[debtHistIdx]);renderDebt();
+}
+// ملحوظة: بتتنفذ فقط لما debtMode==='debtor' و dir==='for' (شوف saveDebtTransaction).
+// ملحوظة مهمة: لو اتحذفت معاملة السداد دى من سجل الدين بعد كده، صف الدخل المرتبط بيها
+// مش بيتحذف تلقائيًا معاها — لسه مفيش ربط ثنائى الاتجاه بين الاتنين.
+function addAutoIncomeFromDebtPayment(debtorName,amount,pay,date){
+  const inc=loadData('income');
+  inc.push({name:debtorName,amount,pay,date,fromDebt:true});
+  saveData('income',inc);
+  renderIncome();
+}
+function deleteDebtTransaction(di,ti){
+  const arr=loadData(debtKey());
+  if(!arr[di]||!arr[di].transactions)return;
+  arr[di].transactions.splice(ti,1);
+  saveData(debtKey(),arr);
+  updateHistHeader(arr[di]);renderStatementList(arr[di]);renderDebt();
+}
+function closeDebtHistory(){
+  document.getElementById('dhm').classList.remove('show');
+  debtHistIdx=null;
+  if(!currentFT&&!currentEM)document.getElementById('overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  OVERLAY CLICK
+// ══════════════════════════════════════════════
+function overlayClick(){
+  closeFTable();closeEModal();closeDebtHistory();
+  document.getElementById('custom-picker').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════
+function getSettings(){return JSON.parse(_getItem(KEYS['settings'])||'{}');}
+function saveAllSettings(s){_setItem(KEYS['settings'],JSON.stringify(s));}
+function saveSetting(k,v){const s=getSettings();s[k]=v;saveAllSettings(s);}
+/* ══ DRAWER & WORKSPACE ══ */
+let _wsType=null; // نوع النشاط اللي بيتضاف
+let workspaces=JSON.parse(localStorage.getItem('fm_workspaces')||'[]');
+let currentWs='personal';
+
+function openDrawer(){
+  document.getElementById('drawer').classList.add('show');
+  document.getElementById('drawer-overlay').classList.add('show');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('show');
+  document.getElementById('drawer-overlay').classList.remove('show');
+  document.getElementById('add-ws-popover').classList.remove('show');
+}
+function toggleAddWorkspacePopover(e){
+  e.stopPropagation();
+  const pop=document.getElementById('add-ws-popover');
+  const btn=document.getElementById('drawer-add-btn');
+  const r=btn.getBoundingClientRect();
+  pop.style.top=(r.bottom+4)+'px';
+  pop.style.right=(window.innerWidth-r.right)+'px';
+  pop.classList.toggle('show');
+}
+function startAddWorkspace(type){
+  _wsType=type;
+  document.getElementById('add-ws-popover').classList.remove('show');
+  document.getElementById('ws-name-title').textContent=type==='business'?'🏪 اسم النشاط التجاري':'🔧 اسم النشاط الخدمي';
+  document.getElementById('ws-name-inp').value='';
+  document.getElementById('ws-name-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('ws-name-inp').focus(),200);
+}
+function closeWsNameModal(){
+  document.getElementById('ws-name-modal').classList.remove('show');
+  _wsType=null;
+}
+function saveNewWorkspace(){
+  const name=document.getElementById('ws-name-inp').value.trim();
+  if(!name)return;
+  if(workspaces.some(w=>w.name===name)){
+    document.getElementById('ws-name-inp').style.borderColor='var(--red)';
+    document.getElementById('ws-name-inp').placeholder='الاسم موجود بالفعل!';
+    setTimeout(()=>{
+      document.getElementById('ws-name-inp').style.borderColor='';
+      document.getElementById('ws-name-inp').placeholder='مثال: محل الملابس';
+    },1500);
+    return;
+  }
+  const id='ws_'+Date.now();
+  const ws={id,name,type:_wsType};
+  workspaces.push(ws);
+  localStorage.setItem('fm_workspaces',JSON.stringify(workspaces));
+  closeWsNameModal();
+  closeDrawer();
+  renderDrawerList();
+  renderWsBar();
+  switchWorkspace(id);
+}
+function renderDrawerList(){
+  const list=document.getElementById('drawer-list');
+  // احتفظ بـ شخصي وزر الإضافة
+  const personal=list.querySelector('#dw-personal');
+  const divider=list.querySelector('.drawer-divider');
+  const addBtn=list.querySelector('#drawer-add-btn');
+  // امسح الأنشطة القديمة
+  list.querySelectorAll('.dw-ws-item').forEach(el=>el.remove());
+  // أضف الأنشطة بعد الـ divider
+  workspaces.forEach(ws=>{
+    const ico=ws.type==='business'?'🏪':'🔧';
+    const div=document.createElement('div');
+    div.className='drawer-item dw-ws-item'+(currentWs===ws.id?' active':'');
+    div.innerHTML=`<span class="drawer-item-ico">${ico}</span><span>${ws.name}</span>`;
+    div.onclick=()=>{switchWorkspace(ws.id);closeDrawer();};
+    list.insertBefore(div,addBtn);
+  });
+  // active state
+  personal.classList.toggle('active',currentWs==='personal');
+}
+function renderWsBar(){
+  const bar=document.getElementById('ws-bar');
+  bar.innerHTML=`<div class="ws-tab${currentWs==='personal'?' active':''}" id="wstab-personal" onclick="switchWorkspace('personal')">👤 شخصي</div>`;
+  workspaces.forEach(ws=>{
+    const ico=ws.type==='business'?'🏪':'🔧';
+    const tab=document.createElement('div');
+    tab.className='ws-tab'+(currentWs===ws.id?' active':'');
+    tab.id='wstab-'+ws.id;
+    tab.textContent=ico+' '+ws.name;
+    tab.onclick=()=>switchWorkspace(ws.id);
+    bar.appendChild(tab);
+  });
+}
+function switchWorkspace(id){
+  currentWs=id;
+  renderDrawerList();
+  renderWsBar();
+  if(id==='personal'){
+    showPage('home');
+  } else {
+    // صفحة فارغة للنشاط
+    const ws=workspaces.find(w=>w.id===id);
+    document.getElementById('pg-home').style.display='none';
+    document.getElementById('pg-settings').style.display='none';
+    document.getElementById('pg-workspace').style.display='flex';
+    document.getElementById('ws-page-ico').textContent=ws.type==='business'?'🏪':'🔧';
+    document.getElementById('ws-page-name').textContent=ws.name;
+    document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+    document.getElementById('nav-home').classList.add('active');
+    closeFTable();closeEModal();
+  }
+}
+// init
+renderDrawerList();
+renderWsBar();
+
+function showPage(page){
+  document.getElementById('pg-home').style.display='none';
+  document.getElementById('pg-settings').style.display='none';
+  document.getElementById('pg-workspace').style.display='none';
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  closeFTable();closeEModal();
+  if(page==='home'){
+    document.getElementById('pg-home').style.display='flex';
+    document.getElementById('nav-home').classList.add('active');
+  } else if(page==='settings'){
+    document.getElementById('pg-settings').style.display='flex';
+    document.getElementById('nav-settings').classList.add('active');
+    loadSettingsPage();
+  }
+}
+
+function loadSettingsPage(){
+  const s=getSettings();
+  if(s.lang)document.getElementById('s-lang').value=s.lang;
+  if(s.currency)document.getElementById('s-currency').value=s.currency;
+  if(s.currencySym)document.getElementById('s-currency-sym').value=s.currencySym;
+  document.getElementById('theme-dark').classList.toggle('active',s.theme!=='light');
+  document.getElementById('theme-light').classList.toggle('active',s.theme==='light');
+  if(document.getElementById('s-notif-commit'))document.getElementById('s-notif-commit').checked=!!s.notifCommit;
+  if(document.getElementById('s-notif-debt'))document.getElementById('s-notif-debt').checked=!!s.notifDebt;
+  if(document.getElementById('s-notif-daily'))document.getElementById('s-notif-daily').checked=!!s.notifDaily;
+  renderTags('creditorCats','tags-creditor');
+  renderTags('debtorCats','tags-debtor');
+  renderTags('payMethods','tags-pay');
+  renderTags('expenseCats','tags-expense-cats');
+  renderCommitSettings();
+}
+function renderTags(sk,cid){
+  const s=getSettings();const cats=s[sk]||[];
+  const el=document.getElementById(cid);if(!el)return;
+  el.innerHTML='';
+  cats.forEach((cat,i)=>{
+    const tag=document.createElement('div');tag.className='s-tag';
+    tag.innerHTML=`<span>${cat}</span><button class="td" onclick="removeCat('${sk}',${i},'${cid}')">×</button>`;
+    el.appendChild(tag);
+  });
+}
+function addCat(sk,inputId,cid){
+  const inp=document.getElementById(inputId);const val=inp.value.trim();if(!val)return;
+  const s=getSettings();if(!s[sk])s[sk]=[];if(s[sk].includes(val))return;
+  s[sk].push(val);saveAllSettings(s);inp.value='';renderTags(sk,cid);
+  if(sk==='creditorCats'||sk==='debtorCats'){renderDebtCats();renderDebt();}
+}
+function removeCat(sk,idx,cid){
+  const s=getSettings();if(!s[sk])return;s[sk].splice(idx,1);saveAllSettings(s);renderTags(sk,cid);
+  if(sk==='creditorCats'||sk==='debtorCats'){renderDebtCats();renderDebt();}
+}
+function setTheme(t){
+  saveSetting('theme',t);
+  document.getElementById('theme-dark').classList.toggle('active',t!=='light');
+  document.getElementById('theme-light').classList.toggle('active',t==='light');
+  applyTheme(t);
+}
+function applyTheme(t){
+  const r=document.documentElement;
+  if(t==='light'){r.style.setProperty('--bg','#f0f2f5');r.style.setProperty('--card','#ffffff');r.style.setProperty('--card2','#f5f7fa');r.style.setProperty('--border','#d0d7e3');r.style.setProperty('--txt','#1a2030');r.style.setProperty('--muted','#6b7a99');r.style.setProperty('--row','rgba(0,0,0,.04)');}
+  else{r.style.setProperty('--bg','#0f1318');r.style.setProperty('--card','#181e26');r.style.setProperty('--card2','#1e2530');r.style.setProperty('--border','#2a3240');r.style.setProperty('--txt','#dde4ef');r.style.setProperty('--muted','#7a8a9e');r.style.setProperty('--row','rgba(255,255,255,.06)');}
+}
+function toggleRecurringField(){
+  const type=document.getElementById('new-commit-type')?.value;
+  const row=document.getElementById('recurring-count-row');
+  if(row)row.style.display=type==='recurring'?'flex':'none';
+}
+function renderCommitSettings(){
+  const s=getSettings();const items=s.commitItems||[];
+  const el=document.getElementById('commit-list-settings');if(!el)return;
+  if(!items.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:4px 0;">لا توجد بنود مضافة</div>';return;}
+  el.innerHTML='';
+  items.forEach((item,i)=>{
+    const isRecurring=item.type==='recurring';
+    const row=document.createElement('div');
+    row.className='commit-item-row';
+    row.innerHTML=`
+      <div class="commit-item-info">
+        <div class="commit-item-name">${item.name}</div>
+        <div class="commit-item-meta">
+          <span class="commit-item-req">${item.req||0} ${getSettings().currencySym||'ج.م'}</span>
+          <span class="commit-badge ${item.type==='permanent'?'permanent':'recurring'}">${item.type==='permanent'?'دائم':'متكرر'}</span>
+          ${isRecurring&&item.count?`<span style="font-size:9px;color:var(--muted);">${item.count} مرة</span>`:''}
+          ${item.due?`<span class="commit-item-due">📅 ${item.due}</span>`:''}
+        </div>
+      </div>
+      <button onclick="removeCommitItem(${i})" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0;padding:0 4px;">×</button>`;
+    el.appendChild(row);
+  });
+}
+function addCommitItem(){
+  const name=document.getElementById('new-commit-name').value.trim();
+  const req=Number(document.getElementById('new-commit-req').value||0);
+  const type=document.getElementById('new-commit-type').value;
+  const due=document.getElementById('new-commit-due')?.value||'';
+  const count=type==='recurring'?Number(document.getElementById('new-commit-count')?.value||0):null;
+  if(!name)return;
+  const s=getSettings();if(!s.commitItems)s.commitItems=[];
+  const item={name,req,type,due};
+  if(type==='recurring'&&count)item.count=count;
+  s.commitItems.push(item);saveAllSettings(s);
+  document.getElementById('new-commit-name').value='';
+  document.getElementById('new-commit-req').value='';
+  document.getElementById('new-commit-due').value='';
+  if(document.getElementById('new-commit-count'))document.getElementById('new-commit-count').value='';
+  document.getElementById('new-commit-type').value='permanent';
+  toggleRecurringField();
+  renderCommitSettings();
+}
+function removeCommitItem(idx){
+  const s=getSettings();if(!s.commitItems)return;
+  s.commitItems.splice(idx,1);saveAllSettings(s);renderCommitSettings();
+}
+function exportAndShare(){
+  // build JSON blob
+  const data={};Object.keys(KEYS).forEach(k=>{data[k]=loadData(k);});
+  data['fm_settings']=getSettings();
+  const json=JSON.stringify(data,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const fileName='finance_backup_'+todayStr()+'.json';
+
+  // Try Web Share API first (works on mobile Chrome/Safari)
+  if(navigator.share && navigator.canShare){
+    const file=new File([blob],fileName,{type:'application/json'});
+    if(navigator.canShare({files:[file]})){
+      navigator.share({
+        title:'نسخة احتياطية — المدير المالي',
+        text:'ملف بيانات التطبيق',
+        files:[file]
+      }).catch(()=>fallbackExport(blob,fileName));
+      return;
+    }
+  }
+  // Fallback: normal download
+  fallbackExport(blob,fileName);
+}
+
+function fallbackExport(blob,fileName){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=fileName;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+  // Show tip
+  setTimeout(()=>alert('💡 بعد التحميل افتح الملف وشاركه على Google Drive يدوياً'),500);
+}
+
+function exportData(){
+  const data={};Object.keys(KEYS).forEach(k=>{data[k]=loadData(k);});
+  data['fm_settings']=getSettings();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  fallbackExport(blob,'finance_backup_'+todayStr()+'.json');
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      Object.keys(KEYS).forEach(k=>{const v=data[k]||data[KEYS[k]];if(v)_setItem(KEYS[k],JSON.stringify(v));});
+      if(data['fm_settings'])_setItem('fm_settings',JSON.stringify(data['fm_settings']));
+      alert('تم الاستيراد بنجاح ✅');location.reload();
+    }catch(err){alert('خطأ في الملف ❌');}
+  };
+  reader.readAsText(file);
+}
+function clearAllData(){
+  if(!confirm('هل أنت متأكد؟'))return;
+  Object.values(KEYS).forEach(k=>_removeItem(k));
+  location.reload();
+}
+
+// ══════════════════════════════════════════════
+//  SEED DATA
+// ══════════════════════════════════════════════
+function seedDemo(){
+  const d=(dd)=>`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+  if(!loadData('income').length)saveData('income',[{name:'مرتب',amount:8000,pay:'تحويل بنكي',date:d(1)},{name:'دخل إضافي',amount:2500,pay:'كاش',date:d(5)},{name:'مكافآت',amount:1000,pay:'تحويل بنكي',date:d(10)},{name:'سلف مستلمة',amount:1000,pay:'كاش',date:d(15)}]);
+  if(!loadData('expense').length)saveData('expense',[{name:'الطعام',amount:1200,pay:'كاش',date:d(3)},{name:'المواصلات',amount:650,pay:'بطاقة',date:d(4)},{name:'وقود',amount:400,pay:'بطاقة',date:d(5)},{name:'مشتريات منزلية',amount:700,pay:'كاش',date:d(7)},{name:'كهرباء',amount:300,pay:'تحويل بنكي',date:d(8)},{name:'مصاريف شخصية',amount:500,pay:'كاش',date:d(10)},{name:'ترفيه',amount:400,pay:'بطاقة',date:d(12)},{name:'ملابس',amount:450,pay:'بطاقة',date:d(14)},{name:'علاج',amount:300,pay:'كاش',date:d(16)},{name:'هدايا',amount:300,pay:'كاش',date:d(20)},{name:'أخرى',amount:500,pay:'كاش',date:d(25)}]);
+  if(!loadData('commit').length)saveData('commit',[{name:'إيجار المنزل',req:2500,paid:2500,pay:'تحويل بنكي',date:d(1)},{name:'كهرباء',req:350,paid:350,pay:'تحويل بنكي',date:d(2)},{name:'مياه',req:200,paid:200,pay:'تحويل بنكي',date:d(2)},{name:'إنترنت',req:250,paid:250,pay:'بطاقة',date:d(3)},{name:'تأمين طبي',req:600,paid:600,pay:'تحويل بنكي',date:d(5)},{name:'أقساط سيارة',req:1800,paid:1800,pay:'تحويل بنكي',date:d(7)},{name:'قرض شخصي',req:1200,paid:1200,pay:'تحويل بنكي',date:d(10)},{name:'صيانة دورية',req:400,paid:400,pay:'كاش',date:d(20)}]);
+  if(!loadData('debt_creditor').length)saveData('debt_creditor',[{name:'أحمد',req:1500,transactions:[{amount:1500,pay:'كاش',dir:'for',date:d(2)}],cat:'مجدولة',date:d(2)},{name:'محمد',req:700,transactions:[{amount:500,pay:'تحويل بنكي',dir:'for',date:d(4)}],cat:'مجدولة',date:d(4)},{name:'شركة X',req:2000,transactions:[],cat:'غير مجدولة',date:d(10)}]);
+  if(!loadData('debt_debtor').length)saveData('debt_debtor',[{name:'علي',req:1200,transactions:[{amount:1200,pay:'كاش',dir:'for',date:d(6)}],cat:'مجدولة',date:d(6)},{name:'محمود',req:950,transactions:[{amount:400,pay:'تحويل',dir:'for',date:d(8)}],cat:'غير مجدولة',date:d(8)}]);
+  let s=JSON.parse(_getItem('fm_settings')||'{}');
+  if(!s.creditorCats)s.creditorCats=['مجدولة','غير مجدولة'];
+  if(!s.debtorCats)s.debtorCats=['مجدولة','غير مجدولة'];
+  if(!s.payMethods)s.payMethods=['كاش','تحويل بنكي','بطاقة','instapay'];
+  if(!s.expenseCats)s.expenseCats=['طعام','مواصلات','فواتير','ترفيه','صحة','ملابس','أخرى'];
+  _setItem('fm_settings',JSON.stringify(s));
+}
+
+// ── INIT ──
+(function migrate(){
+  const old=_getItem('fm_debt');
+  if(old&&!_getItem('fm_debt_creditor')){_setItem('fm_debt_creditor',old);_removeItem('fm_debt');}
+})();
+seedDemo();
+renderDebtCats();
+initDebtSwipe();
+initDebtCardSwipe();
+renderAll();
+applyTheme(getSettings().theme||'dark');
+document.getElementById('pg-home').style.display='flex';
+
+// Auto backup reminder every 7 days
+(function checkBackupReminder(){
+  const last=_getItem('fm_last_backup');
+  const now=Date.now();
+  if(!last||now-Number(last)>7*24*60*60*1000){
+    setTimeout(()=>{
+      const fab=document.getElementById('backup-fab');
+      if(fab){fab.style.display='flex';fab.classList.add('pulse');}
+    },2000);
+  }
+})();
+</script>
+<!-- BACKUP REMINDER FAB -->
+<div id="backup-fab" style="display:none;position:fixed;bottom:70px;left:12px;z-index:150;flex-direction:column;align-items:flex-start;gap:5px;">
+  <div style="background:#1a73e8;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(26,115,232,.4);cursor:pointer;" onclick="exportAndShare();_setItem('fm_last_backup',Date.now());document.getElementById('backup-fab').style.display='none';">
+    <span style="font-size:18px;">☁️</span>
+    <div>
+      <div style="font-size:11px;font-weight:800;color:#fff;">احفظ على Drive</div>
+      <div style="font-size:9px;color:rgba(255,255,255,.7);">آخر نسخة من أكثر من 7 أيام</div>
+    </div>
+    <button onclick="event.stopPropagation();document.getElementById('backup-fab').style.display='none';" style="background:rgba(255,255,255,.15);border:none;border-radius:50%;color:#fff;width:20px;height:20px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;margin-right:-4px;">×</button>
+  </div>
+</div>
+
+<style>
+@keyframes pulse{0%,100%{box-shadow:0 4px 20px rgba(26,115,232,.4);}50%{box-shadow:0 4px 30px rgba(26,115,232,.8);}}
+#backup-fab.pulse > div{animation:pulse 2s infinite;}
+
+/* ── AUTOCOMPLETE DROPDOWN ── */
+.ac-suggest{position:absolute;top:100%;right:0;left:0;background:var(--card);border:1px solid var(--border);border-radius:6px;max-height:160px;overflow-y:auto;z-index:500;box-shadow:0 6px 18px rgba(0,0,0,.5);display:none;margin-top:2px;}
+.ac-suggest.show{display:block;}
+.ac-suggest-item{padding:6px 9px;font-size:12px;color:var(--txt);cursor:pointer;border-bottom:1px solid var(--row);font-family:'Cairo',sans-serif;}
+.ac-suggest-item:last-child{border-bottom:none;}
+.ac-suggest-item:hover,.ac-suggest-item.active{background:rgba(77,168,240,.15);color:var(--blue);}
+.ac-suggest-item .ac-count{float:left;font-size:10px;color:var(--muted);background:var(--card2);border-radius:8px;padding:1px 6px;}
+.add-form input.ac-target{position:relative;}
+</style>
+
+<!-- Category Floating Popover -->
+<div class="cat-popover" id="cat-popover" role="dialog" aria-hidden="true">
+  <div class="cat-popover-hdr">
+    <span class="cat-popover-title" id="cat-popover-title">اختر الفئة</span>
+    <button class="cat-popover-close" id="cat-popover-close" aria-label="إغلاق">✕</button>
+  </div>
+  <div class="cat-popover-list" id="cat-popover-list"></div>
+</div>
+
+</body>
+</html>
