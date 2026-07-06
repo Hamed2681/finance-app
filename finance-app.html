@@ -4054,7 +4054,17 @@ function renderReportsPage(){
   const expense=filteredData('expense').reduce((s,r)=>s+Number(r.amount||0),0);
   const{from:_rf,to:_rt}=getRange(currentPeriod);
   const commitPaid=commitPaidInRange(_rf,_rt);
-  const remain=income-expense-commitPaid;
+  // ★ سداد ديون الدائن + قروض جديدة أُعطيت لمدين = خروج فعلي للنقدية، لازم تُخصم من الصافي المتبقي (زي حساب الصفحة الرئيسية بالظبط)
+  function debtOutflowInRange(k){
+    return loadData(k).reduce((s,r)=>{
+      const t=(r.transactions||[]);
+      const dir=k==='debt_creditor'?'for':'against';
+      return s+t.filter(x=>x.dir===dir&&inRange(x.date||r.date,_rf,_rt)).reduce((a,x)=>a+Number(x.amount||0),0);
+    },0);
+  }
+  const credPaidAmt=debtOutflowInRange('debt_creditor');
+  const debtAddedAmt=debtOutflowInRange('debt_debtor');
+  const remain=income-expense-commitPaid-credPaidAmt-debtAddedAmt;
   const sym=getSettings().currencySym||'ج.م';
   const sg=document.getElementById('rep-summary-grid');
   if(sg){sg.innerHTML=[
@@ -4359,13 +4369,13 @@ function renderNotes(){
     card.style.cssText='background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;';
     const itemsHtml=(r.items||[]).map((it,ii)=>`<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">
         <input type="checkbox" ${it.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleNoteItemDone(${idx},${ii})" style="width:14px;height:14px;accent-color:var(--green);flex-shrink:0;">
-        <span style="flex:1;font-size:12px;${it.done?'text-decoration:line-through;color:var(--muted);':'color:var(--txt);'}">${escapeHtml(it.text||'')}</span>
+        <span style="flex:1;font-size:12px;${it.done?'color:var(--muted);':'color:var(--txt);'}">${escapeHtml(it.text||'')}</span>
         ${it.amount?`<span style="font-size:11px;font-weight:700;color:var(--yellow);flex-shrink:0;">${fmt(it.amount)}</span>`:''}
       </div>`).join('');
     const total=itemsTotal(r.items);
     const totalLine=(r.type==='purchases'||r.type==='payment')&&total>0?`<div style="margin-top:4px;text-align:left;font-size:11px;font-weight:800;color:var(--yellow);">الإجمالي: ${fmt(total)}</div>`:'';
     card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;">
-        <span style="font-size:14px;font-weight:800;${complete?'text-decoration:line-through;color:var(--muted);':'color:var(--txt);'}">${noteTypeIcon(r.type)} ${escapeHtml(r.title||'')}</span>
+        <span style="font-size:14px;font-weight:800;${complete?'color:var(--muted);':'color:var(--txt);'}">${noteTypeIcon(r.type)} ${escapeHtml(r.title||'')}</span>
         <span style="font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0;">${fmtDate(r.date)}</span>
       </div>
       <div>${itemsHtml}</div>
