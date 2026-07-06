@@ -687,6 +687,11 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .cat-popover-item .check{font-size:10px;color:var(--blue);visibility:hidden;}
 .cat-popover-item.active .check{visibility:visible;}
 </style>
+<!-- PWA Support -->
+<meta name="theme-color" content="#0f1318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.json">
 </head>
 <body>
 <div class="overlay" id="overlay" onclick="overlayClick()"></div>
@@ -4814,5 +4819,13 @@ document.getElementById('pg-home').style.display='flex';
   <div class="cat-popover-list" id="cat-popover-list"></div>
 </div>
 
+<script>
+// تسجيل Service Worker — ضروري عشان كروم يدّي خيار "تثبيت" حقيقي بالأيقونة بدل Add to Home Screen العادي
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
 </body>
 </html>
