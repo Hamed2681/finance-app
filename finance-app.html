@@ -1000,8 +1000,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     </div>
   </div>
   <div class="slide-form-actions">
-    <button class="btn-paid" onclick="saveUnified('paid')">💸 مدفوع</button>
-    <button class="btn-received" onclick="saveUnified('received')">💰 مستلم</button>
+    <button class="btn-paid" id="su-btn-paid" onclick="saveUnified('paid')">💸 مدفوع</button>
+    <button class="btn-received" id="su-btn-received" onclick="saveUnified('received')">💰 مستلم</button>
   </div>
 </div>
 
@@ -1029,7 +1029,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       <select id="se-cat"><option value="">الفئة</option></select>
     </div>
     <div style="padding:0 0 4px;">
-      <button class="btn-save-single" onclick="saveExpenseSlide()">💸 تسجيل مصروف</button>
+      <button class="btn-save-single" id="se-save-btn" onclick="saveExpenseSlide()">💸 تسجيل مصروف</button>
     </div>
   </div>
 </div>
@@ -1058,7 +1058,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       </select>
     </div>
     <div style="padding:0 0 4px;">
-      <button class="btn-save-single" onclick="saveCommitSlide()">✅ حفظ الالتزام</button>
+      <button class="btn-save-single" id="sc-save-btn" onclick="saveCommitSlide()">✅ حفظ الالتزام</button>
     </div>
   </div>
 </div>
@@ -1084,7 +1084,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     </div>
     <div id="cp-history" style="margin:2px 0 6px;"></div>
     <div style="padding:0 0 4px;">
-      <button class="btn-save-single" onclick="saveCommitPay()">✅ تسجيل الدفع</button>
+      <button class="btn-save-single" id="cp-save-btn" onclick="saveCommitPay()">✅ تسجيل الدفع</button>
     </div>
   </div>
 </div>
@@ -1222,6 +1222,9 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     </div>
     <div style="display:flex;gap:5px;margin-top:5px;">
       <select id="dhm-pay" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 4px;min-width:0;"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
+      <input type="date" id="dhm-date" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 4px;min-width:0;">
+    </div>
+    <div style="display:flex;gap:5px;margin-top:5px;">
       <button id="dhm-save-btn" onclick="saveDebtTransaction()" style="flex:1;background:var(--yellow);border:none;border-radius:6px;color:#000;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;padding:7px;cursor:pointer;">+ تسجيل</button>
     </div>
     <!-- خيار ترحيل القرض للدخل: يظهر فقط في وضع دائن + اتجاه إضافة (against) -->
@@ -2664,14 +2667,21 @@ window.addEventListener('resize',()=>{if(currentEM)autofitEmodalCells();});
 // ══════════════════════════════════════════════
 //  AUTOCOMPLETE DROPDOWN: اقتراحات البند من البيانات السابقة
 // ══════════════════════════════════════════════
-const AC_FIELDS={income:'fi-name',expense:'fe-name',commit:'fc-name',debt:'fd-name'};
+const AC_FIELDS={income:'su-name',expense:'se-name',commit:'sc-name',debt:'su-name'};
 const AC_HISTORY_KEY='fm_name_history';
 function getNameHistory(type){
   const key=type==='debt'?debtKey():type;
   const arr=loadData(key);
   const counts={};
   arr.forEach(r=>{const n=(r.name||'').trim();if(!n)return;counts[n]=(counts[n]||0)+1;});
-  return Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ar'));
+  const list=Object.entries(counts).map(([name,count])=>({name,count,isBudget:false}));
+  // ★ بنود الميزانية تُقترح كمان أثناء كتابة بند الدخل — اختيارها بيخلي المبلغ يتحسب فى الميزانية تلقائيًا (بالاسم)
+  if(type==='income'&&typeof budgetItems!=='undefined'){
+    budgetItems.forEach(b=>{
+      if(!counts[b.name])list.push({name:b.name,count:0,isBudget:true});
+    });
+  }
+  return list.sort((a,b)=>(b.isBudget-a.isBudget)||b.count-a.count||a.name.localeCompare(b.name,'ar'));
 }
 let _acTarget=null,_acList=[],_acIdx=-1;
 function setupAutocomplete(type){
@@ -2690,7 +2700,8 @@ function setupAutocomplete(type){
     dd.innerHTML='';
     items.slice(0,8).forEach(it=>{
       const row=document.createElement('div');row.className='ac-suggest-item';
-      row.innerHTML=`<span class="ac-count">${it.count}×</span>${escapeHtml(it.name)}`;
+      const badge=it.isBudget?`<span class="ac-count" style="background:rgba(255,200,0,.18);color:var(--yellow);">🎯 ميزانية</span>`:`<span class="ac-count">${it.count}×</span>`;
+      row.innerHTML=`${badge}${escapeHtml(it.name)}`;
       row.addEventListener('mousedown',e=>{e.preventDefault();inp.value=it.name;close();inp.focus();});
       dd.appendChild(row);
     });
@@ -2698,14 +2709,14 @@ function setupAutocomplete(type){
   };
   inp.addEventListener('input',()=>{
     const q=inp.value.trim();
-    const hist=getNameHistory(type);
+    const hist=getNameHistory(_slideFormType||type);
     _acList=q?hist.filter(h=>h.name.includes(q)):hist;
     _acIdx=-1;
     renderDD(_acList);
   });
   inp.addEventListener('focus',()=>{
     const q=inp.value.trim();
-    const hist=getNameHistory(type);
+    const hist=getNameHistory(_slideFormType||type);
     _acList=q?hist.filter(h=>h.name.includes(q)):hist;
     _acIdx=-1;
     renderDD(_acList);
@@ -2743,7 +2754,6 @@ function bindInlineEdit(){
         if(!isNaN(val)&&arr[idx]){
           arr[idx][field]=val;
           if(field==='paid')arr[idx].paidDate=todayStr();
-          if(field==='amount')arr[idx].date=todayStr();
           saveData(key,arr);
         }
         if(type==='income')renderIncome();
@@ -2765,15 +2775,15 @@ function bindInlineEdit(){
       const type=this.dataset.type,idx=Number(this.dataset.idx);
       const key=type==='debt'?debtKey():type;
       const arr=loadData(key);
-      const df=(type==='commit'||type==='debt')?(arr[idx]?.paidDate||arr[idx]?.date):arr[idx]?.date;
+      const df=arr[idx]?.date;
       const inp=document.createElement('input');inp.type='date';inp.value=df||todayStr();
       inp.style.cssText='width:88px;background:var(--card);border:1px solid #4da8f0;border-radius:4px;color:var(--txt);font-family:Cairo,sans-serif;font-size:10px;padding:1px 2px;outline:none;';
       this.textContent='';this.appendChild(inp);inp.focus();
       try{inp.showPicker();}catch(e){}
       const save=()=>{
         if(inp.value&&arr[idx]){
-          if(type==='commit'||type==='debt')arr[idx].paidDate=inp.value;
-          else arr[idx].date=inp.value;
+          // ★ نُحدّث r.date دايمًا — هو الحقل اللي بيعتمد عليه فلترة الفترات (اليوم/الأسبوع/الشهر) فى كل الجداول
+          arr[idx].date=inp.value;
           saveData(key,arr);
         }
         if(type==='income')renderIncome();
@@ -2870,6 +2880,14 @@ function openSlideForm(type){
   _slideFormType=type;
   const today=todayStr();
   document.getElementById('slide-overlay').classList.add('show');
+  // ★ فتح نموذج جديد (مش تعديل) — نصفّر مؤشر التعديل ونرجّع الأزرار لوضعها الافتراضي
+  if(type==='income'||type==='debt'){_editIdx.income=null;_editIdx.debt=null;}
+  else if(_editIdx[type]!==undefined){_editIdx[type]=null;}
+  const btnPaid=document.getElementById('su-btn-paid'),btnRecv=document.getElementById('su-btn-received');
+  if(btnPaid){btnPaid.style.display='';btnPaid.textContent='💸 مدفوع';}
+  if(btnRecv){btnRecv.style.display='';btnRecv.textContent='💰 مستلم';}
+  const seBtn=document.getElementById('se-save-btn');if(seBtn)seBtn.textContent='💸 تسجيل مصروف';
+  const scBtn=document.getElementById('sc-save-btn');if(scBtn)scBtn.textContent='✅ حفظ الالتزام';
 
   // ملء طرق الدفع من الإعدادات في كل النماذج
   const payMethods=getSettings().payMethods||['كاش','تحويل بنكي','بطاقة','instapay'];
@@ -2889,7 +2907,7 @@ function openSlideForm(type){
     document.getElementById('su-debt-cat-row').style.display=type==='debt'?'flex':'none';
     document.getElementById('su-income-cat-row').style.display=type==='income'?'flex':'none';
     if(type==='income'){refreshIncomeCatSelect();const icSel=document.getElementById('su-income-cat');if(icSel)icSel.value='';}
-    document.getElementById('su-loan-row').style.display=type==='income'?'flex':'none';
+    document.getElementById('su-loan-row').style.display='none'; // ★ "قرض مستلم" اتشال من مربع الدخل، بيتسجل من جدول الديون بس
     document.getElementById('su-loan-cat-row').style.display='none';
     // إعادة تعيين حالة زر "قرض مستلم"
     const loanToggleBtn=document.getElementById('su-loan-toggle');
@@ -2898,7 +2916,7 @@ function openSlideForm(type){
     loanCat.innerHTML='<option value="">اختر تصنيف دائن</option>';
     getDebtCats('creditor').forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;loanCat.appendChild(o);});
     document.getElementById('form-unified').classList.add('show');
-    setTimeout(()=>document.getElementById('su-name').focus(),350);
+    setupAutocomplete(type);
   } else if(type==='expense'){
     document.getElementById('se-date').value=today;
     document.getElementById('se-name').value='';
@@ -2907,14 +2925,17 @@ function openSlideForm(type){
     catSel.innerHTML='<option value="">الفئة</option>';
     (getSettings().expenseCats||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
     document.getElementById('form-expense-slide').classList.add('show');
-    setTimeout(()=>document.getElementById('se-name').focus(),350);
+    setupAutocomplete(type);
+    // طريقة الدفع الافتراضية: نقدى (لو موجودة ضمن طرق الدفع المُعرَّفة)
+    const sePay=document.getElementById('se-pay');
+    if(sePay){const cashOpt=[...sePay.options].find(o=>/نقد|كاش/.test(o.value));if(cashOpt)sePay.value=cashOpt.value;}
   } else if(type==='commit'){
     document.getElementById('sc-date').value=today;
     document.getElementById('sc-name').value='';
     document.getElementById('sc-req').value='';
     document.getElementById('sc-paid').value='';
     document.getElementById('form-commit-slide').classList.add('show');
-    setTimeout(()=>document.getElementById('sc-name').focus(),350);
+    setupAutocomplete(type);
   }
 }
 
@@ -2988,16 +3009,26 @@ function saveUnified(action){
     const loanCat=document.getElementById('su-loan-cat')?.value;
     const incomeCat=!isLoan?(document.getElementById('su-income-cat')?.value||''):'';
     const inc=loadData('income');
-    inc.push({name,amount,pay,date,isLoan:isLoan||false,cat:incomeCat,_seq:nextSeq()});
+    if(_editIdx.income!=null&&inc[_editIdx.income]){
+      // ★ تعديل بند دخل موجود — تحديث فى مكانه بدل إضافة صف جديد
+      inc[_editIdx.income]={...inc[_editIdx.income],name,amount,pay,date,cat:incomeCat};
+    } else {
+      inc.push({name,amount,pay,date,isLoan:isLoan||false,cat:incomeCat,_seq:nextSeq()});
+      if(isLoan&&loanCat)addCreditorDebtFromLoan(name,amount,pay,loanCat);
+    }
     saveData('income',inc);
-    if(isLoan&&loanCat)addCreditorDebtFromLoan(name,amount,pay,loanCat);
     renderIncome();
   } else {
     // مدفوع → ديون (مدين) أو دخل الديون
     if(_slideFormType==='debt'){
       const cat=document.getElementById('su-debt-cat').value;
       const arr=loadData(debtKey());
-      arr.push({name,req:amount,transactions:[],pay,cat,date,_seq:nextSeq()});
+      if(_editIdx.debt!=null&&arr[_editIdx.debt]){
+        // ★ تعديل بيانات شخص دين موجود (الاسم/الإجمالي الأساسي/التصنيف/التاريخ) — تحديث بدل إضافة شخص جديد
+        arr[_editIdx.debt]={...arr[_editIdx.debt],name,req:amount,pay,cat,date};
+      } else {
+        arr.push({name,req:amount,transactions:[],pay,cat,date,_seq:nextSeq()});
+      }
       saveData(debtKey(),arr);
       renderDebt();
     } else {
@@ -3008,6 +3039,7 @@ function saveUnified(action){
       renderExpense();
     }
   }
+  _editIdx.income=null;_editIdx.debt=null;
   closeSlideForm();
   updateSummary();
 }
@@ -3020,8 +3052,13 @@ function saveExpenseSlide(){
   const date=document.getElementById('se-date').value||todayStr();
   if(!name||!amount)return;
   const exp=loadData('expense');
-  exp.push({name,amount,pay,cat,date,_seq:nextSeq()});
+  if(_editIdx.expense!=null&&exp[_editIdx.expense]){
+    exp[_editIdx.expense]={...exp[_editIdx.expense],name,amount,pay,cat,date};
+  } else {
+    exp.push({name,amount,pay,cat,date,_seq:nextSeq()});
+  }
   saveData('expense',exp);
+  _editIdx.expense=null;
   renderExpense();closeSlideForm();updateSummary();
 }
 
@@ -3033,8 +3070,13 @@ function saveCommitSlide(){
   const date=document.getElementById('sc-date').value||todayStr();
   if(!name)return;
   const arr=loadData('commit');
-  arr.push({name,req,paid,pay,date});
+  if(_editIdx.commit!=null&&arr[_editIdx.commit]){
+    arr[_editIdx.commit]={...arr[_editIdx.commit],name,req,paid,pay,date};
+  } else {
+    arr.push({name,req,paid,pay,date});
+  }
   saveData('commit',arr);
+  _editIdx.commit=null;
   renderCommit();closeSlideForm();updateSummary();
 }
 
@@ -3043,18 +3085,21 @@ function saveCommitSlide(){
 //  (بيفتح نموذج بنفس أسلوب نموذج المصروفات بدل الكتابة المباشرة فى الخلية)
 // ══════════════════════════════════════════════
 let _commitPayIdx=null;
+let _commitPayEditIdx=null; // ★ رقم الدفعة الجارى تعديلها (null = وضع إضافة دفعة جديدة)
 function openCommitPayForm(idx){
   closeSlideForm();
   const arr=loadData('commit');
   const r=arr[idx];
   if(!r)return;
   _commitPayIdx=idx;
+  _commitPayEditIdx=null;
   document.getElementById('slide-overlay').classList.add('show');
   document.getElementById('cp-title').textContent='💸 تسجيل دفع: '+r.name;
   const remaining=Math.max(0,Number(r.req||0)-Number(r.paid||0));
   document.getElementById('cp-amount').value=remaining||'';
   document.getElementById('cp-date').value=r.paidDate||todayStr();
   document.getElementById('cp-pay').value=r.pay||'';
+  const cpBtn=document.getElementById('cp-save-btn');if(cpBtn)cpBtn.textContent='✅ تسجيل الدفع';
   renderCommitPayHistory(r);
   document.getElementById('form-commit-pay-slide').classList.add('show');
   setTimeout(()=>document.getElementById('cp-amount').focus(),350);
@@ -3069,9 +3114,23 @@ function renderCommitPayHistory(r){
       <span style="font-size:11px;color:var(--txt);">${fmtDate(p.date)}${p.pay?' · '+p.pay:''}</span>
       <span style="display:flex;align-items:center;gap:6px;">
         <span style="font-size:12px;font-weight:800;color:var(--yellow);">${fmt(p.amt)}</span>
+        <button onclick="editCommitPayment(${_commitPayIdx},${pi})" style="background:none;border:none;color:var(--txt);font-size:12px;cursor:pointer;padding:0 2px;">✏️</button>
         <button onclick="deleteCommitPayment(${_commitPayIdx},${pi})" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0 2px;">×</button>
       </span>
     </div>`).join('');
+}
+// ★ تحميل بيانات دفعة موجودة فى النموذج للتعديل
+function editCommitPayment(idx,pi){
+  const arr=loadData('commit');
+  const r=arr[idx];
+  const p=r?.payments?.[pi];
+  if(!p)return;
+  _commitPayEditIdx=pi;
+  document.getElementById('cp-amount').value=p.amt||'';
+  document.getElementById('cp-date').value=p.date||todayStr();
+  document.getElementById('cp-pay').value=p.pay||'';
+  const cpBtn=document.getElementById('cp-save-btn');if(cpBtn)cpBtn.textContent='🔄 تحديث الدفعة';
+  document.getElementById('cp-amount').focus();
 }
 function deleteCommitPayment(idx,pi){
   const arr=loadData('commit');
@@ -3085,6 +3144,10 @@ function deleteCommitPayment(idx,pi){
     r.paid=r.payments.reduce((s,p)=>s+Number(p.amt||0),0);
   }
   saveData('commit',arr);
+  if(_commitPayEditIdx===pi){
+    _commitPayEditIdx=null;
+    const cpBtn=document.getElementById('cp-save-btn');if(cpBtn)cpBtn.textContent='✅ تسجيل الدفع';
+  }
   renderCommit();
   if(typeof renderEM==='function'&&document.getElementById('em-commit')?.classList.contains('show'))renderEM('commit');
   updateSummary();
@@ -3101,16 +3164,22 @@ function saveCommitPay(){
   const date=document.getElementById('cp-date').value||todayStr();
   const pay=document.getElementById('cp-pay').value;
   if(amount<=0)return;
-  // توافق: لو البند عنده paid قديم بدون سجل دفعات، حوّله لأول دفعة قبل ما نضيف الجديدة
   if(!r.payments)r.payments=[];
-  if(!r.payments.length&&Number(r.paid||0)>0){
-    r.payments.push({amt:Number(r.paid||0),date:r.paidDate||r.date,pay:r.pay||'',_seq:nextSeq()});
+  if(_commitPayEditIdx!==null&&r.payments[_commitPayEditIdx]){
+    // ★ تعديل دفعة موجودة فى مكانها
+    r.payments[_commitPayEditIdx]={...r.payments[_commitPayEditIdx],amt:amount,date,pay};
+  } else {
+    // توافق: لو البند عنده paid قديم بدون سجل دفعات، حوّله لأول دفعة قبل ما نضيف الجديدة
+    if(!r.payments.length&&Number(r.paid||0)>0){
+      r.payments.push({amt:Number(r.paid||0),date:r.paidDate||r.date,pay:r.pay||'',_seq:nextSeq()});
+    }
+    r.payments.push({amt:amount,date,pay,_seq:nextSeq()});
   }
-  r.payments.push({amt:amount,date,pay,_seq:nextSeq()});
   r.paid=r.payments.reduce((s,p)=>s+Number(p.amt||0),0);
   r.paidDate=date;
   r.pay=pay;
   saveData('commit',arr);
+  _commitPayEditIdx=null;
   renderCommit();
   if(typeof renderEM==='function'&&document.getElementById('em-commit')?.classList.contains('show'))renderEM('commit');
   closeSlideForm();
@@ -3132,8 +3201,8 @@ function populateFormForEdit(type,idx){
   const arr=loadData(key);
   const r=arr[idx];
   if(!r)return;
-  _editIdx[type]=idx;
   openSlideForm(type);
+  _editIdx[type]=idx;
   if(type==='income'){
     document.getElementById('su-name').value=r.name||'';
     document.getElementById('su-amount').value=r.amount||'';
@@ -3141,24 +3210,34 @@ function populateFormForEdit(type,idx){
     document.getElementById('su-date').value=r.date||todayStr();
     refreshIncomeCatSelect();
     const icSel=document.getElementById('su-income-cat');if(icSel)icSel.value=r.cat||'';
+    // ★ وضع تعديل: زر "مستلم" بس يتحول لـ"تحديث"، "مدفوع" يتخفي (مش منطقي وقت تعديل دخل)
+    const btnPaid=document.getElementById('su-btn-paid'),btnRecv=document.getElementById('su-btn-received');
+    if(btnPaid)btnPaid.style.display='none';
+    if(btnRecv)btnRecv.textContent='🔄 تحديث الدخل';
   } else if(type==='expense'){
     document.getElementById('se-name').value=r.name||'';
     document.getElementById('se-amount').value=r.amount||'';
     document.getElementById('se-pay').value=r.pay||'';
     document.getElementById('se-cat').value=r.cat||'';
     document.getElementById('se-date').value=r.date||todayStr();
+    const seBtn=document.getElementById('se-save-btn');if(seBtn)seBtn.textContent='🔄 تحديث المصروف';
   } else if(type==='commit'){
     document.getElementById('sc-name').value=r.name||'';
     document.getElementById('sc-req').value=r.req||'';
     document.getElementById('sc-paid').value=r.paid||'';
     document.getElementById('sc-pay').value=r.pay||'';
     document.getElementById('sc-date').value=r.date||todayStr();
+    const scBtn=document.getElementById('sc-save-btn');if(scBtn)scBtn.textContent='🔄 تحديث الالتزام';
   } else if(type==='debt'){
     document.getElementById('su-name').value=r.name||'';
     document.getElementById('su-amount').value=r.req||'';
     document.getElementById('su-pay').value=r.pay||'';
     document.getElementById('su-date').value=r.date||todayStr();
     document.getElementById('su-debt-cat').value=r.cat||'';
+    // ★ وضع تعديل: زر "مدفوع" بس يتحول لـ"تحديث"، "مستلم" يتخفي (مش منطقي وقت تعديل بيانات شخص فى الديون)
+    const btnPaid=document.getElementById('su-btn-paid'),btnRecv=document.getElementById('su-btn-received');
+    if(btnRecv)btnRecv.style.display='none';
+    if(btnPaid)btnPaid.textContent='🔄 تحديث الدين';
   }
   const title=document.getElementById('form-'+type+'-title');
   if(title)title.textContent=FORM_EDIT_TITLE[type]||'تعديل';
@@ -3544,8 +3623,10 @@ function saveRow(type){
 //  DEBT HISTORY MODAL
 // ══════════════════════════════════════════════
 let debtHistIdx=null;
+let _dhmEditTxnIdx=null; // ★ رقم المعاملة الجارى تعديلها فى سجل الدين (null = وضع إضافة جديد)
 function openDebtHistory(ri){
   debtHistIdx=ri;
+  _dhmEditTxnIdx=null;
   const arr=loadData(debtKey());const r=arr[ri];if(!r)return;
   if(!r.transactions)r.transactions=[];
   const isCreditor=debtMode==='creditor';
@@ -3561,9 +3642,13 @@ function openDebtHistory(ri){
   document.getElementById('dhm-cat-label').textContent=r.cat||'';
   updateHistHeader(r);renderStatementList(r);
   document.getElementById('dhm-save-btn').style.background=debtMode==='creditor'?'var(--yellow)':'var(--green)';
+  document.getElementById('dhm-save-btn').textContent='+ تسجيل';
   const _dhPayMethods=getSettings().payMethods||['كاش','تحويل بنكي','بطاقة','instapay'];
   const _dhmPay=document.getElementById('dhm-pay');
   if(_dhmPay)_dhmPay.innerHTML='<option value="">طريقة الدفع</option>'+_dhPayMethods.map(p=>`<option>${p}</option>`).join('');
+  document.getElementById('dhm-amount').value='';
+  document.getElementById('dhm-details').value='';
+  const dhmDate=document.getElementById('dhm-date');if(dhmDate)dhmDate.value=todayStr();
   document.getElementById('dhm').classList.add('show');
   document.getElementById('overlay').classList.add('show');
   updateDhmLinkIncomeVisibility();
@@ -3636,7 +3721,7 @@ function renderStatementList(r){
       <div class="dhm-cell dhm-num" style="text-align:center;font-size:13px;font-weight:800;color:${ac};"><span style="font-size:10px;">${arrow}</span> ${fmt(t.amount)}${linkedBadge}</div>
       <div class="dhm-cell dhm-txt" style="text-align:center;font-size:11px;color:${nameColor};font-weight:600;">${t.details||t.pay||'—'}</div>
       <div class="dhm-cell dhm-num" style="text-align:center;font-size:13px;font-weight:800;color:${bc};">${fmt(b)}</div>
-      <div style="text-align:center;display:flex;align-items:center;justify-content:center;gap:2px;">${linkBtn}<button onclick="deleteDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:${redC};font-size:14px;cursor:pointer;padding:0;line-height:1;">×</button></div>`;
+      <div style="text-align:center;display:flex;align-items:center;justify-content:center;gap:2px;">${linkBtn}<button onclick="editDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:${nameColor};font-size:12px;cursor:pointer;padding:0;line-height:1;">✏️</button><button onclick="deleteDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:${redC};font-size:14px;cursor:pointer;padding:0;line-height:1;">×</button></div>`;
     container.appendChild(row);
   });
 }
@@ -3645,13 +3730,32 @@ function saveDebtTransaction(){
   const details=document.getElementById('dhm-details').value.trim();
   const pay=document.getElementById('dhm-pay').value;
   const dir=document.getElementById('dhm-dir').value;
+  const txnDateInput=document.getElementById('dhm-date')?.value||todayStr();
   // هل حقل "ترحيل للدخل كقرض مستلم" مُفعَّل؟ (يظهر فقط في وضع دائن + dir=against)
   const linkToIncome=document.getElementById('dhm-link-income')?.checked===true;
   if(!amount||debtHistIdx===null)return;
   const arr=loadData(debtKey());
   if(!arr[debtHistIdx].transactions)arr[debtHistIdx].transactions=[];
   const debtorName=arr[debtHistIdx].name;
-  const txnDate=todayStr();
+
+  // ★ وضع تعديل معاملة موجودة: تحديث فى مكانها بدل إضافة معاملة جديدة
+  // ملحوظة: لو المعاملة مرحّلة تلقائيًا لجدول الدخل/المصروفات (mirrored) أو مربوطة (linkedToIncome)،
+  // التعديل هنا بيغيّر بيانات معاملة الدين نفسها بس، من غير ما يعدّل الصف المرتبط بيها هناك (زي الحذف بالظبط).
+  if(_dhmEditTxnIdx!==null&&arr[debtHistIdx].transactions[_dhmEditTxnIdx]){
+    const t=arr[debtHistIdx].transactions[_dhmEditTxnIdx];
+    arr[debtHistIdx].transactions[_dhmEditTxnIdx]={...t,amount,details,pay,dir,date:txnDateInput};
+    saveData(debtKey(),arr);
+    _dhmEditTxnIdx=null;
+    document.getElementById('dhm-amount').value='';
+    document.getElementById('dhm-details').value='';
+    document.getElementById('dhm-pay').value='';
+    document.getElementById('dhm-save-btn').textContent='+ تسجيل';
+    const dhmDate=document.getElementById('dhm-date');if(dhmDate)dhmDate.value=todayStr();
+    updateHistHeader(arr[debtHistIdx]);renderStatementList(arr[debtHistIdx]);renderDebt();
+    return;
+  }
+
+  const txnDate=txnDateInput;
   const creditorCat=arr[debtHistIdx].cat||'';
 
   // دائن — سداد أكبر من المطلوب → نافذة تصنيف في المدين
@@ -3718,16 +3822,38 @@ function addAutoExpenseFromDebtAdd(debtorName,amount,pay,date){
   exp.push({name:debtorName,amount,pay,date,fromDebt:true,_seq:nextSeq()});
   saveData('expense',exp);renderExpense();
 }
+// ★ تحميل بيانات معاملة دين موجودة فى النموذج للتعديل (بدل الحذف والإضافة من جديد)
+function editDebtTransaction(di,ti){
+  const arr=loadData(debtKey());
+  const t=arr[di]?.transactions?.[ti];
+  if(!t)return;
+  _dhmEditTxnIdx=ti;
+  document.getElementById('dhm-amount').value=t.amount||'';
+  document.getElementById('dhm-details').value=t.details||'';
+  document.getElementById('dhm-pay').value=t.pay||'';
+  document.getElementById('dhm-dir').value=t.dir||'for';
+  const dhmDate=document.getElementById('dhm-date');if(dhmDate)dhmDate.value=t.date||todayStr();
+  document.getElementById('dhm-save-btn').textContent='🔄 تحديث المعاملة';
+  updateDhmLinkIncomeVisibility();
+  document.getElementById('dhm-amount').focus();
+}
 function deleteDebtTransaction(di,ti){
   const arr=loadData(debtKey());
   if(!arr[di]||!arr[di].transactions)return;
   arr[di].transactions.splice(ti,1);
   saveData(debtKey(),arr);
+  if(_dhmEditTxnIdx===ti){
+    _dhmEditTxnIdx=null;
+    document.getElementById('dhm-amount').value='';
+    document.getElementById('dhm-details').value='';
+    document.getElementById('dhm-save-btn').textContent='+ تسجيل';
+  }
   updateHistHeader(arr[di]);renderStatementList(arr[di]);renderDebt();
 }
 function closeDebtHistory(){
   document.getElementById('dhm').classList.remove('show');
   debtHistIdx=null;
+  _dhmEditTxnIdx=null;
   if(!currentFT&&!currentEM)document.getElementById('overlay').classList.remove('show');
 }
 
@@ -4123,7 +4249,7 @@ function renderReportsPage(){
       let out=`<div style="font-size:10px;font-weight:800;color:${color};margin:6px 0 4px;">${label}</div>`;
       out+=list.sort((a,b)=>b.allReq-a.allReq).map(x=>{
         const pct=Math.min(100,Math.round((x.allReq/maxReq)*100));
-        const lbl=`متبقي ${fmt(x.rem)}${x.paidPeriod>0?` · مسدد ${fmt(x.paidPeriod)}`:''}`;
+        const lbl=fmt(x.rem);
         return barRow(x.cat,pct,color,lbl);
       }).join('');
       return out;
@@ -4150,11 +4276,11 @@ function renderReportsPage(){
       html+=`<div style="font-size:10px;font-weight:800;color:var(--muted);margin:10px 0 4px;padding-top:6px;border-top:1px dashed var(--border);">تفاصيل الأشخاص</div>`;
       if(credPersons.length){
         html+=`<div style="font-size:10px;font-weight:800;color:var(--red);margin:4px 0;">دائن</div>`;
-        html+=credPersons.sort((a,b)=>b.rem-a.rem).map(x=>barRow(x.name,x.pct,'var(--red)',`متبقي ${fmt(x.rem)}${x.paidPeriod>0?` · مسدد ${fmt(x.paidPeriod)}`:''}`)).join('');
+        html+=credPersons.sort((a,b)=>b.rem-a.rem).map(x=>barRow(x.name,x.pct,'var(--red)',fmt(x.rem))).join('');
       }
       if(debtPersons.length){
         html+=`<div style="font-size:10px;font-weight:800;color:var(--green);margin:4px 0;">مدين</div>`;
-        html+=debtPersons.sort((a,b)=>b.rem-a.rem).map(x=>barRow(x.name,x.pct,'var(--green)',`متبقي ${fmt(x.rem)}${x.paidPeriod>0?` · مسدد ${fmt(x.paidPeriod)}`:''}`)).join('');
+        html+=debtPersons.sort((a,b)=>b.rem-a.rem).map(x=>barRow(x.name,x.pct,'var(--green)',fmt(x.rem))).join('');
       }
     }
     if(!credAll.allReq&&!debtAll.allReq){html='<div style="font-size:11px;color:var(--muted);text-align:center;padding:10px;">لا توجد ديون</div>';}
