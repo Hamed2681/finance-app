@@ -1770,9 +1770,9 @@ function renderDebtCats(){
     const slots=allDebtCatSlots();
     if(slots.length>1){
       const curIdx=slots.findIndex(s=>s.mode===debtMode&&s.cat===active);
-      lbl.textContent=`◀ ${mode} · ${active}  ${curIdx+1}/${slots.length} ▶`;
+      lbl.textContent=`◀ ${active}  ${curIdx+1}/${slots.length} ▶`;
     } else {
-      lbl.textContent=`${mode} · ${active}`;
+      lbl.textContent=active;
     }
   }
   // تحديث عنوان الـ ftable
@@ -2897,7 +2897,7 @@ function openSlideForm(type){
   });
 
   if(type==='income'||type==='debt'){
-    document.getElementById('unified-title').textContent=type==='income'?'📥 دخل / ديون':'📥 دخل / ديون';
+    document.getElementById('unified-title').textContent=type==='income'?'📥 وارد':'📋 تسجيل دين';
     document.getElementById('su-date').value=today;
     document.getElementById('su-name').value='';
     document.getElementById('su-amount').value='';
@@ -2915,6 +2915,15 @@ function openSlideForm(type){
     const loanCat=document.getElementById('su-loan-cat');
     loanCat.innerHTML='<option value="">اختر تصنيف دائن</option>';
     getDebtCats('creditor').forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;loanCat.appendChild(o);});
+    // ★ زر واحد بس ظاهر حسب نوع المربع: "مستلم" للدخل (وارد)، "مدفوع" للديون
+    const btnPaidEl=document.getElementById('su-btn-paid'),btnRecvEl=document.getElementById('su-btn-received');
+    if(type==='income'){
+      if(btnPaidEl)btnPaidEl.style.display='none';
+      if(btnRecvEl)btnRecvEl.style.display='';
+    } else {
+      if(btnRecvEl)btnRecvEl.style.display='none';
+      if(btnPaidEl)btnPaidEl.style.display='';
+    }
     document.getElementById('form-unified').classList.add('show');
     setupAutocomplete(type);
   } else if(type==='expense'){
