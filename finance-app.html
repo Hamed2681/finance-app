@@ -931,7 +931,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
   <div class="ftable-body">
     <div class="tbl-wrap" id="tbl-debt">
       <table><colgroup><col style="width:60%"><col style="width:20%"><col style="width:20%"></colgroup>
-        <thead><tr><th>البند</th><th>مطلوب</th><th>مدفوع</th></tr></thead>
+        <thead><tr><th>البند</th><th>مطلوب</th><th id="ft-debt-paid-th">مدفوع</th></tr></thead>
         <tbody id="tbody-debt"></tbody>
       </table>
     </div>
@@ -1182,7 +1182,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
   <div class="emodal-body">
     <div class="tbl-wrap">
       <table><colgroup><col style="width:14%"><col style="width:46%"><col style="width:18%"><col style="width:18%"><col style="width:18%"></colgroup>
-        <thead><tr><th>ت.الدفع</th><th>البند</th><th>مطلوب</th><th>مدفوع</th><th>طريقة الدفع</th></tr></thead>
+        <thead><tr><th>ت.الدفع</th><th>البند</th><th>مطلوب</th><th id="em-debt-paid-th">مدفوع</th><th>طريقة الدفع</th></tr></thead>
         <tbody id="tbody-debt-em"></tbody>
       </table>
     </div>
@@ -2052,6 +2052,10 @@ function initCommitSwipe(){
 }
 
 function renderDebt(){
+  // ★ عمود "مدفوع" فى وضع مدين يوريك "سداد" (المبلغ المُحصَّل من المدين)، وفى دائن يفضل "مدفوع" (اللي دفعته له)
+  const paidColLbl=debtMode==='debtor'?'سداد':'مدفوع';
+  const ftTh=document.getElementById('ft-debt-paid-th');if(ftTh)ftTh.textContent=paidColLbl;
+  const emTh=document.getElementById('em-debt-paid-th');if(emTh)emTh.textContent=paidColLbl;
   const rows=filteredData('debt');
   const all=loadData(debtKey());
   let tReq=0,tPaid=0;
@@ -2915,14 +2919,14 @@ function openSlideForm(type){
     const loanCat=document.getElementById('su-loan-cat');
     loanCat.innerHTML='<option value="">اختر تصنيف دائن</option>';
     getDebtCats('creditor').forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;loanCat.appendChild(o);});
-    // ★ زر واحد بس ظاهر حسب نوع المربع: "مستلم" للدخل (وارد)، "مدفوع" للديون
+    // ★ الدخل: زر "مستلم" بس. الديون: الزرين مع بعض (مستلم/مدفوع) لكل من دائن ومدين، لبند جديد أو قديم
     const btnPaidEl=document.getElementById('su-btn-paid'),btnRecvEl=document.getElementById('su-btn-received');
     if(type==='income'){
       if(btnPaidEl)btnPaidEl.style.display='none';
-      if(btnRecvEl)btnRecvEl.style.display='';
+      if(btnRecvEl){btnRecvEl.style.display='';btnRecvEl.textContent='💰 مستلم';}
     } else {
-      if(btnRecvEl)btnRecvEl.style.display='none';
-      if(btnPaidEl)btnPaidEl.style.display='';
+      if(btnPaidEl){btnPaidEl.style.display='';btnPaidEl.textContent='💸 مدفوع';}
+      if(btnRecvEl){btnRecvEl.style.display='';btnRecvEl.textContent='💰 مستلم';}
     }
     document.getElementById('form-unified').classList.add('show');
     setupAutocomplete(type);
@@ -3012,43 +3016,63 @@ function saveUnified(action){
   const date=document.getElementById('su-date').value||todayStr();
   if(!name||!amount)return;
 
-  if(action==='received'){
-    // مستلم → دخل
-    const isLoan=document.getElementById('su-loan-toggle')?.classList.contains('active');
-    const loanCat=document.getElementById('su-loan-cat')?.value;
-    const incomeCat=!isLoan?(document.getElementById('su-income-cat')?.value||''):'';
-    const inc=loadData('income');
-    if(_editIdx.income!=null&&inc[_editIdx.income]){
-      // ★ تعديل بند دخل موجود — تحديث فى مكانه بدل إضافة صف جديد
-      inc[_editIdx.income]={...inc[_editIdx.income],name,amount,pay,date,cat:incomeCat};
-    } else {
-      inc.push({name,amount,pay,date,isLoan:isLoan||false,cat:incomeCat,_seq:nextSeq()});
-      if(isLoan&&loanCat)addCreditorDebtFromLoan(name,amount,pay,loanCat);
-    }
-    saveData('income',inc);
-    renderIncome();
-  } else {
-    // مدفوع → ديون (مدين) أو دخل الديون
-    if(_slideFormType==='debt'){
+  if(_slideFormType==='debt'){
+    // ★ وضع تعديل بيانات شخص موجود (من ✏️ تعديل) — تحديث الحقول الأساسية بس، مش معاملة جديدة
+    if(_editIdx.debt!=null){
       const cat=document.getElementById('su-debt-cat').value;
       const arr=loadData(debtKey());
-      if(_editIdx.debt!=null&&arr[_editIdx.debt]){
-        // ★ تعديل بيانات شخص دين موجود (الاسم/الإجمالي الأساسي/التصنيف/التاريخ) — تحديث بدل إضافة شخص جديد
+      if(arr[_editIdx.debt]){
         arr[_editIdx.debt]={...arr[_editIdx.debt],name,req:amount,pay,cat,date};
-      } else {
-        arr.push({name,req:amount,transactions:[],pay,cat,date,_seq:nextSeq()});
+        saveData(debtKey(),arr);
+        renderDebt();
       }
-      saveData(debtKey(),arr);
-      renderDebt();
-    } else {
-      // من نموذج الدخل — يُضاف كمصروف
-      const exp=loadData('expense');
-      exp.push({name,amount,pay,date,_seq:nextSeq()});
-      saveData('expense',exp);
-      renderExpense();
+      _editIdx.debt=null;
+      closeSlideForm();updateSummary();
+      return;
     }
+    // ★ مربع الديون: مستلم/مدفوع شغالين مع دائن ومدين، سواء لبند جديد أو بند قديم (بنفس الاسم)
+    // دائن + مستلم = سلفة استلمناها (against) | دائن + مدفوع = سداد له (for)
+    // مدين + مستلم = سداد استلمناه منه (for)  | مدين + مدفوع = سلفة إضافية له (against)
+    const dir=action==='received'?(debtMode==='creditor'?'against':'for'):(debtMode==='creditor'?'for':'against');
+    const cat=document.getElementById('su-debt-cat').value;
+    const arr=loadData(debtKey());
+    let idx=arr.findIndex(r=>(r.name||'').trim()===name);
+    if(idx<0){
+      arr.push({name,req:0,transactions:[],pay,cat,date,_seq:nextSeq()});
+      idx=arr.length-1;
+      saveData(debtKey(),arr);
+    }
+    // ★ نستخدم نفس منظومة تسجيل المعاملات الموجودة (saveDebtTransaction) بدل تكرار المنطق —
+    // هي أصلاً بتتكفل بالترحيل الصحيح للدخل/المصروف ومنع التكرار فى صفحة السجل
+    debtHistIdx=idx;
+    _dhmEditTxnIdx=null;
+    document.getElementById('dhm-amount').value=amount;
+    document.getElementById('dhm-details').value='';
+    document.getElementById('dhm-pay').value=pay;
+    document.getElementById('dhm-dir').value=dir;
+    const dhmDate=document.getElementById('dhm-date');if(dhmDate)dhmDate.value=date;
+    const dhmLink=document.getElementById('dhm-link-income');
+    if(dhmLink)dhmLink.checked=(action==='received'&&debtMode==='creditor');
+    saveDebtTransaction();
+    debtHistIdx=null;
+    closeSlideForm();
+    return;
   }
-  _editIdx.income=null;_editIdx.debt=null;
+
+  // ★ مربع الدخل (وارد): زر "مستلم" بس
+  const isLoan=document.getElementById('su-loan-toggle')?.classList.contains('active');
+  const loanCat=document.getElementById('su-loan-cat')?.value;
+  const incomeCat=!isLoan?(document.getElementById('su-income-cat')?.value||''):'';
+  const inc=loadData('income');
+  if(_editIdx.income!=null&&inc[_editIdx.income]){
+    inc[_editIdx.income]={...inc[_editIdx.income],name,amount,pay,date,cat:incomeCat};
+  } else {
+    inc.push({name,amount,pay,date,isLoan:isLoan||false,cat:incomeCat,_seq:nextSeq()});
+    if(isLoan&&loanCat)addCreditorDebtFromLoan(name,amount,pay,loanCat);
+  }
+  saveData('income',inc);
+  _editIdx.income=null;
+  renderIncome();
   closeSlideForm();
   updateSummary();
 }
