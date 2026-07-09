@@ -51,6 +51,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 
 /* شارت على يسار الكرت (commit/debt) — موضع افتراضي */
 .scard.has-side-chart{padding-left:60px;}
+.fa-row{flex:1;overflow:hidden;max-width:0;max-height:0;opacity:0;transition:max-width .35s ease, max-height .35s ease, opacity .25s ease;background:linear-gradient(135deg,rgba(77,168,240,.16),rgba(62,207,106,.12));border:1px solid rgba(77,168,240,.3);border-radius:14px;display:flex;align-items:center;}
+.fa-row.open{max-width:2000px;max-height:120px;min-height:36px;opacity:1;}
+.fa-row.open{max-width:2000px;opacity:1;}
 .scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
 .scard-side-chart svg{width:54px;height:54px;opacity:.85;}
 
@@ -856,13 +859,16 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       </div>
     </div>
 
-    <!-- زر الخبير المالي — عمود بعرض الكلمة، وشريط أخبار دوّار للبنود جواه -->
-    <div onclick="openFinancialAnalysis()" style="cursor:pointer;background:linear-gradient(135deg,rgba(77,168,240,.16),rgba(62,207,106,.12));border:1px solid rgba(77,168,240,.3);border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;width:fit-content;min-height:32vh;justify-self:start;">
-      <div style="font-size:22px;">🧠</div>
-      <div style="font-size:12px;font-weight:800;color:var(--txt);line-height:1.4;text-align:center;">الخبير</div>
-      <div style="font-size:12px;font-weight:800;color:var(--txt);line-height:1.4;text-align:center;">المالي</div>
-      <div id="fa-ticker-wrap" style="perspective:500px;transition:transform .25s ease;transform-style:preserve-3d;flex:1;width:64px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:4px;">
-        <div id="fa-ticker-text" style="font-size:10px;font-weight:700;line-height:1.5;text-align:center;word-break:break-word;"></div>
+    <!-- صف الخبير المالي — زر مصغّر بيفتح/يطوي صف البنود جنبه -->
+    <div style="grid-column:1/-1;display:flex;align-items:flex-start;gap:8px;">
+      <div onclick="toggleFinancialRow()" style="cursor:pointer;background:linear-gradient(135deg,rgba(77,168,240,.16),rgba(62,207,106,.12));border:1px solid rgba(77,168,240,.3);border-radius:12px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex-shrink:0;width:52px;align-self:flex-start;">
+        <div style="font-size:10px;font-weight:800;color:var(--txt);line-height:1.3;text-align:center;">الخبير</div>
+        <div style="font-size:10px;font-weight:800;color:var(--txt);line-height:1.3;text-align:center;">المالي</div>
+      </div>
+      <div id="fa-row" class="fa-row">
+        <div id="fa-ticker-wrap" style="perspective:500px;transition:transform .25s ease;transform-style:preserve-3d;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 10px;">
+          <div id="fa-ticker-text" style="font-size:11px;font-weight:700;line-height:1.4;text-align:center;word-break:break-word;"></div>
+        </div>
       </div>
     </div>
 
@@ -2428,6 +2434,11 @@ function openFinancialAnalysis(){
 }
 function closeFinancialAnalysis(){
   document.getElementById('fa-modal').classList.remove('show');
+}
+function toggleFinancialRow(){
+  const row=document.getElementById('fa-row');
+  if(!row)return;
+  row.classList.toggle('open');
 }
 
 /* ══ شريط الأخبار الدوّار لبنود "الخبير المالي" — دوران زى الألواح + كتابة حرف حرف ══ */
