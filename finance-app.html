@@ -856,6 +856,16 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       </div>
     </div>
 
+    <!-- زر الخبير المالي — عمود بعرض الكلمة، وشريط أخبار دوّار للبنود جواه -->
+    <div onclick="openFinancialAnalysis()" style="cursor:pointer;background:linear-gradient(135deg,rgba(77,168,240,.16),rgba(62,207,106,.12));border:1px solid rgba(77,168,240,.3);border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;width:fit-content;min-height:32vh;justify-self:start;">
+      <div style="font-size:22px;">🧠</div>
+      <div style="font-size:12px;font-weight:800;color:var(--txt);line-height:1.4;text-align:center;">الخبير</div>
+      <div style="font-size:12px;font-weight:800;color:var(--txt);line-height:1.4;text-align:center;">المالي</div>
+      <div id="fa-ticker-wrap" style="perspective:500px;transition:transform .25s ease;transform-style:preserve-3d;flex:1;width:64px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:4px;">
+        <div id="fa-ticker-text" style="font-size:10px;font-weight:700;line-height:1.5;text-align:center;word-break:break-word;"></div>
+      </div>
+    </div>
+
 </div><!-- /cards-grid-2col -->
 </div><!-- /pg-home -->
 
@@ -1466,6 +1476,18 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <tbody id="budget-detail-tbody"></tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- ══ FINANCIAL ANALYSIS MODAL ══ -->
+<div class="budget-detail-modal" id="fa-modal">
+  <div class="budget-detail-box" style="max-width:380px;">
+    <div class="budget-detail-hdr">
+      <span class="budget-detail-title" style="color:var(--blue);">🧠 الخبير المالي</span>
+      <button class="btn-ft btn-ft-icon" onclick="closeFinancialAnalysis()">×</button>
+    </div>
+    <div style="padding:4px 2px 2px;font-size:10px;color:var(--muted);text-align:center;border-bottom:1px solid var(--border);padding-bottom:8px;">بناءً على بيانات الفترة الحالية المختارة فى الصفحة الرئيسية</div>
+    <div class="budget-tbl-wrap" style="padding:10px;display:flex;flex-direction:column;gap:8px;" id="fa-insights-list"></div>
   </div>
 </div>
 
@@ -2309,6 +2331,137 @@ function updateSummary(){
     debtEl.className='val '+(debtRem>0?'cv-y':debtRem===0?'cv-g':'cv-g');
   }
   updateRatioBars(adjustedIncome,expense,commitP,credPaidAmt,debPaidAmt,totalExp);
+}
+
+/* ══════════════════════════════════════════════
+   🧠 تحليل الوضع المالي — نصائح وتحذيرات بناءً على بيانات الفترة الحالية
+   ══════════════════════════════════════════════ */
+function computeFinancialInsights(){
+  const insights=[];
+  const income=filteredData('income').reduce((s,r)=>s+Number(r.amount||0),0);
+  const expense=filteredData('expense').reduce((s,r)=>s+Number(r.amount||0),0);
+  const{from:rf,to:rt}=getRange(currentPeriod);
+  const commitPaid=commitPaidInRange(rf,rt);
+  const cdt=debtTotalsInMode('creditor',rf,rt);
+  const ddt=debtTotalsInMode('debtor',rf,rt);
+  const credAll=debtTotalsInMode('creditor',null,null);
+  const debtAll=debtTotalsInMode('debtor',null,null);
+  const credRem=Math.max(0,credAll.allReq-credAll.paid);
+  const debtRem=Math.max(0,debtAll.allReq-debtAll.paid);
+  const totalOut=expense+commitPaid+cdt.paid;
+
+  // 1) معدل الادخار خلال الفترة الحالية
+  if(income>0){
+    const savingsRate=(income-totalOut)/income;
+    if(savingsRate<0){
+      insights.push({level:'danger',icon:'🚨',text:`مصروفاتك والتزاماتك تجاوزت دخلك بمقدار ${fmt(Math.abs(income-totalOut))} فى الفترة الحالية.`});
+    } else if(savingsRate<0.1){
+      insights.push({level:'warning',icon:'⚠️',text:`نسبة ما توفّره من دخلك ضئيلة (${Math.round(savingsRate*100)}%) فى الفترة الحالية. حاول تراجع بعض بنود الصرف.`});
+    } else if(savingsRate>=0.3){
+      insights.push({level:'good',icon:'✅',text:`نسبة توفير ممتازة (${Math.round(savingsRate*100)}%) من دخلك فى الفترة الحالية.`});
+    } else {
+      insights.push({level:'info',icon:'ℹ️',text:`بتوفّر حوالى ${Math.round(savingsRate*100)}% من دخلك فى الفترة الحالية.`});
+    }
+  } else if(totalOut>0){
+    insights.push({level:'warning',icon:'⚠️',text:'مفيش دخل مسجّل فى الفترة الحالية، لكن فيه مصروفات أو التزامات مدفوعة.'});
+  }
+
+  // 2) نسبة المصروفات وحدها من الدخل
+  if(income>0&&expense>0){
+    const pct=Math.round((expense/income)*100);
+    if(pct>70)insights.push({level:'warning',icon:'💸',text:`المصروفات بتاخد ${pct}% من دخلك فى الفترة الحالية — نسبة مرتفعة.`});
+  }
+
+  // 3) عبء الديون (كل الأزمنة) مقارنة بدخل الفترة الحالية
+  if(credRem>0){
+    if(income>0&&credRem>income*2){
+      insights.push({level:'danger',icon:'📉',text:`إجمالي مديونيتك الحالية (${fmt(credRem)}) بيعادل أكتر من ضعف دخل الفترة الحالية — يُفضّل وضع خطة سداد.`});
+    } else {
+      insights.push({level:'info',icon:'💳',text:`متبقي عليك ${fmt(credRem)} لسداد ديونك الحالية.`});
+    }
+  }
+  if(debtRem>0){
+    insights.push({level:'good',icon:'🤝',text:`ليك ${fmt(debtRem)} مستحقة عند آخرين حاليًا.`});
+  }
+
+  // 4) التزامات متأخرة أو مستحقة قريبًا (بغض النظر عن الفترة المختارة — بتُفحص بتاريخ اليوم الفعلي)
+  const today=new Date();today.setHours(0,0,0,0);
+  let overdueCount=0,soonCount=0;
+  loadData('commit').forEach(r=>{
+    const rem=Number(r.req||0)-Number(r.paid||0);
+    if(rem<=0||!r.dueDate)return;
+    const due=new Date(r.dueDate+'T00:00:00');
+    const diffDays=Math.round((due-today)/86400000);
+    if(diffDays<0)overdueCount++;
+    else if(diffDays<=7)soonCount++;
+  });
+  if(overdueCount>0)insights.push({level:'danger',icon:'⏰',text:`عندك ${overdueCount} التزام فات ميعاد استحقاقه ولسه مدفوعش بالكامل.`});
+  if(soonCount>0)insights.push({level:'warning',icon:'📅',text:`عندك ${soonCount} التزام مستحق خلال 7 أيام القادمة.`});
+
+  // 5) أكبر فئة مصروفات فى الفترة الحالية
+  const expByCat={};
+  filteredData('expense').forEach(r=>{const c=r.cat||'بدون تصنيف';expByCat[c]=(expByCat[c]||0)+Number(r.amount||0);});
+  const catEntries=Object.entries(expByCat).sort((a,b)=>b[1]-a[1]);
+  if(catEntries.length&&expense>0){
+    const[topCat,topVal]=catEntries[0];
+    const pct=Math.round((topVal/expense)*100);
+    if(pct>=40)insights.push({level:'info',icon:'🏷️',text:`فئة "${topCat}" بتمثل ${pct}% من مصروفاتك فى الفترة الحالية.`});
+  }
+
+  if(!insights.length)insights.push({level:'info',icon:'👍',text:'مفيش تنبيهات حاليًا — وضعك المالي مستقر فى الفترة دي.'});
+  return insights;
+}
+function renderFinancialInsights(){
+  const list=computeFinancialInsights();
+  const colors={danger:'var(--red)',warning:'var(--yellow)',good:'var(--green)',info:'var(--blue)'};
+  const bgs={danger:'rgba(192,57,43,.12)',warning:'rgba(224,176,48,.12)',good:'rgba(62,207,106,.12)',info:'rgba(77,168,240,.12)'};
+  const el=document.getElementById('fa-insights-list');
+  if(!el)return;
+  el.innerHTML=list.map(x=>`<div style="background:${bgs[x.level]};border:1px solid ${colors[x.level]};border-radius:10px;padding:10px;display:flex;gap:8px;align-items:flex-start;">
+    <span style="font-size:16px;flex-shrink:0;">${x.icon}</span>
+    <span style="font-size:12px;color:var(--txt);line-height:1.6;">${x.text}</span>
+  </div>`).join('');
+}
+function openFinancialAnalysis(){
+  renderFinancialInsights();
+  document.getElementById('fa-modal').classList.add('show');
+}
+function closeFinancialAnalysis(){
+  document.getElementById('fa-modal').classList.remove('show');
+}
+
+/* ══ شريط الأخبار الدوّار لبنود "الخبير المالي" — دوران زى الألواح + كتابة حرف حرف ══ */
+let _faTickerIdx=0;
+let _faTickerTimer=null;
+const FA_LEVEL_COLORS={danger:'var(--red)',warning:'var(--yellow)',good:'var(--green)',info:'var(--blue)'};
+function tickFinancialTicker(){
+  const wrap=document.getElementById('fa-ticker-wrap');
+  const el=document.getElementById('fa-ticker-text');
+  if(!wrap||!el)return;
+  const insights=computeFinancialInsights();
+  if(!insights.length)return;
+  const item=insights[_faTickerIdx%insights.length];
+  _faTickerIdx++;
+  // ★ دوران الصف زى الألواح (split-flap) قبل ظهور البند الجديد
+  wrap.style.transform='rotateX(90deg)';
+  clearTimeout(_faTickerTimer);
+  _faTickerTimer=setTimeout(()=>{
+    el.style.color=FA_LEVEL_COLORS[item.level]||'var(--txt)';
+    el.textContent='';
+    wrap.style.transform='rotateX(0deg)';
+    const fullText=item.icon+' '+item.text;
+    faTypeWriter(el,fullText,0,()=>{
+      _faTickerTimer=setTimeout(tickFinancialTicker,4200);
+    });
+  },260);
+}
+function faTypeWriter(el,text,i,done){
+  if(i<=text.length){
+    el.textContent=text.slice(0,i);
+    _faTickerTimer=setTimeout(()=>faTypeWriter(el,text,i+1,done),32);
+  } else {
+    done();
+  }
 }
 // ══════════════════════════════════════════════
 //  الدوائر الأربعة بالكروت — كل واحدة بتجاوب على سؤال مختلف:
@@ -4981,6 +5134,7 @@ initDebtCardSwipe();
 autoAddCommitItems();
 renderAll();
 renderPeriodRangeBar();
+tickFinancialTicker();
 applyTheme(getSettings().theme||'dark');
 document.getElementById('pg-home').style.display='flex';
 
