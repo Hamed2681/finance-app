@@ -28,6 +28,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 
 /* period tabs */
 .ptabs{display:flex;gap:3px;position:relative;}
+.period-range-bar{background:var(--card2);border:1px solid var(--border);border-radius:8px;}
+.tri-nav-btn{background:var(--card);border:1px solid var(--border);border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;color:var(--blue);font-size:11px;cursor:pointer;flex-shrink:0;padding:0;}
+.tri-nav-btn:active{background:var(--border);}
 .ptab{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 1px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;}
 .ptab.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .custom-picker{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;z-index:400;flex-direction:column;gap:7px;}
@@ -183,9 +186,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .ftable.debt.debtor-mode .ftable-hdr{background:var(--hi);}
 .ftable-title{font-size:14px;font-weight:800;color:#fff;}
 .ftable-hdr-btns{display:flex;gap:5px;align-items:center;}
-.btn-ft{height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:0 8px;display:flex;align-items:center;gap:3px;}
+.btn-ft{height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:0 10px;display:flex;align-items:center;gap:3px;}
 .btn-ft-icon{width:24px;padding:0;justify-content:center;font-size:17px;font-weight:800;}
-.btn-ft-add{width:24px;padding:0;justify-content:center;font-size:19px;font-weight:800;line-height:1;}
+.btn-ft-add{width:30px;padding:0;justify-content:center;font-size:22px;font-weight:800;line-height:1;}
 /* table body */
 .ftable-body{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg);}
 .tbl-wrap{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#2a3240 transparent;}
@@ -361,12 +364,12 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .btn-loan-toggle{flex:1;background:rgba(179,136,255,.1);border:1px solid rgba(179,136,255,.35);border-radius:6px;color:#b388ff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:8px;cursor:pointer;transition:all .15s;}
 .btn-loan-toggle.active{background:#b388ff;border-color:#b388ff;color:#1a1a2e;}
 /* delete/edit bar */
-.del-bar{display:none;flex-shrink:0;background:rgba(248,81,73,.1);border-top:1px solid rgba(248,81,73,.25);padding:6px 10px;justify-content:space-between;align-items:center;gap:6px;}
+.del-bar{display:none;flex-shrink:0;background:rgba(248,81,73,.1);border-top:1px solid rgba(248,81,73,.25);padding:8px 10px;justify-content:space-between;align-items:center;gap:6px;}
 .del-bar.show{display:flex;}
 .del-bar-actions{display:flex;gap:6px;flex-shrink:0;}
-.btn-del{background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 14px;cursor:pointer;white-space:nowrap;}
-.btn-edit{background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;white-space:nowrap;}
-.btn-del-cancel{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;flex-shrink:0;}
+.btn-del{background:var(--red);border:none;border-radius:7px;color:#fff;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:8px 16px;cursor:pointer;white-space:nowrap;}
+.btn-edit{background:var(--blue);border:none;border-radius:7px;color:#fff;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;white-space:nowrap;}
+.btn-del-cancel{background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:13px;padding:8px 12px;cursor:pointer;flex-shrink:0;}
 
 /* ── EXPANDED MODAL (level 2 — ⤢ button) ── */
 .emodal{display:flex;position:fixed;top:2vh;left:50%;transform:translateX(-50%) translateY(14px);width:96vw;max-width:600px;height:96vh;background:var(--bg);border-radius:14px;z-index:250;flex-direction:column;overflow:hidden;box-shadow:0 15px 60px rgba(0,0,0,.9);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),visibility .28s;}
@@ -430,6 +433,9 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .commit-item-due{font-size:10px;color:var(--yellow);}
 .s-sec{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
 .s-sec-title{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.s-sec-title.s-collapsible{cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.s-collapse-arrow{color:var(--blue);font-size:14px;transition:transform .2s;display:inline-block;}
+.s-collapse-arrow.open{transform:rotate(90deg);}
 .s-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;}
 .s-lbl{font-size:13px;color:var(--txt);}
 .s-sub{font-size:12px;color:var(--muted);font-weight:600;}
@@ -535,22 +541,15 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .budget-tbl-wrap::-webkit-scrollbar{display:none;}
 .budget-tbl-wrap table{width:100%;border-collapse:separate;border-spacing:0 5px;}
 .budget-tbl-wrap th{position:sticky;top:0;background:#253445;font-size:10px;font-weight:700;color:var(--muted);padding:6px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08);z-index:2;}
-.budget-tbl-wrap tbody tr{background:#2d3f52;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 2px 6px rgba(0,0,0,.35);transition:transform .35s cubic-bezier(.2,.8,.3,1),box-shadow .25s ease;}
-.budget-tbl-wrap table{border-collapse:separate;border-spacing:0 2px;}
-.budget-tbl-wrap tr{background:#7a7f85;border-radius:8px;}
-.budget-tbl-wrap tr:nth-child(even){background:#e8e9eb;}
-.budget-tbl-wrap td{font-size:11px;padding:7px 4px;text-align:center;color:#1a1c1f;background:transparent;border:none;}
-.budget-tbl-wrap tr:nth-child(even) td{color:#2a2d33;}
+.budget-tbl-wrap tbody tr{background:#3a3a3a;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 2px 6px rgba(0,0,0,.35);transition:transform .35s cubic-bezier(.2,.8,.3,1),box-shadow .25s ease;}
+.budget-tbl-wrap tbody tr:nth-child(even){background:#434343;}
+.budget-tbl-wrap td{font-size:12px;font-weight:600;padding:8px 4px;text-align:center;color:var(--txt);background:transparent;border:none;}
 .budget-tbl-wrap tr td:first-child{border-radius:0 8px 8px 0;}
 .budget-tbl-wrap tr td:last-child{border-radius:8px 0 0 8px;}
-.budget-tbl-wrap tr.opening-row td{background:rgba(180,130,0,.15);color:#6b4a00;font-weight:700;font-size:10px;}
-.budget-tbl-wrap tbody tr td:first-child{border-top-right-radius:10px;border-bottom-right-radius:10px;}
-.budget-tbl-wrap tbody tr td:last-child{border-top-left-radius:10px;border-bottom-left-radius:10px;}
-.budget-tbl-wrap tbody tr:not(:last-child) td{border-bottom:1px dotted #ffffff;}
 .budget-tbl-wrap tbody tr:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(77,168,240,.25),0 6px 14px rgba(0,0,0,.5);}
 .budget-tbl-wrap tbody tr:hover td{background:rgba(77,168,240,.06)!important;}
-.budget-tbl-wrap tbody tr.opening-row{background:rgba(255,200,0,.12)!important;box-shadow:inset 0 0 0 1px rgba(255,200,0,.3),0 2px 6px rgba(0,0,0,.35);}
-.budget-tbl-wrap tbody tr.opening-row td{color:var(--yellow);font-weight:700;font-size:10px;}
+.budget-tbl-wrap tbody tr.opening-row{background:rgba(255,200,0,.14)!important;box-shadow:inset 0 0 0 1px rgba(255,200,0,.35),0 2px 6px rgba(0,0,0,.35);}
+.budget-tbl-wrap tbody tr.opening-row td{color:var(--yellow);font-weight:800;font-size:12px;}
 /* إعدادات الميزانية */
 .commit-item-row{display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:8px;background:var(--card2);border:1px solid var(--border);margin-bottom:4px;cursor:default;transition:opacity .2s,transform .15s,box-shadow .15s;user-select:none;}
 .commit-item-row.dragging{opacity:.4;transform:scale(.97);}
@@ -732,6 +731,11 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       <div><label>إلى</label><input type="date" id="date-to"></div>
       <button class="btn-apply" onclick="applyCustom()">تطبيق</button>
     </div>
+  </div>
+  <div class="period-range-bar" id="period-range-bar" style="display:none;align-items:center;justify-content:space-between;gap:4px;padding:3px 8px;margin-top:3px;">
+    <button class="tri-nav-btn" onclick="stepPeriod(-1)">‹</button>
+    <span id="period-range-label" style="font-size:10px;font-weight:700;color:var(--txt);flex:1;text-align:center;"></span>
+    <button class="tri-nav-btn" onclick="stepPeriod(1)">›</button>
   </div>
 </div>
 
@@ -1207,7 +1211,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     </div>
   </div>
   <div id="dhm-col-header" style="flex-shrink:0;display:grid;grid-template-columns:22% 20% 28% 22% 8%;background:var(--hc);padding:5px 10px;border-bottom:2px solid rgba(255,255,255,.15);">
-    <div style="font-size:10px;font-weight:800;color:#fff;">تاريخ ↓</div>
+    <div style="font-size:10px;font-weight:800;color:#fff;">تاريخ ⌄</div>
     <div style="font-size:10px;font-weight:800;color:#fff;text-align:center;">المبلغ</div>
     <div style="font-size:10px;font-weight:800;color:#fff;text-align:center;">التفاصيل</div>
     <div style="font-size:10px;font-weight:800;color:#fff;text-align:center;">الرصيد</div>
@@ -1218,7 +1222,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div style="display:flex;gap:5px;">
       <input type="number" id="dhm-amount" placeholder="المبلغ" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;padding:6px 8px;min-width:0;">
       <input type="text" id="dhm-details" placeholder="التفاصيل" style="flex:1.4;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 7px;min-width:0;">
-      <select id="dhm-dir" onchange="updateDhmLinkIncomeVisibility()" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 4px;min-width:0;"><option value="for">سداد ▲</option><option value="against">إضافة ▼</option></select>
+      <select id="dhm-dir" onchange="updateDhmLinkIncomeVisibility()" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 4px;min-width:0;"><option value="for">سداد ⌃</option><option value="against">إضافة ⌄</option></select>
     </div>
     <div style="display:flex;gap:5px;margin-top:5px;">
       <select id="dhm-pay" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 4px;min-width:0;"><option value="">طريقة الدفع</option><option>كاش</option><option>تحويل بنكي</option><option>بطاقة</option><option>instapay</option></select>
@@ -1248,7 +1252,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div class="s-sec"><div class="s-sec-title">🔖 تصنيف الدخل</div><div class="s-row"><span class="s-sub">بنود دخل أساسي</span></div><div class="s-tags" id="tags-income-basic"></div><div class="s-add-row"><input class="s-inp" id="new-income-basic-cat" placeholder="بند جديد..."><button class="s-btn-add" onclick="addCat('basicIncomeCats','new-income-basic-cat','tags-income-basic')">+</button></div><div class="s-row" style="margin-top:8px;"><span class="s-sub">بنود دخل إضافي</span></div><div class="s-tags" id="tags-income-add"></div><div class="s-add-row"><input class="s-inp" id="new-income-add-cat" placeholder="بند جديد..."><button class="s-btn-add" onclick="addCat('addIncomeCats','new-income-add-cat','tags-income-add')">+</button></div><div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.7;">💰 "قروض مستلمة" و"سداد قروض" فئتان ثابتتان تُصنَّفان تلقائيًا من جدول الديون، ولا تحتاجان بنود يدوية.</div></div>
     <div class="s-sec"><div class="s-sec-title">🔖 تصنيف الديون</div><div class="s-row"><span class="s-sub">تصنيفات الدائن</span></div><div class="s-tags" id="tags-creditor"></div><div class="s-add-row"><input class="s-inp" id="new-creditor-cat" placeholder="تصنيف جديد..."><button class="s-btn-add" onclick="addCat('creditorCats','new-creditor-cat','tags-creditor')">+</button></div><div class="s-row" style="margin-top:8px;"><span class="s-sub">تصنيفات المدين</span></div><div class="s-tags" id="tags-debtor"></div><div class="s-add-row"><input class="s-inp" id="new-debtor-cat" placeholder="تصنيف جديد..."><button class="s-btn-add" onclick="addCat('debtorCats','new-debtor-cat','tags-debtor')">+</button></div></div>
     <div class="s-sec">
-      <div class="s-sec-title">📋 قائمة الالتزامات</div>
+      <div class="s-sec-title s-collapsible" onclick="toggleSettingsSection('commit-items-body',this)">📋 قائمة الالتزامات<span class="s-collapse-arrow">›</span></div>
+      <div id="commit-items-body" class="s-collapse-body" style="display:none;">
       <div id="commit-list-settings"></div>
       <div class="commit-add-form">
         <div class="s-add-row">
@@ -1270,9 +1275,11 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <button class="s-btn-add" onclick="addCommitItem()" style="width:auto;padding:0 14px;font-size:12px;font-family:'Cairo',sans-serif;">+ إضافة</button>
         </div>
       </div>
+      </div>
     </div>
     <div class="s-sec">
-      <div class="s-sec-title">💰 بنود الميزانية</div>
+      <div class="s-sec-title s-collapsible" onclick="toggleSettingsSection('budget-items-body',this)">💰 بنود الميزانية<span class="s-collapse-arrow">›</span></div>
+      <div id="budget-items-body" class="s-collapse-body" style="display:none;">
       <div id="budget-settings-list"></div>
       <div class="commit-add-form">
         <div class="s-add-row">
@@ -1284,6 +1291,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <input class="s-inp" id="new-budget-opening" placeholder="رصيد افتتاحي (اختياري)" type="number" style="max-width:160px;">
           <button class="s-btn-add" onclick="addBudgetItem()" style="width:auto;padding:0 14px;font-size:12px;font-family:'Cairo',sans-serif;">+ إضافة</button>
         </div>
+      </div>
       </div>
     </div>
     <div class="s-sec"><div class="s-sec-title">💳 طرق الدفع</div><div class="s-tags" id="tags-pay"></div><div class="s-add-row"><input class="s-inp" id="new-pay" placeholder="طريقة دفع جديدة..."><button class="s-btn-add" onclick="addCat('payMethods','new-pay','tags-pay')">+</button></div></div>
@@ -1598,13 +1606,15 @@ function fmt(n){return Number(n||0).toLocaleString('en-US');}
 //  PERIOD FILTER
 // ══════════════════════════════════════════════
 let currentPeriod='month',filterFrom=null,filterTo=null;
+let periodOffset=0; // ★ عدد الخطوات للأمام/للخلف عن الفترة الحالية (يوم/أسبوع/شهر/سنة) — يُستخدم مع أزرار ← →
 function getRange(p){
   // "اليوم" يبدأ بعد منتصف الليل — أي بالتاريخ الحالي فقط
   const n=new Date();
-  const y=n.getFullYear(),m=n.getMonth(),d=n.getDate();
+  let y=n.getFullYear(),m=n.getMonth(),d=n.getDate();
 
   if(p==='day'){
-    return{from:new Date(y,m,d,0,0,0),to:new Date(y,m,d,23,59,59)};
+    const dt=new Date(y,m,d+periodOffset);
+    return{from:new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,0,0),to:new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59)};
   }
 
   if(p==='week'){
@@ -1613,18 +1623,18 @@ function getRange(p){
     const weekStartDay=typeof s.weekStartDay==='number'?s.weekStartDay:6;
     let dow=n.getDay(); // 0=أحد
     let diff=(dow-weekStartDay+7)%7;
-    const from=new Date(y,m,d-diff,0,0,0);
-    const to=new Date(y,m,d-diff+6,23,59,59);
+    const from=new Date(y,m,d-diff+periodOffset*7,0,0,0);
+    const to=new Date(y,m,d-diff+6+periodOffset*7,23,59,59);
     return{from,to};
   }
 
   if(p==='month'){
     // الشهر يبدأ من يوم 1 بعد منتصف الليل
-    return{from:new Date(y,m,1,0,0,0),to:new Date(y,m+1,0,23,59,59)};
+    return{from:new Date(y,m+periodOffset,1,0,0,0),to:new Date(y,m+periodOffset+1,0,23,59,59)};
   }
 
   if(p==='year'){
-    return{from:new Date(y,0,1,0,0,0),to:new Date(y,11,31,23,59,59)};
+    return{from:new Date(y+periodOffset,0,1,0,0,0),to:new Date(y+periodOffset,11,31,23,59,59)};
   }
 
   if(p==='custom'){
@@ -1696,10 +1706,30 @@ function commitPaidInRange(from,to){
   return commitAllPayments().filter(p=>inRange(p.date,from,to)).reduce((s,p)=>s+p.amount,0);
 }
 function setPeriod(btn,p){
-  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');currentPeriod=p;
+  document.querySelectorAll('.ptabs .ptab').forEach(b=>{if(b.closest('#pg-home'))b.classList.remove('active');});
+  btn.classList.add('active');currentPeriod=p;periodOffset=0;
   if(p==='custom'){document.getElementById('custom-picker').classList.toggle('show');}
   else{document.getElementById('custom-picker').classList.remove('show');renderAll();}
+  renderPeriodRangeBar();
+}
+function stepPeriod(dir){
+  periodOffset+=dir;
+  renderAll();
+  renderPeriodRangeBar();
+}
+const AR_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function fmtRangeDate(dt){
+  return`${String(dt.getDate()).padStart(2,'0')}-${AR_MONTHS[dt.getMonth()]}-${dt.getFullYear()}`;
+}
+function renderPeriodRangeBar(){
+  const bar=document.getElementById('period-range-bar');
+  if(!bar)return;
+  if(currentPeriod==='custom'||currentPeriod==='all'){bar.style.display='none';return;}
+  const{from,to}=getRange(currentPeriod);
+  if(!from||!to){bar.style.display='none';return;}
+  bar.style.display='flex';
+  const lbl=document.getElementById('period-range-label');
+  if(lbl)lbl.textContent=`${fmtRangeDate(from)}  ›  ${fmtRangeDate(to)}`;
 }
 function applyCustom(){
   filterFrom=document.getElementById('date-from').value;
@@ -1770,7 +1800,7 @@ function renderDebtCats(){
     const slots=allDebtCatSlots();
     if(slots.length>1){
       const curIdx=slots.findIndex(s=>s.mode===debtMode&&s.cat===active);
-      lbl.textContent=`◀ ${active}  ${curIdx+1}/${slots.length} ▶`;
+      lbl.textContent=`‹ ${active}  ${curIdx+1}/${slots.length} ›`;
     } else {
       lbl.textContent=active;
     }
@@ -2141,7 +2171,7 @@ function renderDebt(){
             <span style="font-size:10px;color:#e0b030;font-weight:700;">${fmt(gReq)}</span>
             <span style="font-size:10px;color:#4da8f0;font-weight:700;">${fmt(gPaid)}</span>
             <span style="font-size:10px;color:${gRem>0?'#f05454':gRem<0?'#4CAF50':'#7a8a9e'};font-weight:700;">${fmt(Math.abs(gRem))}</span>
-            <span style="font-size:13px;color:#4da8f0;transition:transform .25s;display:inline-block;transform:rotate(${isCollapsed?'90deg':'0deg'});">▶</span>
+            <span style="font-size:13px;color:#4da8f0;transition:transform .25s;display:inline-block;transform:rotate(${isCollapsed?'90deg':'0deg'});">›</span>
           </div>
         </div>
       </td>`;
@@ -3131,6 +3161,10 @@ function openCommitPayForm(idx){
   const remaining=Math.max(0,Number(r.req||0)-Number(r.paid||0));
   document.getElementById('cp-amount').value=remaining||'';
   document.getElementById('cp-date').value=r.paidDate||todayStr();
+  // ★ مزامنة طرق الدفع مع الإعدادات (كانت ثابتة وغير متزامنة)
+  const cpPayMethods=getSettings().payMethods||['كاش','تحويل بنكي','بطاقة','instapay'];
+  const cpPaySel=document.getElementById('cp-pay');
+  if(cpPaySel)cpPaySel.innerHTML='<option value="">طريقة الدفع</option>'+cpPayMethods.map(p=>`<option value="${p}">${p}</option>`).join('');
   document.getElementById('cp-pay').value=r.pay||'';
   const cpBtn=document.getElementById('cp-save-btn');if(cpBtn)cpBtn.textContent='✅ تسجيل الدفع';
   renderCommitPayHistory(r);
@@ -3147,8 +3181,8 @@ function renderCommitPayHistory(r){
       <span style="font-size:11px;color:var(--txt);">${fmtDate(p.date)}${p.pay?' · '+p.pay:''}</span>
       <span style="display:flex;align-items:center;gap:6px;">
         <span style="font-size:12px;font-weight:800;color:var(--yellow);">${fmt(p.amt)}</span>
-        <button onclick="editCommitPayment(${_commitPayIdx},${pi})" style="background:none;border:none;color:var(--txt);font-size:12px;cursor:pointer;padding:0 2px;">✏️</button>
-        <button onclick="deleteCommitPayment(${_commitPayIdx},${pi})" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0 2px;">×</button>
+        <button onclick="editCommitPayment(${_commitPayIdx},${pi})" style="background:none;border:none;color:var(--txt);font-size:16px;cursor:pointer;padding:2px 4px;">✏️</button>
+        <button onclick="deleteCommitPayment(${_commitPayIdx},${pi})" style="background:none;border:none;color:var(--red);font-size:19px;cursor:pointer;padding:2px 4px;">×</button>
       </span>
     </div>`).join('');
 }
@@ -3444,7 +3478,7 @@ function expenseCatSelectHTML(idx,selected,ctx){
   const label = selected || 'بدون';
   const emptyCls = selected ? '' : ' empty';
   const c = ctx || 'main';
-  return `<div class="cat-cell-trigger${emptyCls}" data-idx="${idx}" data-ctx="${c}" onclick="openCatPopover(${idx},'${c}',event)" title="اختر الفئة"><span class="arr">▼</span><span>${label}</span></div>`;
+  return `<div class="cat-cell-trigger${emptyCls}" data-idx="${idx}" data-ctx="${c}" onclick="openCatPopover(${idx},'${c}',event)" title="اختر الفئة"><span class="arr">⌄</span><span>${label}</span></div>`;
 }
 function setExpenseCat(idx,val){
   const arr=loadData('expense');
@@ -3743,7 +3777,7 @@ function renderStatementList(r){
     const mutedC=isOdd?'#3a3f47':'#4a5060';
     const ac=isExcess?blueC:(isFor?greenC:redC);
     const bc=b>0?redC:b<0?greenC:mutedC;
-    const arrow=isExcess?'⇄':(isFor?'▲':'▼');
+    const arrow=isExcess?'⇄':(isFor?'⌃':'⌄');
     const row=document.createElement('div');
     row.style.cssText='display:grid;grid-template-columns:22% 20% 28% 22% 8%;align-items:center;padding:9px 10px;background:'+rowBg+';border-radius:10px;margin-bottom:5px;box-shadow:0 2px 4px rgba(0,0,0,.15);transition:transform .35s cubic-bezier(.2,.8,.3,1),box-shadow .25s ease;'+(isExcess?'border:1px solid rgba(26,58,139,.35);':'');
     // إذا دائن + معاملة إضافة (against) + غير ممرحل للدخل: أعرض زر التحويل للدخل
@@ -3754,7 +3788,7 @@ function renderStatementList(r){
       <div class="dhm-cell dhm-num" style="text-align:center;font-size:13px;font-weight:800;color:${ac};"><span style="font-size:10px;">${arrow}</span> ${fmt(t.amount)}${linkedBadge}</div>
       <div class="dhm-cell dhm-txt" style="text-align:center;font-size:11px;color:${nameColor};font-weight:600;">${t.details||t.pay||'—'}</div>
       <div class="dhm-cell dhm-num" style="text-align:center;font-size:13px;font-weight:800;color:${bc};">${fmt(b)}</div>
-      <div style="text-align:center;display:flex;align-items:center;justify-content:center;gap:2px;">${linkBtn}<button onclick="editDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:${nameColor};font-size:12px;cursor:pointer;padding:0;line-height:1;">✏️</button><button onclick="deleteDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:${redC};font-size:14px;cursor:pointer;padding:0;line-height:1;">×</button></div>`;
+      <div style="text-align:center;display:flex;align-items:center;justify-content:center;gap:4px;">${linkBtn}<button onclick="editDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:${nameColor};font-size:16px;cursor:pointer;padding:2px 4px;line-height:1;">✏️</button><button onclick="deleteDebtTransaction(${debtHistIdx},${ri2})" style="background:none;border:none;color:${redC};font-size:19px;cursor:pointer;padding:2px 4px;line-height:1;">×</button></div>`;
     container.appendChild(row);
   });
 }
@@ -4093,7 +4127,7 @@ function openBudgetDetail(id){
     <td style="color:${r.paid?'var(--red)':'var(--muted)'}">${r.paid?fmt(r.paid):'—'}</td>
     <td style="color:${r.recv?'var(--green)':'var(--muted)'}">${r.recv?fmt(r.recv):'—'}</td>
     <td><input type="text" value="${notes[i]||''}" placeholder="ملاحظة..."
-      style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--txt);font-family:'Cairo',sans-serif;font-size:10px;width:100%;outline:none;padding:1px 2px;"
+      style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;width:100%;outline:none;padding:2px 2px;"
       onkeydown="if(event.key==='Enter'){saveBudgetNote('${b.id}',${i},this.value);this.blur();}"
       onblur="saveBudgetNote('${b.id}',${i},this.value)"></td>
   </tr>`).join('');
@@ -4705,6 +4739,14 @@ function toggleRecurringField(){
   const row=document.getElementById('recurring-count-row');
   if(row)row.style.display=type==='recurring'?'flex':'none';
 }
+function toggleSettingsSection(bodyId,titleEl){
+  const body=document.getElementById(bodyId);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  const arrow=titleEl.querySelector('.s-collapse-arrow');
+  if(arrow)arrow.classList.toggle('open',!isOpen);
+}
 function renderCommitSettings(){
   const s=getSettings();const items=s.commitItems||[];
   const el=document.getElementById('commit-list-settings');if(!el)return;
@@ -4938,6 +4980,7 @@ initDebtSwipe();
 initDebtCardSwipe();
 autoAddCommitItems();
 renderAll();
+renderPeriodRangeBar();
 applyTheme(getSettings().theme||'dark');
 document.getElementById('pg-home').style.display='flex';
 
