@@ -590,6 +590,33 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .drawer-item:hover{background:rgba(255,255,255,.05);}
 .drawer-item.active{background:rgba(77,168,240,.12);color:var(--blue);}
 .drawer-item-ico{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+.dw-ws-item{position:relative;}
+.dw-ws-item span:nth-child(2){flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dw-ws-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+.dw-ws-action-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:13px;color:var(--muted);flex-shrink:0;}
+.dw-ws-action-btn:hover{background:rgba(255,255,255,.1);color:var(--txt);}
+.dw-ws-action-btn.del:hover{color:var(--red);background:rgba(192,57,43,.15);}
+.ws-ctx-menu{position:fixed;z-index:750;background:#0a0d12;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.8);padding:6px;min-width:130px;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .15s,transform .15s,visibility .15s;}
+.ws-ctx-menu.show{opacity:1;visibility:visible;transform:translateY(0);}
+.ws-ctx-opt{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;border-radius:7px;}
+.ws-ctx-opt:hover{background:rgba(192,57,43,.12);}
+.ws-ctx-overlay{position:fixed;inset:0;z-index:740;display:none;}
+.ws-ctx-overlay.show{display:block;}
+/* ── لوحة معلومات النشاط التجاري ── */
+.biz-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:5px;min-width:0;}
+.biz-card-hdr{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:800;gap:4px;}
+.biz-ico{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.biz-lbl{font-size:8.5px;color:var(--muted);}
+.biz-val{font-size:14px;font-weight:800;color:var(--txt);white-space:nowrap;}
+.biz-sub{font-size:8px;color:var(--muted);}
+.biz-bar{height:5px;background:var(--card2);border-radius:3px;overflow:hidden;}
+.biz-bar>div{height:100%;border-radius:3px;}
+.biz-split-lbls{display:flex;justify-content:space-between;gap:4px;text-align:center;font-size:8px;color:var(--muted);border-top:1px solid var(--border);padding-top:5px;}
+.biz-split-lbls>div{display:flex;flex-direction:column;gap:1px;flex:1;}
+.biz-split-lbls b{font-size:10px;font-weight:800;}
+.biz-split-bar{display:flex;height:4px;border-radius:3px;overflow:hidden;}
+.biz-link{font-size:8.5px;color:var(--blue);text-align:center;padding-top:2px;}
+.biz-ptab.active{background:rgba(77,168,240,.15);border-color:var(--blue);color:var(--blue);}
 .drawer-divider{height:1px;background:var(--border);margin:6px 14px;}
 .drawer-add-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--green);cursor:pointer;}
 .drawer-add-btn:hover{background:rgba(62,207,106,.08);}
@@ -865,7 +892,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div style="font-size:10px;font-weight:800;color:var(--txt);line-height:1.3;text-align:center;">الخبير</div>
         <div style="font-size:10px;font-weight:800;color:var(--txt);line-height:1.3;text-align:center;">المالي</div>
       </div>
-      <div id="fa-row" class="fa-row">
+      <div id="fa-row" class="fa-row" onclick="openFinancialAnalysis()">
         <div id="fa-ticker-wrap" style="perspective:500px;transition:transform .25s ease;transform-style:preserve-3d;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 10px;">
           <div id="fa-ticker-text" style="font-size:11px;font-weight:700;line-height:1.4;text-align:center;word-break:break-word;"></div>
         </div>
@@ -1423,12 +1450,169 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     </div>
   </div>
 </div>
-<!-- ══ WORKSPACE PAGE (فارغة — للأنشطة المضافة) ══ -->
-<div id="pg-workspace" class="page" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
-  <div style="font-size:48px;" id="ws-page-ico">🏪</div>
-  <div style="font-size:16px;font-weight:800;color:var(--txt);" id="ws-page-name"></div>
-  <div style="font-size:12px;color:var(--muted);text-align:center;padding:0 30px;">هذا النشاط قيد الإعداد<br>سيتم إضافة وظائفه قريباً</div>
+<!-- ══ WORKSPACE PAGE (للأنشطة المضافة) ══ -->
+<div id="pg-workspace" class="page" style="display:none;">
+
+  <!-- لوحة معلومات نشاط تجاري — نفس تقسيم الصورة المرجعية -->
+  <div id="ws-biz-dashboard" style="display:none;flex:1;flex-direction:column;overflow-y:auto;scrollbar-width:none;">
+    <div class="top-bar" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <button class="drawer-toggle" onclick="openDrawer()">☰</button>
+      <div style="font-size:14px;font-weight:800;color:var(--txt);">لوحة المعلومات</div>
+      <div style="position:relative;width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--card2);border:1px solid var(--border);border-radius:9px;font-size:14px;">
+        🔔
+        <span style="position:absolute;top:-4px;left:-4px;background:var(--red);color:#fff;font-size:8.5px;font-weight:800;border-radius:8px;padding:1px 4px;">3</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:5px;padding:8px;overflow-x:auto;scrollbar-width:none;">
+      <div style="flex-shrink:0;width:32px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--card2);border:1px solid var(--border);border-radius:6px;font-size:13px;">📅</div>
+      <div class="ptab biz-ptab active" style="flex-shrink:0;padding:5px 10px;" onclick="setBizPeriod(this)">اليوم</div>
+      <div class="ptab biz-ptab" style="flex-shrink:0;padding:5px 10px;" onclick="setBizPeriod(this)">الأسبوع</div>
+      <div class="ptab biz-ptab" style="flex-shrink:0;padding:5px 10px;" onclick="setBizPeriod(this)">الشهر</div>
+      <div class="ptab biz-ptab" style="flex-shrink:0;padding:5px 10px;" onclick="setBizPeriod(this)">السنة</div>
+      <div class="ptab biz-ptab" style="flex-shrink:0;padding:5px 10px;" onclick="setBizPeriod(this)">فترة مخصصة</div>
+    </div>
+
+    <div style="padding:2px 8px 16px;display:flex;flex-direction:column;gap:8px;">
+
+      <!-- 3 كروت علوية: المشتريات/الموردين — المخزون — المبيعات/العملاء -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:stretch;">
+
+        <!-- المشتريات / الموردين -->
+        <div class="biz-card" style="border-color:rgba(139,108,240,.35);">
+          <div class="biz-card-hdr">
+            <span style="color:#9b81f5;">المشتريات/الموردين</span>
+            <span class="biz-ico" style="background:rgba(139,108,240,.16);">🛒</span>
+          </div>
+          <div class="biz-lbl">إجمالي المشتريات</div>
+          <div class="biz-val">45,250</div>
+          <div class="biz-sub">من رأس المال <b style="color:#9b81f5;">45.2%</b></div>
+          <div class="biz-bar"><div style="width:45.2%;background:#8b6cf0;"></div></div>
+          <div class="biz-split-lbls">
+            <div><span>مدفوع</span><b style="color:var(--green);">30,000</b><small>60%</small></div>
+            <div><span>متبقي</span><b style="color:var(--red);">15,250</b><small>40%</small></div>
+          </div>
+          <div class="biz-split-bar"><div style="width:60%;background:var(--green);"></div><div style="width:40%;background:var(--red);"></div></div>
+          <div class="biz-link">‹ اضغط للوصول للعمليات</div>
+        </div>
+
+        <!-- المخزون -->
+        <div class="biz-card" style="border-color:rgba(45,212,167,.35);align-items:center;text-align:center;">
+          <div class="biz-card-hdr" style="width:100%;">
+            <span style="color:#2dd4a7;">المخزون</span>
+            <span class="biz-ico" style="background:rgba(45,212,167,.16);">🎓</span>
+          </div>
+          <div class="biz-lbl">قيمة المخزون</div>
+          <div style="position:relative;width:78px;height:78px;margin:2px 0;">
+            <svg id="ws-inv-ring" viewBox="0 0 78 78" style="width:78px;height:78px;"></svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+              <span style="font-size:13px;font-weight:800;color:var(--txt);">62,500</span>
+            </div>
+          </div>
+          <div class="biz-sub">من رأس المال <b style="color:#2dd4a7;">62.5%</b></div>
+          <div class="biz-split-lbls" style="width:100%;margin-top:4px;">
+            <div><span>عدد الأصناف</span><b style="color:var(--txt);">120</b></div>
+            <div><span>أصناف منخفضة</span><b style="color:var(--yellow);">8 ⚠️</b></div>
+          </div>
+          <div class="biz-link">‹ اضغط للوصول للعمليات</div>
+        </div>
+
+        <!-- المبيعات / العملاء -->
+        <div class="biz-card" style="border-color:rgba(77,168,240,.35);">
+          <div class="biz-card-hdr">
+            <span style="color:var(--blue);">المبيعات/العملاء</span>
+            <span class="biz-ico" style="background:rgba(77,168,240,.16);">👥</span>
+          </div>
+          <div class="biz-lbl">إجمالي المبيعات</div>
+          <div class="biz-val">78,750</div>
+          <div class="biz-sub">من رأس المال <b style="color:var(--blue);">78.7%</b></div>
+          <div class="biz-bar"><div style="width:78.7%;background:var(--blue);"></div></div>
+          <div class="biz-split-lbls">
+            <div><span>محصل</span><b style="color:var(--green);">58,000</b><small>73.7%</small></div>
+            <div><span>متبقي</span><b style="color:var(--red);">20,750</b><small>26.3%</small></div>
+          </div>
+          <div class="biz-split-bar"><div style="width:73.7%;background:var(--blue);"></div><div style="width:26.3%;background:var(--red);"></div></div>
+          <div class="biz-link">‹ اضغط للوصول للعمليات</div>
+        </div>
+      </div>
+
+      <!-- السيولة النقدية -->
+      <div style="background:var(--card);border:1px solid rgba(224,176,48,.3);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:32px;height:32px;border-radius:9px;background:rgba(224,176,48,.16);display:flex;align-items:center;justify-content:center;font-size:15px;">💼</span>
+          <span style="font-size:13px;font-weight:800;color:var(--txt);">السيولة النقدية</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:110px;">
+            <div class="biz-lbl">إجمالي السيولة</div>
+            <div class="biz-val" style="font-size:17px;">85,000</div>
+            <div class="biz-sub">من رأس المال <b style="color:var(--yellow);">42.5%</b></div>
+          </div>
+          <div style="flex:1.4;min-width:130px;">
+            <div class="biz-lbl" style="margin-bottom:4px;">نسبة السيولة من رأس المال</div>
+            <div style="height:20px;background:var(--card2);border-radius:6px;overflow:hidden;display:flex;align-items:center;">
+              <div style="height:100%;width:42.5%;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#241d05;">42.5%</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;align-items:center;gap:8px;">
+            <span style="width:26px;height:26px;border-radius:7px;background:rgba(62,207,106,.15);display:flex;align-items:center;justify-content:center;font-size:12px;">💵</span>
+            <div><div class="biz-lbl">الخزينة</div><div style="font-size:12px;font-weight:800;color:var(--yellow);">25,000</div></div>
+          </div>
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;align-items:center;gap:8px;">
+            <span style="width:26px;height:26px;border-radius:7px;background:rgba(77,168,240,.15);display:flex;align-items:center;justify-content:center;font-size:12px;">🏦</span>
+            <div><div class="biz-lbl">البنك</div><div style="font-size:12px;font-weight:800;color:var(--yellow);">60,000</div></div>
+          </div>
+        </div>
+        <div class="biz-link" style="text-align:center;">‹ اضغط للوصول للعمليات</div>
+      </div>
+
+      <!-- المصروفات + حسابات -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--card);border:1px solid rgba(224,138,62,.35);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;">
+          <div class="biz-card-hdr">
+            <span style="color:#e08a3e;">المصروفات</span>
+            <span class="biz-ico" style="background:rgba(224,138,62,.16);">🧾</span>
+          </div>
+          <div class="biz-lbl">إجمالي المصروفات</div>
+          <div class="biz-val">18,600</div>
+          <div class="biz-sub">من رأس المال <b style="color:#e08a3e;">9.3%</b></div>
+          <div class="biz-bar"><div style="width:9.3%;background:#e08a3e;"></div></div>
+          <div class="biz-split-lbls">
+            <div><span>مصروفات تشغيلية</span><b style="color:var(--txt);">12,400</b><small>66.7%</small></div>
+            <div><span>مصروفات إدارية</span><b style="color:var(--txt);">6,200</b><small>33.3%</small></div>
+          </div>
+          <div class="biz-link">‹ اضغط للوصول للعمليات</div>
+        </div>
+        <div style="background:var(--card);border:1px solid rgba(77,168,240,.35);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;">
+          <div class="biz-card-hdr">
+            <span style="color:var(--blue);">حسابات</span>
+            <span class="biz-ico" style="background:rgba(77,168,240,.16);">📋</span>
+          </div>
+          <div class="biz-lbl">إجمالي الأصول</div>
+          <div class="biz-val" style="font-size:15px;">145,000</div>
+          <div class="biz-lbl" style="margin-top:2px;">إجمالي الخصوم وحقوق الملكية</div>
+          <div class="biz-val" style="font-size:15px;">145,000</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+            <div><div class="biz-lbl">التوازن</div><div style="font-size:12px;font-weight:800;color:var(--green);">متوازن ✅</div></div>
+            <span style="font-size:20px;">⚖️</span>
+          </div>
+          <div class="biz-link">‹ اضغط للوصول للتفاصيل</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- placeholder للأنشطة الخدمية (لسه قيد الإعداد) -->
+  <div id="ws-placeholder" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+    <div style="font-size:48px;" id="ws-page-ico">🔧</div>
+    <div style="font-size:16px;font-weight:800;color:var(--txt);" id="ws-page-name"></div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;padding:0 30px;">هذا النشاط قيد الإعداد<br>سيتم إضافة وظائفه قريباً</div>
+  </div>
 </div>
+
 
 <!-- ══ EXCESS DEBT MODAL ══ -->
 <div class="ws-name-modal" id="excess-modal">
@@ -1493,7 +1677,25 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       <button class="btn-ft btn-ft-icon" onclick="closeFinancialAnalysis()">×</button>
     </div>
     <div style="padding:4px 2px 2px;font-size:10px;color:var(--muted);text-align:center;border-bottom:1px solid var(--border);padding-bottom:8px;">بناءً على بيانات الفترة الحالية المختارة فى الصفحة الرئيسية</div>
-    <div class="budget-tbl-wrap" style="padding:10px;display:flex;flex-direction:column;gap:8px;" id="fa-insights-list"></div>
+    <div class="budget-tbl-wrap" style="padding:10px;display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--blue);margin-bottom:6px;">🤖 تحليل الذكاء الاصطناعي</div>
+        <div id="fa-ai-summary" style="background:rgba(77,168,240,.08);border:1px solid rgba(77,168,240,.25);border-radius:10px;padding:10px;font-size:12px;color:var(--txt);line-height:1.7;min-height:36px;white-space:pre-line;">
+          <span style="color:var(--muted);">جارٍ تحليل بياناتك…</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px;">🔍 كل الملاحظات المكتشفة</div>
+        <div id="fa-insights-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:8px 10px;flex-shrink:0;">
+      <div id="fa-chat-log" style="display:flex;flex-direction:column;gap:6px;max-height:130px;overflow-y:auto;margin-bottom:6px;"></div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="fa-chat-input" placeholder="اسأل الخبير المالي..." style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;padding:8px 10px;outline:none;min-width:0;" onkeydown="if(event.key==='Enter')faSendQuestion()">
+        <button onclick="faSendQuestion()" style="background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:800;padding:0 14px;cursor:pointer;flex-shrink:0;">إرسال</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1525,6 +1727,23 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
   <div class="add-ws-opt" onclick="startAddWorkspace('service')">🔧 خدمي</div>
 </div>
 
+<!-- قائمة اختيار عند الضغط المطوّل على نشاط -->
+<div class="ws-ctx-overlay" id="ws-ctx-overlay" onclick="closeWsContextMenu()"></div>
+<div class="ws-ctx-menu" id="ws-ctx-menu">
+  <div class="ws-ctx-opt" onclick="confirmDeleteFromCtxMenu()">🗑️ حذف</div>
+</div>
+
+<!-- نافذة تأكيد حذف نشاط -->
+<div class="ws-name-modal" id="ws-del-confirm-modal">
+  <div class="ws-name-box">
+    <div class="ws-name-title" id="ws-del-confirm-text">هل تريد حذف هذا النشاط؟</div>
+    <div class="ws-name-btns">
+      <button class="ws-name-cancel" onclick="closeWsDeleteConfirm()">إلغاء</button>
+      <button class="ws-name-save" style="background:var(--red);" onclick="doDeleteWorkspace()">حذف</button>
+    </div>
+  </div>
+</div>
+
 <!-- نافذة اسم النشاط -->
 <div class="ws-name-modal" id="ws-name-modal">
   <div class="ws-name-box">
@@ -1532,7 +1751,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <input class="ws-name-inp" id="ws-name-inp" placeholder="مثال: محل الملابس" onkeydown="if(event.key==='Enter')saveNewWorkspace()">
     <div class="ws-name-btns">
       <button class="ws-name-cancel" onclick="closeWsNameModal()">إلغاء</button>
-      <button class="ws-name-save" onclick="saveNewWorkspace()">حفظ وانتقال</button>
+      <button class="ws-name-save" id="ws-name-save-btn" onclick="saveNewWorkspace()">حفظ وانتقال</button>
     </div>
   </div>
 </div>
@@ -2339,83 +2558,161 @@ function updateSummary(){
   updateRatioBars(adjustedIncome,expense,commitP,credPaidAmt,debPaidAmt,totalExp);
 }
 
-/* ══════════════════════════════════════════════
-   🧠 تحليل الوضع المالي — نصائح وتحذيرات بناءً على بيانات الفترة الحالية
-   ══════════════════════════════════════════════ */
-function computeFinancialInsights(){
-  const insights=[];
-  const income=filteredData('income').reduce((s,r)=>s+Number(r.amount||0),0);
-  const expense=filteredData('expense').reduce((s,r)=>s+Number(r.amount||0),0);
-  const{from:rf,to:rt}=getRange(currentPeriod);
-  const commitPaid=commitPaidInRange(rf,rt);
-  const cdt=debtTotalsInMode('creditor',rf,rt);
-  const ddt=debtTotalsInMode('debtor',rf,rt);
+/* ══════════════════════════════════════════════════════════════
+   🧠 الخبير المالي — معمارية 3 طبقات
+   ══════════════════════════════════════════════════════════════
+   1) طبقة الحسابات   (faComputeMetrics)  — تجمع كل البيانات الخام وتحسب المؤشرات المالية
+   2) طبقة التحليل    (FA_RULES / faRunRules) — عشرات القواعد البرمجية الثابتة + قواعد ديناميكية
+                        لكل فئة/بند، بتكشف المخاطر والفرص من المؤشرات
+   3) طبقة الذكاء الاصطناعي (faRenderAISummary / faSendQuestion) — بتفسر نتائج القواعد،
+                        ترتب الأولويات، تقترح إجراءات، وتجاوب على أسئلة المستخدم بلغة بسيطة
+   ══════════════════════════════════════════════════════════════ */
+
+// ── طبقة 1: الحسابات ──────────────────────────────────────────
+// بتاخد الفترة الزمنية والفترة السابقة لها للمقارنة، وتحسب كل المؤشرات
+// (دخل/مصروف/توفير/ديون/التزامات/فئات) فى object واحد تستخدمه الطبقتين التانيتين.
+function getRangeShifted(p,deltaOffset){
+  const saved=periodOffset;
+  periodOffset+=deltaOffset;
+  const r=getRange(p);
+  periodOffset=saved;
+  return r;
+}
+function faComputeMetrics(){
+  const period=currentPeriod;
+  const{from:cf,to:ct}=getRange(period);
+  const canCompare=(period==='day'||period==='week'||period==='month'||period==='year');
+  const{from:pf,to:pt}=canCompare?getRangeShifted(period,-1):{from:null,to:null};
+
+  const incomeRows=filteredData('income');
+  const expenseRows=filteredData('expense');
+  const income=incomeRows.reduce((s,r)=>s+Number(r.amount||0),0);
+  const expense=expenseRows.reduce((s,r)=>s+Number(r.amount||0),0);
+
+  const prevIncome=(pf&&pt)?loadData('income').filter(r=>inRange(r.date,pf,pt)).reduce((s,r)=>s+Number(r.amount||0),0):null;
+  const prevExpenseRows=(pf&&pt)?loadData('expense').filter(r=>inRange(r.date,pf,pt)):[];
+  const prevExpense=(pf&&pt)?prevExpenseRows.reduce((s,r)=>s+Number(r.amount||0),0):null;
+
+  const commitPaid=commitPaidInRange(cf,ct);
+  const cdt=debtTotalsInMode('creditor',cf,ct);
+  const ddt=debtTotalsInMode('debtor',cf,ct);
   const credAll=debtTotalsInMode('creditor',null,null);
   const debtAll=debtTotalsInMode('debtor',null,null);
   const credRem=Math.max(0,credAll.allReq-credAll.paid);
   const debtRem=Math.max(0,debtAll.allReq-debtAll.paid);
+
   const totalOut=expense+commitPaid+cdt.paid;
+  const savingsRate=income>0?(income-totalOut)/income:null;
 
-  // 1) معدل الادخار خلال الفترة الحالية
-  if(income>0){
-    const savingsRate=(income-totalOut)/income;
-    if(savingsRate<0){
-      insights.push({level:'danger',icon:'🚨',text:`مصروفاتك والتزاماتك تجاوزت دخلك بمقدار ${fmt(Math.abs(income-totalOut))} فى الفترة الحالية.`});
-    } else if(savingsRate<0.1){
-      insights.push({level:'warning',icon:'⚠️',text:`نسبة ما توفّره من دخلك ضئيلة (${Math.round(savingsRate*100)}%) فى الفترة الحالية. حاول تراجع بعض بنود الصرف.`});
-    } else if(savingsRate>=0.3){
-      insights.push({level:'good',icon:'✅',text:`نسبة توفير ممتازة (${Math.round(savingsRate*100)}%) من دخلك فى الفترة الحالية.`});
-    } else {
-      insights.push({level:'info',icon:'ℹ️',text:`بتوفّر حوالى ${Math.round(savingsRate*100)}% من دخلك فى الفترة الحالية.`});
-    }
-  } else if(totalOut>0){
-    insights.push({level:'warning',icon:'⚠️',text:'مفيش دخل مسجّل فى الفترة الحالية، لكن فيه مصروفات أو التزامات مدفوعة.'});
-  }
+  const expByCat={};
+  expenseRows.forEach(r=>{const c=r.cat||'بدون تصنيف';expByCat[c]=(expByCat[c]||0)+Number(r.amount||0);});
+  const catEntries=Object.entries(expByCat).sort((a,b)=>b[1]-a[1]);
+  const prevExpByCat={};
+  prevExpenseRows.forEach(r=>{const c=r.cat||'بدون تصنيف';prevExpByCat[c]=(prevExpByCat[c]||0)+Number(r.amount||0);});
 
-  // 2) نسبة المصروفات وحدها من الدخل
-  if(income>0&&expense>0){
-    const pct=Math.round((expense/income)*100);
-    if(pct>70)insights.push({level:'warning',icon:'💸',text:`المصروفات بتاخد ${pct}% من دخلك فى الفترة الحالية — نسبة مرتفعة.`});
-  }
-
-  // 3) عبء الديون (كل الأزمنة) مقارنة بدخل الفترة الحالية
-  if(credRem>0){
-    if(income>0&&credRem>income*2){
-      insights.push({level:'danger',icon:'📉',text:`إجمالي مديونيتك الحالية (${fmt(credRem)}) بيعادل أكتر من ضعف دخل الفترة الحالية — يُفضّل وضع خطة سداد.`});
-    } else {
-      insights.push({level:'info',icon:'💳',text:`متبقي عليك ${fmt(credRem)} لسداد ديونك الحالية.`});
-    }
-  }
-  if(debtRem>0){
-    insights.push({level:'good',icon:'🤝',text:`ليك ${fmt(debtRem)} مستحقة عند آخرين حاليًا.`});
-  }
-
-  // 4) التزامات متأخرة أو مستحقة قريبًا (بغض النظر عن الفترة المختارة — بتُفحص بتاريخ اليوم الفعلي)
   const today=new Date();today.setHours(0,0,0,0);
-  let overdueCount=0,soonCount=0;
+  let overdueCount=0,overdueAmt=0,soonCount=0,soonAmt=0;
   loadData('commit').forEach(r=>{
     const rem=Number(r.req||0)-Number(r.paid||0);
     if(rem<=0||!r.dueDate)return;
     const due=new Date(r.dueDate+'T00:00:00');
     const diffDays=Math.round((due-today)/86400000);
-    if(diffDays<0)overdueCount++;
-    else if(diffDays<=7)soonCount++;
+    if(diffDays<0){overdueCount++;overdueAmt+=rem;}
+    else if(diffDays<=7){soonCount++;soonAmt+=rem;}
   });
-  if(overdueCount>0)insights.push({level:'danger',icon:'⏰',text:`عندك ${overdueCount} التزام فات ميعاد استحقاقه ولسه مدفوعش بالكامل.`});
-  if(soonCount>0)insights.push({level:'warning',icon:'📅',text:`عندك ${soonCount} التزام مستحق خلال 7 أيام القادمة.`});
 
-  // 5) أكبر فئة مصروفات فى الفترة الحالية
-  const expByCat={};
-  filteredData('expense').forEach(r=>{const c=r.cat||'بدون تصنيف';expByCat[c]=(expByCat[c]||0)+Number(r.amount||0);});
-  const catEntries=Object.entries(expByCat).sort((a,b)=>b[1]-a[1]);
-  if(catEntries.length&&expense>0){
-    const[topCat,topVal]=catEntries[0];
-    const pct=Math.round((topVal/expense)*100);
-    if(pct>=40)insights.push({level:'info',icon:'🏷️',text:`فئة "${topCat}" بتمثل ${pct}% من مصروفاتك فى الفترة الحالية.`});
+  let maxExpense=null;
+  expenseRows.forEach(r=>{
+    const amt=Number(r.amount||0);
+    if(!maxExpense||amt>maxExpense.amount)maxExpense={name:r.name||r.cat||'بند',amount:amt};
+  });
+
+  return{
+    period,income,expense,prevIncome,prevExpense,commitPaid,
+    credRem,debtRem,totalOut,savingsRate,catEntries,prevExpByCat,
+    overdueCount,overdueAmt,soonCount,soonAmt,maxExpense,
+    credAllReq:credAll.allReq
+  };
+}
+
+// ── طبقة 2: التحليل (محرك القواعد) ────────────────────────────
+// كل قاعدة: id + مستوى الخطورة + أيقونة + شرط + نص. المحرك بيفحص كل القواعد
+// على المؤشرات الناتجة من طبقة الحسابات، وبيولّد كمان قواعد ديناميكية لكل فئة مصروف.
+const FA_RULES=[
+  {id:'sav_negative',level:'danger',icon:'🚨',test:m=>m.income>0&&m.savingsRate<0,
+    text:m=>`مصروفاتك والتزاماتك تجاوزت دخلك بمقدار ${fmt(Math.abs(m.income-m.totalOut))} فى الفترة الحالية.`},
+  {id:'sav_low',level:'warning',icon:'⚠️',test:m=>m.income>0&&m.savingsRate>=0&&m.savingsRate<0.1,
+    text:m=>`نسبة ما توفّره من دخلك ضئيلة (${Math.round(m.savingsRate*100)}%) فى الفترة الحالية.`},
+  {id:'sav_ok',level:'info',icon:'ℹ️',test:m=>m.income>0&&m.savingsRate>=0.1&&m.savingsRate<0.3,
+    text:m=>`بتوفّر حوالى ${Math.round(m.savingsRate*100)}% من دخلك فى الفترة الحالية.`},
+  {id:'sav_great',level:'good',icon:'✅',test:m=>m.income>0&&m.savingsRate>=0.3,
+    text:m=>`نسبة توفير ممتازة (${Math.round(m.savingsRate*100)}%) من دخلك فى الفترة الحالية.`},
+  {id:'no_income_has_out',level:'warning',icon:'⚠️',test:m=>m.income===0&&m.totalOut>0,
+    text:()=>'مفيش دخل مسجّل فى الفترة الحالية، لكن فيه مصروفات أو التزامات مدفوعة.'},
+
+  {id:'exp_ratio_extreme',level:'danger',icon:'🔥',test:m=>m.income>0&&m.expense>m.income,
+    text:m=>`المصروفات وحدها تجاوزت دخلك بالكامل (${Math.round((m.expense/m.income)*100)}%) فى الفترة الحالية.`},
+  {id:'exp_ratio_high',level:'warning',icon:'💸',test:m=>m.income>0&&m.expense>0&&m.expense<=m.income&&(m.expense/m.income)>0.7,
+    text:m=>`المصروفات بتاخد ${Math.round((m.expense/m.income)*100)}% من دخلك فى الفترة الحالية — نسبة مرتفعة.`},
+
+  {id:'debt_owe_danger',level:'danger',icon:'📉',test:m=>m.credRem>0&&m.income>0&&m.credRem>m.income*2,
+    text:m=>`إجمالي مديونيتك الحالية (${fmt(m.credRem)}) بيعادل أكتر من ضعف دخل الفترة الحالية — يُفضّل وضع خطة سداد.`},
+  {id:'debt_owe_warn',level:'warning',icon:'💳',test:m=>m.credRem>0&&m.income>0&&m.credRem>m.income&&m.credRem<=m.income*2,
+    text:m=>`مديونيتك الحالية (${fmt(m.credRem)}) قريبة من ضعف دخل الفترة — راقب السداد.`},
+  {id:'debt_owe_info',level:'info',icon:'💳',test:m=>m.credRem>0&&!(m.income>0&&m.credRem>m.income),
+    text:m=>`متبقي عليك ${fmt(m.credRem)} لسداد ديونك الحالية.`},
+  {id:'debt_free',level:'good',icon:'🎉',test:m=>m.credRem===0&&m.credAllReq>0,
+    text:()=>'تهانينا! مفيش عليك أي ديون متبقية حاليًا.'},
+  {id:'owed_to_you',level:'good',icon:'🤝',test:m=>m.debtRem>0,
+    text:m=>`ليك ${fmt(m.debtRem)} مستحقة عند آخرين حاليًا.`},
+
+  {id:'commit_overdue',level:'danger',icon:'⏰',test:m=>m.overdueCount>0,
+    text:m=>`عندك ${m.overdueCount} التزام فات ميعاد استحقاقه بقيمة ${fmt(m.overdueAmt)}.`},
+  {id:'commit_soon',level:'warning',icon:'📅',test:m=>m.soonCount>0,
+    text:m=>`عندك ${m.soonCount} التزام مستحق خلال 7 أيام بقيمة ${fmt(m.soonAmt)}.`},
+  {id:'commit_burden_high',level:'warning',icon:'📌',test:m=>m.income>0&&m.commitPaid>0&&(m.commitPaid/m.income)>0.4,
+    text:m=>`الالتزامات المدفوعة بتاخد ${Math.round((m.commitPaid/m.income)*100)}% من دخلك فى الفترة الحالية.`},
+
+  {id:'top_cat_concentration',level:'info',icon:'🏷️',test:m=>m.catEntries.length&&m.expense>0&&(m.catEntries[0][1]/m.expense)>=0.4,
+    text:m=>{const[c,v]=m.catEntries[0];return`فئة "${c}" بتمثل ${Math.round((v/m.expense)*100)}% من مصروفاتك فى الفترة الحالية.`;}},
+  {id:'max_txn_large',level:'info',icon:'🔎',test:m=>m.maxExpense&&m.income>0&&(m.maxExpense.amount/m.income)>=0.25,
+    text:m=>`أكبر مصروف منفرد "${m.maxExpense.name}" بقيمة ${fmt(m.maxExpense.amount)} — ${Math.round((m.maxExpense.amount/m.income)*100)}% من دخلك.`},
+
+  {id:'income_up',level:'good',icon:'📈',test:m=>m.prevIncome!==null&&m.prevIncome>0&&m.income>m.prevIncome*1.1,
+    text:m=>`دخلك زاد ${Math.round(((m.income-m.prevIncome)/m.prevIncome)*100)}% مقارنة بالفترة السابقة.`},
+  {id:'income_down',level:'warning',icon:'📉',test:m=>m.prevIncome!==null&&m.prevIncome>0&&m.income<m.prevIncome*0.9,
+    text:m=>`دخلك قل ${Math.round(((m.prevIncome-m.income)/m.prevIncome)*100)}% مقارنة بالفترة السابقة.`},
+  {id:'expense_up',level:'warning',icon:'📈',test:m=>m.prevExpense!==null&&m.prevExpense>0&&m.expense>m.prevExpense*1.2,
+    text:m=>`مصروفاتك زادت ${Math.round(((m.expense-m.prevExpense)/m.prevExpense)*100)}% عن الفترة السابقة.`},
+  {id:'expense_down',level:'good',icon:'📉',test:m=>m.prevExpense!==null&&m.prevExpense>0&&m.expense<m.prevExpense*0.8,
+    text:m=>`مصروفاتك قلّت ${Math.round(((m.prevExpense-m.expense)/m.prevExpense)*100)}% عن الفترة السابقة — أحسنت.`},
+
+  {id:'no_data',level:'info',icon:'👍',test:m=>m.income===0&&m.expense===0&&m.commitPaid===0&&m.credRem===0&&m.debtRem===0&&m.overdueCount===0&&m.soonCount===0,
+    text:()=>'مفيش تنبيهات حاليًا — وضعك المالي مستقر فى الفترة دي.'}
+];
+function faRunRules(m){
+  const flags=[];
+  FA_RULES.forEach(rule=>{
+    try{ if(rule.test(m)) flags.push({id:rule.id,level:rule.level,icon:rule.icon,text:rule.text(m)}); }
+    catch(e){}
+  });
+  // قواعد ديناميكية: نمو/ظهور كل فئة مصروف على حدة مقارنة بالفترة السابقة
+  if(m.prevExpense!==null){
+    m.catEntries.forEach(([cat,val])=>{
+      const prevVal=m.prevExpByCat[cat]||0;
+      if(prevVal>0&&val>prevVal*1.5&&val>=(m.income||0)*0.05){
+        flags.push({id:'cat_growth_'+cat,level:'warning',icon:'📊',text:`مصروفات فئة "${cat}" زادت بشكل ملحوظ (${Math.round(((val-prevVal)/prevVal)*100)}%) عن الفترة السابقة.`});
+      } else if(prevVal===0&&m.income>0&&val>=m.income*0.1){
+        flags.push({id:'cat_new_'+cat,level:'info',icon:'🆕',text:`ظهرت فئة مصروفات جديدة "${cat}" بقيمة ${fmt(val)} فى الفترة الحالية.`});
+      }
+    });
   }
-
-  if(!insights.length)insights.push({level:'info',icon:'👍',text:'مفيش تنبيهات حاليًا — وضعك المالي مستقر فى الفترة دي.'});
-  return insights;
+  if(!flags.length)flags.push({id:'fallback',level:'info',icon:'👍',text:'مفيش تنبيهات حاليًا — وضعك المالي مستقر فى الفترة دي.'});
+  return flags;
+}
+// دالة التوافق القديمة (مستخدمة فى شريط الأخبار بالصفحة الرئيسية) — بقت تستخدم الطبقتين 1+2
+function computeFinancialInsights(){
+  return faRunRules(faComputeMetrics());
 }
 function renderFinancialInsights(){
   const list=computeFinancialInsights();
@@ -2428,8 +2725,89 @@ function renderFinancialInsights(){
     <span style="font-size:12px;color:var(--txt);line-height:1.6;">${x.text}</span>
   </div>`).join('');
 }
+
+// ── طبقة 3: الذكاء الاصطناعي ───────────────────────────────────
+// بتاخد مخرجات الطبقتين 1+2 وتحوّلها لملخص مبسّط مرتب بالأولوية مع إجراءات مقترحة،
+// وبتجاوب على أسئلة المستخدم الحرة عن وضعه المالي.
+async function faCallAPI(messages){
+  const response=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages})
+  });
+  const data=await response.json();
+  const text=(data.content||[]).map(b=>b.text||'').join('\n').trim();
+  return text||'تعذر الحصول على رد الآن.';
+}
+function faBuildContext(m,flags){
+  const lines=[];
+  lines.push(`الدخل: ${fmt(m.income)} | المصروفات: ${fmt(m.expense)} | الالتزامات المدفوعة: ${fmt(m.commitPaid)}`);
+  if(m.income>0)lines.push(`نسبة التوفير: ${Math.round((m.savingsRate||0)*100)}%`);
+  lines.push(`متبقٍ عليك من ديون: ${fmt(m.credRem)} | مستحق لك عند آخرين: ${fmt(m.debtRem)}`);
+  if(m.overdueCount)lines.push(`التزامات متأخرة: ${m.overdueCount} بقيمة ${fmt(m.overdueAmt)}`);
+  if(m.soonCount)lines.push(`التزامات مستحقة قريبًا: ${m.soonCount} بقيمة ${fmt(m.soonAmt)}`);
+  if(m.catEntries.length)lines.push('أكبر فئات المصروفات: '+m.catEntries.slice(0,3).map(([c,v])=>`${c} (${fmt(v)})`).join('، '));
+  lines.push('ملاحظات مكتشفة تلقائيًا من محرك القواعد:');
+  flags.forEach(f=>lines.push(`- [${f.level}] ${f.text}`));
+  return lines.join('\n');
+}
+async function faRenderAISummary(){
+  const el=document.getElementById('fa-ai-summary');
+  if(!el)return;
+  el.innerHTML='<span style="color:var(--muted);">جارٍ تحليل بياناتك…</span>';
+  const m=faComputeMetrics();
+  const flags=faRunRules(m);
+  const context=faBuildContext(m,flags);
+  const prompt=`إنت "الخبير المالي" جوه تطبيق إدارة مالية شخصية. دي بيانات وملاحظات محسوبة تلقائيًا عن وضع المستخدم المالي:\n\n${context}\n\nمطلوب منك (بالعامية المصرية البسيطة، من غير أي مقدمات أو عناوين ماركداون):\n1) رتّب أهم الملاحظات بالأولوية حسب الخطورة والأهمية.\n2) لكل ملاحظة مهمة اقترح إجراء عملي قصير.\nالرد يكون مختصر (٤-٦ أسطر).`;
+  try{
+    const reply=await faCallAPI([{role:'user',content:prompt}]);
+    el.textContent=reply;
+  }catch(e){
+    el.innerHTML='<span style="color:var(--muted);">تعذر الاتصال بالذكاء الاصطناعي حاليًا — الملاحظات أسفل لسه متاحة.</span>';
+  }
+}
+function faAppendChatMessage(role,text){
+  const log=document.getElementById('fa-chat-log');
+  if(!log)return;
+  const isUser=role==='user';
+  const div=document.createElement('div');
+  div.style.cssText=`align-self:${isUser?'flex-start':'flex-end'};max-width:85%;background:${isUser?'var(--card2)':'rgba(77,168,240,.15)'};border:1px solid ${isUser?'var(--border)':'rgba(77,168,240,.3)'};border-radius:10px;padding:6px 9px;font-size:11.5px;color:var(--txt);line-height:1.6;`;
+  div.textContent=text;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
+}
+async function faSendQuestion(){
+  const input=document.getElementById('fa-chat-input');
+  if(!input)return;
+  const q=input.value.trim();
+  if(!q)return;
+  input.value='';
+  faAppendChatMessage('user',q);
+  const log=document.getElementById('fa-chat-log');
+  const loadingId='fa-loading-'+Date.now();
+  const loadingDiv=document.createElement('div');
+  loadingDiv.id=loadingId;
+  loadingDiv.style.cssText='align-self:flex-end;font-size:11.5px;color:var(--muted);padding:4px 6px;';
+  loadingDiv.textContent='الخبير بيكتب…';
+  log.appendChild(loadingDiv);
+  log.scrollTop=log.scrollHeight;
+
+  const m=faComputeMetrics();
+  const flags=faRunRules(m);
+  const context=faBuildContext(m,flags);
+  const msg={role:'user',content:`إنت "الخبير المالي" فى تطبيق إدارة مالية شخصية. دي بيانات المستخدم الحالية:\n\n${context}\n\nجاوب على سؤال المستخدم التالي بالعامية المصرية، بإيجاز ووضوح، بالاعتماد على البيانات دي لو ليها علاقة:\n"${q}"`};
+  try{
+    const reply=await faCallAPI([msg]);
+    document.getElementById(loadingId)?.remove();
+    faAppendChatMessage('assistant',reply);
+  }catch(e){
+    document.getElementById(loadingId)?.remove();
+    faAppendChatMessage('assistant','معلش، حصل خطأ فى الاتصال. جرّب تاني.');
+  }
+}
 function openFinancialAnalysis(){
   renderFinancialInsights();
+  faRenderAISummary();
   document.getElementById('fa-modal').classList.add('show');
 }
 function closeFinancialAnalysis(){
@@ -4348,6 +4726,7 @@ function getBudgetNotes(budgetId){
 }
 
 let _wsType=null; // نوع النشاط اللي بيتضاف
+let _wsEditId=null; // معرّف النشاط اللي بيتعدّل (لو null يبقى إضافة جديدة)
 let workspaces=JSON.parse(_getItem('fm_workspaces')||'[]');
 let currentWs='personal';
 
@@ -4359,6 +4738,7 @@ function closeDrawer(){
   document.getElementById('drawer').classList.remove('show');
   document.getElementById('drawer-overlay').classList.remove('show');
   document.getElementById('add-ws-popover').classList.remove('show');
+  closeWsContextMenu();
 }
 function toggleAddWorkspacePopover(e){
   e.stopPropagation();
@@ -4371,26 +4751,78 @@ function toggleAddWorkspacePopover(e){
 }
 function startAddWorkspace(type){
   _wsType=type;
+  _wsEditId=null;
   document.getElementById('add-ws-popover').classList.remove('show');
   document.getElementById('ws-name-title').textContent=type==='business'?'🏪 اسم النشاط التجاري':'🔧 اسم النشاط الخدمي';
   document.getElementById('ws-name-inp').value='';
+  document.getElementById('ws-name-save-btn').textContent='حفظ وانتقال';
   document.getElementById('ws-name-modal').classList.add('show');
   setTimeout(()=>document.getElementById('ws-name-inp').focus(),200);
+}
+function startEditWorkspace(id){
+  const ws=workspaces.find(w=>w.id===id);
+  if(!ws)return;
+  _wsType=ws.type;
+  _wsEditId=id;
+  document.getElementById('ws-name-title').textContent=ws.type==='business'?'🏪 تعديل اسم النشاط التجاري':'🔧 تعديل اسم النشاط الخدمي';
+  document.getElementById('ws-name-inp').value=ws.name;
+  document.getElementById('ws-name-save-btn').textContent='حفظ التعديل';
+  document.getElementById('ws-name-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('ws-name-inp').focus(),200);
+}
+let _wsPendingDeleteId=null;
+function deleteWorkspace(id){
+  const ws=workspaces.find(w=>w.id===id);
+  if(!ws)return;
+  _wsPendingDeleteId=id;
+  document.getElementById('ws-del-confirm-text').textContent=`هل تريد حذف نشاط "${ws.name}"؟`;
+  document.getElementById('ws-del-confirm-modal').classList.add('show');
+}
+function closeWsDeleteConfirm(){
+  document.getElementById('ws-del-confirm-modal').classList.remove('show');
+  _wsPendingDeleteId=null;
+}
+function doDeleteWorkspace(){
+  const id=_wsPendingDeleteId;
+  closeWsDeleteConfirm();
+  if(!id)return;
+  workspaces=workspaces.filter(w=>w.id!==id);
+  _setItem('fm_workspaces',JSON.stringify(workspaces));
+  if(currentWs===id)switchWorkspace('personal');
+  renderDrawerList();
+  renderWsBar();
 }
 function closeWsNameModal(){
   document.getElementById('ws-name-modal').classList.remove('show');
   _wsType=null;
+  _wsEditId=null;
 }
 function saveNewWorkspace(){
   const name=document.getElementById('ws-name-inp').value.trim();
   if(!name)return;
-  if(workspaces.some(w=>w.name===name)){
+  if(workspaces.some(w=>w.name===name&&w.id!==_wsEditId)){
     document.getElementById('ws-name-inp').style.borderColor='var(--red)';
     document.getElementById('ws-name-inp').placeholder='الاسم موجود بالفعل!';
     setTimeout(()=>{
       document.getElementById('ws-name-inp').style.borderColor='';
       document.getElementById('ws-name-inp').placeholder='مثال: محل الملابس';
     },1500);
+    return;
+  }
+  if(_wsEditId){
+    // وضع التعديل — تحديث الاسم لنشاط موجود
+    const ws=workspaces.find(w=>w.id===_wsEditId);
+    if(ws){
+      ws.name=name;
+      _setItem('fm_workspaces',JSON.stringify(workspaces));
+      if(currentWs===ws.id){
+        const nameEl=document.getElementById('ws-page-name');
+        if(nameEl)nameEl.textContent=name;
+      }
+    }
+    closeWsNameModal();
+    renderDrawerList();
+    renderWsBar();
     return;
   }
   const id='ws_'+Date.now();
@@ -4635,6 +5067,45 @@ function renderLogPage(){
   }).join('');
 }
 
+// ضغط مطوّل على نشاط فى القائمة الجانبية يفتح قائمة اختيار (حذف)
+let _wsPressTimer=null;
+let _wsLongPressFired=false;
+function attachWsLongPress(el,id){
+  const start=(e)=>{
+    _wsLongPressFired=false;
+    _wsPressTimer=setTimeout(()=>{
+      _wsPressTimer=null;
+      _wsLongPressFired=true;
+      if(navigator.vibrate)navigator.vibrate(15);
+      showWsContextMenu(el,id);
+    },500);
+  };
+  const cancel=()=>{ if(_wsPressTimer){clearTimeout(_wsPressTimer);_wsPressTimer=null;} };
+  el.addEventListener('touchstart',start,{passive:true});
+  el.addEventListener('touchend',cancel);
+  el.addEventListener('touchmove',cancel);
+  el.addEventListener('mousedown',start);
+  el.addEventListener('mouseup',cancel);
+  el.addEventListener('mouseleave',cancel);
+}
+function showWsContextMenu(el,id){
+  const menu=document.getElementById('ws-ctx-menu');
+  const r=el.getBoundingClientRect();
+  menu.style.top=(r.top)+'px';
+  menu.style.right=(window.innerWidth-r.right+30)+'px';
+  menu.dataset.wsId=id;
+  menu.classList.add('show');
+  document.getElementById('ws-ctx-overlay').classList.add('show');
+}
+function closeWsContextMenu(){
+  document.getElementById('ws-ctx-menu').classList.remove('show');
+  document.getElementById('ws-ctx-overlay').classList.remove('show');
+}
+function confirmDeleteFromCtxMenu(){
+  const id=document.getElementById('ws-ctx-menu').dataset.wsId;
+  closeWsContextMenu();
+  if(id)deleteWorkspace(id);
+}
 function renderDrawerList(){
   const list=document.getElementById('drawer-list');
   // احتفظ بـ شخصي وزر الإضافة
@@ -4648,8 +5119,14 @@ function renderDrawerList(){
     const ico=ws.type==='business'?'🏪':'🔧';
     const div=document.createElement('div');
     div.className='drawer-item dw-ws-item'+(currentWs===ws.id?' active':'');
-    div.innerHTML=`<span class="drawer-item-ico">${ico}</span><span>${ws.name}</span>`;
-    div.onclick=()=>{switchWorkspace(ws.id);closeDrawer();};
+    div.innerHTML=`<span class="drawer-item-ico">${ico}</span><span>${ws.name}</span>
+      <span class="dw-ws-actions">
+        <span class="dw-ws-action-btn" title="تعديل">✏️</span>
+      </span>`;
+    div.onclick=()=>{if(_wsLongPressFired){_wsLongPressFired=false;return;}switchWorkspace(ws.id);closeDrawer();};
+    const editBtn=div.querySelector('.dw-ws-action-btn');
+    editBtn.onclick=(e)=>{e.stopPropagation();startEditWorkspace(ws.id);};
+    attachWsLongPress(div,ws.id);
     list.insertBefore(div,addBtn);
   });
   // active state
@@ -4675,16 +5152,26 @@ function switchWorkspace(id){
   if(id==='personal'){
     showPage('home');
   } else {
-    // صفحة فارغة للنشاط
     const ws=workspaces.find(w=>w.id===id);
     ['pg-home','pg-settings','pg-reports','pg-log'].forEach(pid=>{const el=document.getElementById(pid);if(el)el.style.display='none';});
     document.getElementById('pg-workspace').style.display='flex';
-    document.getElementById('ws-page-ico').textContent=ws.type==='business'?'🏪':'🔧';
-    document.getElementById('ws-page-name').textContent=ws.name;
+    const isBiz=ws.type==='business';
+    document.getElementById('ws-biz-dashboard').style.display=isBiz?'flex':'none';
+    document.getElementById('ws-placeholder').style.display=isBiz?'none':'flex';
+    if(isBiz){
+      drawPercentRing('ws-inv-ring',62.5,'#2dd4a7',{sw:8,pctId:'ws-inv-ring-unused'});
+    } else {
+      document.getElementById('ws-page-ico').textContent='🔧';
+      document.getElementById('ws-page-name').textContent=ws.name;
+    }
     document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
     document.getElementById('nav-home').classList.add('active');
     closeFTable();closeEModal();
   }
+}
+function setBizPeriod(btn){
+  document.querySelectorAll('.biz-ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
 }
 // init
 renderDrawerList();
