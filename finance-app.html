@@ -603,7 +603,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .ws-ctx-overlay{position:fixed;inset:0;z-index:740;display:none;}
 .ws-ctx-overlay.show{display:block;}
 /* ── لوحة معلومات النشاط التجاري ── */
-.biz-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%;box-sizing:border-box;cursor:pointer;transition:transform .12s;}
+.biz-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%;box-sizing:border-box;cursor:pointer;transition:transform .12s;}
 .biz-card:active{transform:scale(.97);}
 .biz-card-hdr{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
 .biz-ico{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
@@ -617,21 +617,64 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-split-lbls b{font-size:9.5px;font-weight:800;}
 .biz-split-bar{display:flex;height:4px;border-radius:3px;overflow:hidden;}
 .biz-ptab.active{background:rgba(77,168,240,.15);border-color:var(--blue);color:var(--blue);}
-.biz-card-ftr{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:1px;border-top:1px solid var(--border);padding-top:3px;}
-.biz-card-title{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;}
-.biz-expand-btn{width:18px;height:18px;border-radius:5px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;cursor:pointer;color:var(--muted);}
+.biz-card-ftr{display:flex;align-items:center;justify-content:center;gap:6px;margin:auto -7px -7px -7px;background:var(--card2);border-top:1px solid var(--border);border-radius:0 0 11px 11px;padding:4px 8px;}
+.biz-expand-overlay .biz-card-ftr{margin:auto -16px -16px -16px;padding:8px 16px;border-radius:0 0 16px 16px;}
+.biz-card-title{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:center;}
+.biz-expand-btn{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:5px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;cursor:pointer;color:var(--muted);z-index:2;}
 .biz-expand-btn:active{background:var(--border);}
-.biz-expand-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:none;align-items:center;justify-content:center;padding:20px;}
-.biz-expand-overlay.show{display:flex;}
-.biz-expand-overlay .biz-card{width:min(78vw,360px);box-shadow:0 12px 40px rgba(0,0,0,.6);padding:16px;gap:10px;cursor:default;}
+.biz-expand-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+.biz-expand-overlay.show{opacity:1;pointer-events:auto;}
+.biz-expand-overlay .biz-card{width:min(78vw,360px);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:16px;gap:10px;cursor:default;transform:scale(.85);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.3),opacity .18s ease;}
+.biz-expand-overlay.show .biz-card{transform:scale(1);opacity:1;}
 .biz-expand-overlay .biz-card:active{transform:none;}
 .biz-expand-overlay .biz-card-title{font-size:14px;}
+.biz-expand-overlay .biz-expand-btn{top:14px;right:14px;width:24px;height:24px;font-size:11px;}
 .biz-expand-overlay .biz-val{font-size:20px;}
 .biz-expand-overlay .biz-lbl{font-size:11px;}
 .biz-expand-overlay .biz-sub{font-size:10.5px;}
 .biz-expand-overlay .biz-split-lbls{font-size:10.5px;}
 .biz-expand-overlay .biz-split-lbls b{font-size:13px;}
 .biz-expand-overlay .biz-ico{width:30px;height:30px;font-size:15px;}
+
+/* ══ قسم المشتريات: فاتورة / مردود / حسابات موردين ══ */
+.biz-po-tabs{display:flex;gap:6px;}
+.biz-po-addbtn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;}
+.biz-po-list{display:flex;flex-direction:column;gap:6px;}
+.biz-po-empty{text-align:center;color:var(--muted);font-size:11.5px;padding:18px 8px;}
+.biz-po-row{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;}
+.biz-po-row-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--txt);}
+.biz-po-row-top span{font-size:10.5px;color:var(--muted);}
+.biz-po-row-bottom{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);}
+.biz-po-row-bottom b{font-size:12.5px;}
+.biz-po-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px;}
+.biz-po-form-title{font-size:12.5px;font-weight:800;color:var(--txt);text-align:center;padding-bottom:2px;}
+.biz-po-frow{display:flex;}
+.biz-po-frow2{display:flex;gap:6px;}
+.biz-po-inp{flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;padding:7px 8px;}
+.biz-po-tbl-wrap{display:flex;flex-direction:column;gap:6px;}
+.biz-po-items-hdr{display:grid;grid-template-columns:18px 1fr 34px 44px 52px 16px;gap:5px;padding:0 14px;font-size:9px;color:var(--muted);font-weight:700;}
+.biz-po-item-row{display:grid;grid-template-columns:18px 1fr 34px 44px 52px 16px;align-items:center;gap:5px;border-radius:999px;padding:8px 14px;}
+.biz-po-item-row.odd{background:#2b3646;}
+.biz-po-item-row.even{background:#151a22;}
+.biz-po-item-row span{font-size:10.5px;color:var(--txt);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.biz-po-item-row span.m{color:var(--muted);font-size:10px;}
+.biz-po-item-row span.amt{font-weight:800;}
+.biz-po-cell{width:100%;min-width:0;background:transparent;border:none;color:var(--txt);font-family:'Cairo',sans-serif;font-size:10.5px;text-align:center;padding:2px;}
+.biz-po-del{color:var(--red);cursor:pointer;font-size:11px;text-align:center;}
+.biz-po-addrow{background:var(--card2);border:1px dashed var(--border);border-radius:7px;padding:6px;font-family:'Cairo',sans-serif;font-size:11px;color:var(--muted);cursor:pointer;}
+.biz-po-total-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--txt);padding:4px 2px;}
+.biz-po-total-row b{font-size:13.5px;}
+.biz-po-detail-line{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--muted);}
+.biz-po-detail-line b{color:var(--txt);font-weight:700;}
+.biz-po-remaining{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:4px;font-size:11px;color:var(--muted);}
+.biz-po-btns{display:flex;gap:8px;margin-top:2px;}
+.biz-po-btn{flex:1;border:none;border-radius:8px;padding:9px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;}
+.biz-po-btn.save{background:var(--green);color:#08221a;}
+.biz-po-btn.print{background:var(--blue);color:#fff;}
+.biz-po-btn.cancel{background:var(--card2);color:var(--muted);}
+.biz-po-sup-card{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 10px;display:flex;flex-direction:column;gap:5px;cursor:pointer;}
+.biz-po-sup-top{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:800;color:var(--txt);}
+.biz-po-sup-bottom{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--muted);}
 .drawer-divider{height:1px;background:var(--border);margin:6px 14px;}
 .drawer-add-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--green);cursor:pointer;}
 .drawer-add-btn:hover{background:rgba(62,207,106,.08);}
@@ -1368,7 +1411,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 <!-- ════ REPORTS PAGE ════ -->
 <div id="pg-reports" class="page" style="display:none;flex-direction:column;">
   <div style="flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:10px 12px;">
-    <div style="font-size:15px;font-weight:800;color:var(--txt);">📊 التقارير</div>
+    <div style="font-size:15px;font-weight:800;color:var(--txt);text-align:center;">📊 التقارير</div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;">
@@ -1400,9 +1443,9 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 
 <!-- ════ LOG PAGE ════ -->
 <div id="pg-log" class="page" style="display:none;flex-direction:column;">
-  <div style="flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="font-size:15px;font-weight:800;color:var(--txt);">📋 سجل المعاملات</div>
-    <select id="log-filter-type" onchange="renderLogPage()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:4px 6px;">
+  <div style="flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:10px 12px;position:relative;display:flex;align-items:center;justify-content:flex-end;">
+    <div style="position:absolute;left:0;right:0;text-align:center;font-size:15px;font-weight:800;color:var(--txt);pointer-events:none;">📋 سجل المعاملات</div>
+    <select id="log-filter-type" onchange="renderLogPage()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:4px 6px;position:relative;">
       <option value="all">كل الجداول</option>
       <option value="income">دخل</option>
       <option value="expense">مصروفات</option>
@@ -1433,9 +1476,9 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 <!-- ════ صفحة الملاحظات ════ -->
 <div id="pg-notes" class="page" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
   <div class="top-bar">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px 4px;">
-      <span style="font-size:17px;font-weight:800;color:var(--txt);">📝 ملاحظات</span>
-      <div class="ftable-hdr-btns">
+    <div style="position:relative;display:flex;align-items:center;justify-content:flex-end;padding:8px 12px 4px;">
+      <span style="position:absolute;left:0;right:0;text-align:center;font-size:17px;font-weight:800;color:var(--txt);pointer-events:none;">📝 ملاحظات</span>
+      <div class="ftable-hdr-btns" style="position:relative;">
         <button class="btn-ft btn-ft-add" onclick="openNotesForm()" title="إضافة ملاحظة جديدة">+</button>
         <button class="btn-ft" onclick="clearCompletedNotes()" title="حذف المكتملة">🗑</button>
       </div>
@@ -1486,6 +1529,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 
         <!-- المشتريات / الموردين -->
         <div class="biz-card" style="border-color:rgba(139,108,240,.35);" data-biz-key="purchases" onclick="openBizDetail('purchases')">
+          <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(139,108,240,.16);">🛒</span>
           </div>
@@ -1501,12 +1545,12 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <div class="biz-split-bar"><div style="width:60%;background:var(--green);"></div><div style="width:40%;background:var(--red);"></div></div>
           <div class="biz-card-ftr">
             <span class="biz-card-title" style="color:#9b81f5;">المشتريات/الموردين</span>
-            <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           </div>
         </div>
 
         <!-- المخزون -->
         <div class="biz-card" style="border-color:rgba(45,212,167,.35);align-items:center;text-align:center;" data-biz-key="inventory" onclick="openBizDetail('inventory')">
+          <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('inventory')">⤢</span>
           <div class="biz-card-hdr" style="width:100%;">
             <span class="biz-ico" style="background:rgba(45,212,167,.16);">🎓</span>
           </div>
@@ -1524,12 +1568,12 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           </div>
           <div class="biz-card-ftr" style="width:100%;">
             <span class="biz-card-title" style="color:#2dd4a7;">المخزون</span>
-            <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('inventory')">⤢</span>
           </div>
         </div>
 
         <!-- المبيعات / العملاء -->
         <div class="biz-card" style="border-color:rgba(77,168,240,.35);" data-biz-key="sales" onclick="openBizDetail('sales')">
+          <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">👥</span>
           </div>
@@ -1544,13 +1588,13 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <div class="biz-split-bar"><div style="width:73.7%;background:var(--blue);"></div><div style="width:26.3%;background:var(--red);"></div></div>
           <div class="biz-card-ftr">
             <span class="biz-card-title" style="color:var(--blue);">المبيعات/العملاء</span>
-            <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           </div>
         </div>
       </div>
 
       <!-- السيولة النقدية -->
       <div class="biz-card" style="border-color:rgba(224,176,48,.3);border-radius:14px;padding:7px;gap:4px;" data-biz-key="liquidity" onclick="openBizDetail('liquidity')">
+          <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('liquidity')">⤢</span>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="width:20px;height:20px;border-radius:6px;background:rgba(224,176,48,.16);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">💼</span>
           <div class="biz-lbl" style="flex:1;">إجمالي السيولة</div>
@@ -1572,13 +1616,13 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         </div>
         <div class="biz-card-ftr">
           <span class="biz-card-title" style="color:var(--yellow);">السيولة النقدية</span>
-          <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('liquidity')">⤢</span>
         </div>
       </div>
 
       <!-- المصروفات + حسابات -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div class="biz-card" style="border-color:rgba(224,138,62,.35);border-radius:14px;padding:7px;gap:3px;" data-biz-key="expenses" onclick="openBizDetail('expenses')">
+          <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('expenses')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(224,138,62,.16);">🧾</span>
           </div>
@@ -1592,10 +1636,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           </div>
           <div class="biz-card-ftr">
             <span class="biz-card-title" style="color:#e08a3e;">المصروفات</span>
-            <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('expenses')">⤢</span>
           </div>
         </div>
         <div class="biz-card" style="border-color:rgba(77,168,240,.35);border-radius:14px;padding:7px;gap:3px;" data-biz-key="accounts" onclick="openBizDetail('accounts')">
+          <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('accounts')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">📋</span>
           </div>
@@ -1609,7 +1653,6 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           </div>
           <div class="biz-card-ftr">
             <span class="biz-card-title" style="color:var(--blue);">حسابات</span>
-            <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('accounts')">⤢</span>
           </div>
         </div>
       </div>
@@ -1632,10 +1675,13 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 
 <!-- ══ صفحة تفاصيل كارت النشاط التجاري ══ -->
 <div id="pg-biz-detail" class="page" style="display:none;">
-  <div class="top-bar" style="display:flex;align-items:center;gap:8px;">
-    <button class="drawer-toggle" onclick="closeBizDetail()">→</button>
-    <span class="biz-ico" id="biz-detail-ico" style="width:30px;height:30px;font-size:14px;">🏪</span>
-    <div style="font-size:14px;font-weight:800;color:var(--txt);" id="biz-detail-title">تفاصيل</div>
+  <div class="top-bar" style="display:grid;grid-template-columns:26px 1fr 26px;align-items:center;gap:8px;">
+    <button class="drawer-toggle" onclick="closeBizDetail()" style="position:static;font-size:16px;padding:0;">→</button>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;">
+      <span class="biz-ico" id="biz-detail-ico" style="width:24px;height:24px;font-size:12px;flex-shrink:0;">🏪</span>
+      <div style="font-size:13px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="biz-detail-title">تفاصيل</div>
+    </div>
+    <div></div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;" id="biz-detail-body"></div>
 </div>
@@ -1760,6 +1806,17 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
   <div class="ws-ctx-opt" onclick="confirmDeleteFromCtxMenu()">🗑️ حذف</div>
 </div>
 
+<!-- نافذة تأكيد عامة -->
+<div class="ws-name-modal" id="generic-confirm-modal">
+  <div class="ws-name-box">
+    <div class="ws-name-title" id="generic-confirm-text">هل أنت متأكد؟</div>
+    <div class="ws-name-btns">
+      <button class="ws-name-cancel" onclick="closeGenericConfirm()">إلغاء</button>
+      <button class="ws-name-save" id="generic-confirm-ok-btn" style="background:var(--red);" onclick="_genericConfirmYes()">حذف</button>
+    </div>
+  </div>
+</div>
+
 <!-- نافذة تأكيد حذف نشاط -->
 <div class="ws-name-modal" id="ws-del-confirm-modal">
   <div class="ws-name-box">
@@ -1873,6 +1930,22 @@ function nextSeq(){
   return s;
 }
 function todayStr(){return new Date().toISOString().slice(0,10);}
+let _genericConfirmCb=null;
+function pgConfirm(msg,onYes,okLabel){
+  document.getElementById('generic-confirm-text').textContent=msg;
+  document.getElementById('generic-confirm-ok-btn').textContent=okLabel||'حذف';
+  _genericConfirmCb=onYes;
+  document.getElementById('generic-confirm-modal').classList.add('show');
+}
+function closeGenericConfirm(){
+  document.getElementById('generic-confirm-modal').classList.remove('show');
+  _genericConfirmCb=null;
+}
+function _genericConfirmYes(){
+  const cb=_genericConfirmCb;
+  closeGenericConfirm();
+  if(cb)cb();
+}
 function fmtDate(d){if(!d)return'';const[,m,day]=d.split('-');return day+'/'+m;}
 function fmt(n){return Number(n||0).toLocaleString('en-US');}
 
@@ -5221,7 +5294,7 @@ function expandBizCard(key){
   const ftrBtn=clone.querySelector('.biz-expand-btn');
   if(ftrBtn)ftrBtn.outerHTML='<span class="biz-expand-btn" onclick="closeBizExpand()">✕</span>';
   slot.appendChild(clone);
-  overlay.classList.add('show');
+  requestAnimationFrame(()=>overlay.classList.add('show'));
 }
 function closeBizExpand(){
   document.getElementById('biz-expand-overlay').classList.remove('show');
@@ -5241,19 +5314,342 @@ function openBizDetail(key){
     summary.removeAttribute('onclick');
     const ftr=summary.querySelector('.biz-card-ftr');
     if(ftr)ftr.remove();
+    const btn=summary.querySelector('.biz-expand-btn');
+    if(btn)btn.remove();
     summary.style.cursor='default';
     body.appendChild(summary);
   }
-  const note=document.createElement('div');
-  note.style.cssText='text-align:center;color:var(--muted);font-size:12px;padding:30px 10px;';
-  note.innerHTML='📄<br><br>سجل العمليات التفصيلي لـ«'+meta.title+'» قيد الإعداد<br>سيتم إضافته قريباً';
-  body.appendChild(note);
+  if(key==='purchases'){
+    renderPurchasesDetail();
+  }else{
+    const note=document.createElement('div');
+    note.style.cssText='text-align:center;color:var(--muted);font-size:12px;padding:30px 10px;';
+    note.innerHTML='📄<br><br>سجل العمليات التفصيلي لـ«'+meta.title+'» قيد الإعداد<br>سيتم إضافته قريباً';
+    body.appendChild(note);
+  }
   ['pg-home','pg-settings','pg-reports','pg-log','pg-workspace'].forEach(pid=>{const el=document.getElementById(pid);if(el)el.style.display='none';});
   document.getElementById('pg-biz-detail').style.display='flex';
 }
 function closeBizDetail(){
   document.getElementById('pg-biz-detail').style.display='none';
   document.getElementById('pg-workspace').style.display='flex';
+}
+
+/* ══════════════════════════════════════════════
+   قسم المشتريات: فاتورة مشتريات / مردود مشتريات / حسابات موردين
+   ══════════════════════════════════════════════ */
+function loadPInvoices(){return JSON.parse(_getItem('fm_biz_purchase_invoices')||'[]');}
+function savePInvoices(l){_setItem('fm_biz_purchase_invoices',JSON.stringify(l));}
+function loadPReturns(){return JSON.parse(_getItem('fm_biz_purchase_returns')||'[]');}
+function savePReturns(l){_setItem('fm_biz_purchase_returns',JSON.stringify(l));}
+
+let bizPurchaseTab='invoice';
+let _pInvItems=[],_pRetItems=[];
+
+function renderPurchasesDetail(){
+  const body=document.getElementById('biz-detail-body');
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;flex-direction:column;gap:10px;';
+  wrap.innerHTML=`
+    <div class="biz-po-tabs">
+      <button class="ptab" id="pptab-invoice" onclick="switchPurchaseTab('invoice')">فاتورة مشتريات</button>
+      <button class="ptab" id="pptab-return" onclick="switchPurchaseTab('return')">مردود مشتريات</button>
+      <button class="ptab" id="pptab-suppliers" onclick="switchPurchaseTab('suppliers')">حسابات موردين</button>
+    </div>
+    <div id="biz-purchase-tab-content"></div>`;
+  body.appendChild(wrap);
+  switchPurchaseTab(bizPurchaseTab);
+}
+function switchPurchaseTab(tab){
+  bizPurchaseTab=tab;
+  ['invoice','return','suppliers'].forEach(t=>{
+    const b=document.getElementById('pptab-'+t);
+    if(!b)return;
+    if(t===tab){b.style.background='var(--blue)';b.style.color='#fff';b.style.borderColor='var(--blue)';}
+    else{b.style.background='var(--card2)';b.style.color='var(--muted)';b.style.borderColor='var(--border)';}
+  });
+  const c=document.getElementById('biz-purchase-tab-content');
+  if(!c)return;
+  if(tab==='invoice')renderInvoiceTab(c);
+  else if(tab==='return')renderReturnTab(c);
+  else renderSuppliersTab(c);
+}
+
+/* ── فاتورة مشتريات ── */
+function renderInvoiceTab(c){
+  const list=loadPInvoices().slice().reverse();
+  c.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="biz-po-addbtn" onclick="openInvoiceForm()">+ فاتورة مشتريات جديدة</button>
+      <div id="invoice-form-slot"></div>
+      <div class="biz-po-list">${list.length?list.map(invoiceRowHtml).join(''):'<div class="biz-po-empty">لا توجد فواتير مشتريات مسجلة بعد</div>'}</div>
+    </div>`;
+}
+function invoiceRowHtml(inv){
+  const color=inv.remaining>0?'var(--red)':'var(--green)';
+  return `<div class="biz-po-row" onclick="viewInvoice('${inv.id}')">
+    <div class="biz-po-row-top"><b>${esc(inv.supplierName)||'—'}</b><span>${inv.invNo?'#'+esc(inv.invNo):''}</span></div>
+    <div class="biz-po-row-bottom"><span>${inv.date||''}</span><b style="color:${color};">${fmt(inv.total)}</b></div>
+  </div>`;
+}
+function esc(s){return (s||'').toString().replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+function staticItemsRowsHtml(items){
+  return `<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr"><span>م</span><span>الصنف</span><span>العدد</span><span>السعر</span><span>المبلغ</span><span></span></div>`+
+    items.map((it,i)=>`<div class="biz-po-item-row ${i%2===0?'odd':'even'}">
+        <span class="m">${i+1}</span><span>${esc(it.name)}</span><span>${it.qty}</span><span>${fmt(it.price)}</span><span class="amt">${fmt(it.qty*it.price)}</span><span></span>
+      </div>`).join('')+`</div>`;
+}
+function openInvoiceForm(){
+  _pInvItems=[{name:'',qty:1,price:0}];
+  document.getElementById('invoice-form-slot').innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">فاتورة مشتريات جديدة</div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="pinv-supplier" placeholder="اسم المورد"></div>
+      <div class="biz-po-frow2">
+        <input class="biz-po-inp" id="pinv-phone" placeholder="رقم الهاتف">
+        <input class="biz-po-inp" id="pinv-no" placeholder="رقم الفاتورة">
+      </div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="pinv-date" type="date" value="${todayStr()}"></div>
+      <div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr"><span>م</span><span>الصنف</span><span>العدد</span><span>السعر</span><span>المبلغ</span><span></span></div><div id="pinv-items-tbl"></div></div>
+      <div class="biz-po-addrow" onclick="addInvItemRow()">+ إضافة صنف</div>
+      <div class="biz-po-total-row"><span>الإجمالي</span><b id="pinv-total">0.00</b></div>
+      <div class="biz-po-frow2">
+        <input class="biz-po-inp" id="pinv-paid" type="number" placeholder="المدفوع" value="0" oninput="updInvRemaining()">
+        <div class="biz-po-remaining">متبقي: <b id="pinv-remaining">0.00</b></div>
+      </div>
+      <textarea class="biz-po-inp" id="pinv-notes" placeholder="ملاحظات" rows="2" style="resize:none;"></textarea>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveInvoice()">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="closeInvoiceForm()">إلغاء</button>
+      </div>
+    </div>`;
+  renderInvItemsTable();
+}
+function renderInvItemsTable(){
+  const tbl=document.getElementById('pinv-items-tbl');
+  if(!tbl)return;
+  let total=0;
+  tbl.innerHTML=_pInvItems.map((it,i)=>{
+      const amt=(Number(it.qty)||0)*(Number(it.price)||0);
+      total+=amt;
+      return `<div class="biz-po-item-row ${i%2===0?'odd':'even'}">
+        <span class="m">${i+1}</span>
+        <input class="biz-po-cell" value="${esc(it.name)}" oninput="updInvItem(${i},'name',this.value)">
+        <input class="biz-po-cell" type="number" value="${it.qty}" oninput="updInvItem(${i},'qty',this.value)">
+        <input class="biz-po-cell" type="number" value="${it.price}" oninput="updInvItem(${i},'price',this.value)">
+        <span class="amt">${fmt(amt)}</span>
+        <span class="biz-po-del" onclick="delInvItem(${i})">✕</span>
+      </div>`;
+    }).join('');
+  const totalEl=document.getElementById('pinv-total');
+  if(totalEl)totalEl.textContent=fmt(total);
+  updInvRemaining();
+}
+function updInvItem(i,field,val){_pInvItems[i][field]=field==='name'?val:Number(val);renderInvItemsTable();}
+function addInvItemRow(){_pInvItems.push({name:'',qty:1,price:0});renderInvItemsTable();}
+function delInvItem(i){_pInvItems.splice(i,1);if(!_pInvItems.length)_pInvItems.push({name:'',qty:1,price:0});renderInvItemsTable();}
+function updInvRemaining(){
+  const total=_pInvItems.reduce((s,it)=>s+(Number(it.qty)||0)*(Number(it.price)||0),0);
+  const paid=Number(document.getElementById('pinv-paid')?.value||0);
+  const rem=Math.max(total-paid,0);
+  const remEl=document.getElementById('pinv-remaining');
+  if(remEl){remEl.textContent=fmt(rem);remEl.style.color=rem>0?'var(--red)':'var(--green)';}
+}
+function closeInvoiceForm(){const s=document.getElementById('invoice-form-slot');if(s)s.innerHTML='';}
+function saveInvoice(){
+  const supplierName=document.getElementById('pinv-supplier').value.trim();
+  if(!supplierName){pgConfirm('من فضلك أدخل اسم المورد أولاً',()=>{},'حسناً');return;}
+  const items=_pInvItems.filter(it=>it.name&&it.name.trim());
+  if(!items.length){pgConfirm('أضف صنف واحد على الأقل',()=>{},'حسناً');return;}
+  const total=items.reduce((s,it)=>s+(Number(it.qty)||0)*(Number(it.price)||0),0);
+  const paid=Number(document.getElementById('pinv-paid').value||0);
+  const inv={id:'pinv_'+Date.now(),seq:nextSeq(),supplierName,
+    phone:document.getElementById('pinv-phone').value.trim(),
+    invNo:document.getElementById('pinv-no').value.trim(),
+    date:document.getElementById('pinv-date').value||todayStr(),
+    items,total,paid,remaining:Math.max(total-paid,0),
+    notes:document.getElementById('pinv-notes').value.trim()};
+  const list=loadPInvoices();list.push(inv);savePInvoices(list);
+  closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
+}
+function viewInvoice(id){
+  const inv=loadPInvoices().find(x=>x.id===id);
+  if(!inv)return;
+  document.getElementById('invoice-form-slot').innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">فاتورة ${inv.invNo?'#'+esc(inv.invNo):''} — ${esc(inv.supplierName)}</div>
+      <div class="biz-po-detail-line"><span>التاريخ</span><b>${inv.date}</b></div>
+      ${inv.phone?`<div class="biz-po-detail-line"><span>الهاتف</span><b>${esc(inv.phone)}</b></div>`:''}
+      ${staticItemsRowsHtml(inv.items)}
+      <div class="biz-po-total-row"><span>الإجمالي</span><b>${fmt(inv.total)}</b></div>
+      <div class="biz-po-total-row"><span>المدفوع</span><b style="color:var(--green);">${fmt(inv.paid)}</b></div>
+      <div class="biz-po-total-row"><span>المتبقي</span><b style="color:${inv.remaining>0?'var(--red)':'var(--green)'};">${fmt(inv.remaining)}</b></div>
+      ${inv.notes?`<div class="biz-po-detail-line"><span>ملاحظات</span><b>${esc(inv.notes)}</b></div>`:''}
+      <div class="biz-po-btns">
+        <button class="biz-po-btn cancel" onclick="pgConfirm('هل تريد حذف هذه الفاتورة؟',()=>deleteInvoice('${inv.id}'))">حذف</button>
+        <button class="biz-po-btn save" onclick="closeInvoiceForm()">إغلاق</button>
+      </div>
+    </div>`;
+}
+function deleteInvoice(id){
+  savePInvoices(loadPInvoices().filter(x=>x.id!==id));
+  closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
+}
+
+/* ── مردود مشتريات ── */
+function renderReturnTab(c){
+  const list=loadPReturns().slice().reverse();
+  c.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="biz-po-addbtn" onclick="openReturnForm()">+ مردود مشتريات جديد</button>
+      <div id="return-form-slot"></div>
+      <div class="biz-po-list">${list.length?list.map(returnRowHtml).join(''):'<div class="biz-po-empty">لا توجد مردودات مشتريات مسجلة بعد</div>'}</div>
+    </div>`;
+}
+function returnRowHtml(r){
+  return `<div class="biz-po-row" onclick="viewReturn('${r.id}')">
+    <div class="biz-po-row-top"><b>${esc(r.supplierName)||'—'}</b><span>مرجع #${r.refNo}</span></div>
+    <div class="biz-po-row-bottom"><span>${r.date||''}</span><b style="color:var(--red);">${fmt(r.returnValue)}</b></div>
+  </div>`;
+}
+function openReturnForm(){
+  _pRetItems=[{name:'',qty:1,price:0}];
+  document.getElementById('return-form-slot').innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">مردود مشتريات جديد</div>
+      <div class="biz-po-detail-line"><span>رقم المرجع</span><b>${nextReturnRefPreview()}</b></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="pret-date" type="date" value="${todayStr()}"></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="pret-supplier" placeholder="اسم المورد"></div>
+      <div class="biz-po-frow2">
+        <input class="biz-po-inp" id="pret-phone" placeholder="رقم الهاتف">
+        <input class="biz-po-inp" id="pret-orig-no" placeholder="رقم الفاتورة الأصلية">
+      </div>
+      <div class="biz-po-frow" style="flex-direction:column;gap:3px;align-items:flex-end;"><span style="font-size:10px;color:var(--muted);">تاريخ الفاتورة الأصلية</span><input class="biz-po-inp" id="pret-orig-date" type="date" style="width:100%;"></div>
+      <div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr"><span>م</span><span>الصنف</span><span>العدد</span><span>السعر</span><span>المبلغ</span><span></span></div><div id="pret-items-tbl"></div></div>
+      <div class="biz-po-addrow" onclick="addRetItemRow()">+ إضافة صنف</div>
+      <div class="biz-po-total-row"><span>إجمالي المرتجع</span><b id="pret-total">0.00</b></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="pret-value" type="number" placeholder="قيمة المرتجع" oninput="this.dataset.touched='1'"></div>
+      <div class="biz-po-frow"><select class="biz-po-inp" id="pret-settle">
+        <option value="خصم من الرصيد">خصم من الرصيد</option>
+        <option value="استرداد نقدي">استرداد نقدي</option>
+        <option value="استبدال بضاعة">استبدال بضاعة</option>
+      </select></div>
+      <textarea class="biz-po-inp" id="pret-notes" placeholder="ملاحظات" rows="2" style="resize:none;"></textarea>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveReturn(false)">حفظ</button>
+        <button class="biz-po-btn print" onclick="saveReturn(true)">حفظ وطباعة</button>
+        <button class="biz-po-btn cancel" onclick="closeReturnForm()">إلغاء</button>
+      </div>
+    </div>`;
+  renderRetItemsTable();
+}
+function nextReturnRefPreview(){
+  let n=Number(_getItem('fm_return_ref_seq')||0);
+  if(!n){n=20000+loadPReturns().length;}
+  return n+1;
+}
+function commitReturnRef(refNo){_setItem('fm_return_ref_seq',String(refNo));}
+function renderRetItemsTable(){
+  const tbl=document.getElementById('pret-items-tbl');
+  if(!tbl)return;
+  let total=0;
+  tbl.innerHTML=_pRetItems.map((it,i)=>{
+      const amt=(Number(it.qty)||0)*(Number(it.price)||0);
+      total+=amt;
+      return `<div class="biz-po-item-row ${i%2===0?'odd':'even'}">
+        <span class="m">${i+1}</span>
+        <input class="biz-po-cell" value="${esc(it.name)}" oninput="updRetItem(${i},'name',this.value)">
+        <input class="biz-po-cell" type="number" value="${it.qty}" oninput="updRetItem(${i},'qty',this.value)">
+        <input class="biz-po-cell" type="number" value="${it.price}" oninput="updRetItem(${i},'price',this.value)">
+        <span class="amt">${fmt(amt)}</span>
+        <span class="biz-po-del" onclick="delRetItem(${i})">✕</span>
+      </div>`;
+    }).join('');
+  const totalEl=document.getElementById('pret-total');
+  if(totalEl)totalEl.textContent=fmt(total);
+  const valInp=document.getElementById('pret-value');
+  if(valInp&&!valInp.dataset.touched)valInp.value=total?total.toFixed(2):'';
+}
+function updRetItem(i,field,val){_pRetItems[i][field]=field==='name'?val:Number(val);renderRetItemsTable();}
+function addRetItemRow(){_pRetItems.push({name:'',qty:1,price:0});renderRetItemsTable();}
+function delRetItem(i){_pRetItems.splice(i,1);if(!_pRetItems.length)_pRetItems.push({name:'',qty:1,price:0});renderRetItemsTable();}
+function closeReturnForm(){const s=document.getElementById('return-form-slot');if(s)s.innerHTML='';}
+function saveReturn(print){
+  const supplierName=document.getElementById('pret-supplier').value.trim();
+  if(!supplierName){pgConfirm('من فضلك أدخل اسم المورد أولاً',()=>{},'حسناً');return;}
+  const items=_pRetItems.filter(it=>it.name&&it.name.trim());
+  if(!items.length){pgConfirm('أضف صنف واحد على الأقل',()=>{},'حسناً');return;}
+  const total=items.reduce((s,it)=>s+(Number(it.qty)||0)*(Number(it.price)||0),0);
+  const refNo=nextReturnRefPreview();
+  const r={id:'pret_'+Date.now(),seq:nextSeq(),refNo,
+    date:document.getElementById('pret-date').value||todayStr(),
+    supplierName,phone:document.getElementById('pret-phone').value.trim(),
+    origInvNo:document.getElementById('pret-orig-no').value.trim(),
+    origInvDate:document.getElementById('pret-orig-date').value,
+    items,total,
+    returnValue:Number(document.getElementById('pret-value').value||total),
+    settleMethod:document.getElementById('pret-settle').value,
+    notes:document.getElementById('pret-notes').value.trim()};
+  commitReturnRef(refNo);
+  const list=loadPReturns();list.push(r);savePReturns(list);
+  closeReturnForm();renderReturnTab(document.getElementById('biz-purchase-tab-content'));
+  if(print)setTimeout(()=>window.print(),300);
+}
+function viewReturn(id){
+  const r=loadPReturns().find(x=>x.id===id);
+  if(!r)return;
+  document.getElementById('return-form-slot').innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">مردود مشتريات — مرجع #${r.refNo}</div>
+      <div class="biz-po-detail-line"><span>التاريخ</span><b>${r.date}</b></div>
+      <div class="biz-po-detail-line"><span>المورد</span><b>${esc(r.supplierName)}</b></div>
+      ${r.phone?`<div class="biz-po-detail-line"><span>الهاتف</span><b>${esc(r.phone)}</b></div>`:''}
+      ${r.origInvNo?`<div class="biz-po-detail-line"><span>رقم الفاتورة الأصلية</span><b>${esc(r.origInvNo)}</b></div>`:''}
+      ${r.origInvDate?`<div class="biz-po-detail-line"><span>تاريخ الفاتورة الأصلية</span><b>${r.origInvDate}</b></div>`:''}
+      ${staticItemsRowsHtml(r.items)}
+      <div class="biz-po-total-row"><span>إجمالي المرتجع</span><b>${fmt(r.total)}</b></div>
+      <div class="biz-po-total-row"><span>قيمة المرتجع</span><b style="color:var(--red);">${fmt(r.returnValue)}</b></div>
+      <div class="biz-po-detail-line"><span>طريقة التسوية</span><b>${esc(r.settleMethod)}</b></div>
+      ${r.notes?`<div class="biz-po-detail-line"><span>ملاحظات</span><b>${esc(r.notes)}</b></div>`:''}
+      <div class="biz-po-btns">
+        <button class="biz-po-btn cancel" onclick="pgConfirm('هل تريد حذف هذا المردود؟',()=>deleteReturn('${r.id}'))">حذف</button>
+        <button class="biz-po-btn save" onclick="closeReturnForm()">إغلاق</button>
+      </div>
+    </div>`;
+}
+function deleteReturn(id){
+  savePReturns(loadPReturns().filter(x=>x.id!==id));
+  closeReturnForm();renderReturnTab(document.getElementById('biz-purchase-tab-content'));
+}
+
+/* ── حسابات موردين ── */
+function renderSuppliersTab(c){
+  const invoices=loadPInvoices(),returns=loadPReturns();
+  const map={};
+  invoices.forEach(inv=>{
+    const k=inv.supplierName||'—';
+    if(!map[k])map[k]={name:k,phone:inv.phone||'',total:0,paid:0,returned:0};
+    map[k].total+=inv.total;map[k].paid+=inv.paid;
+    if(inv.phone)map[k].phone=inv.phone;
+  });
+  returns.forEach(r=>{
+    const k=r.supplierName||'—';
+    if(!map[k])map[k]={name:k,phone:r.phone||'',total:0,paid:0,returned:0};
+    map[k].returned+=r.returnValue;
+    if(r.phone)map[k].phone=r.phone;
+  });
+  const suppliers=Object.values(map);
+  c.innerHTML=`<div class="biz-po-list">${suppliers.length?suppliers.map(supplierCardHtml).join(''):'<div class="biz-po-empty">لا يوجد موردون مسجلون بعد<br>سيظهر الموردون هنا تلقائياً بعد تسجيل أول فاتورة مشتريات</div>'}</div>`;
+}
+function supplierCardHtml(s){
+  const balance=Math.max(s.total-s.paid-s.returned,0);
+  return `<div class="biz-po-sup-card">
+    <div class="biz-po-sup-top"><span>${esc(s.name)}</span><span style="color:${balance>0?'var(--red)':'var(--green)'};font-size:12px;">${fmt(balance)}</span></div>
+    <div class="biz-po-sup-bottom">
+      <span>${s.phone?esc(s.phone):'—'}</span>
+      <span>إجمالي: ${fmt(s.total)} · مدفوع: ${fmt(s.paid)}${s.returned?' · مردود: '+fmt(s.returned):''}</span>
+    </div>
+  </div>`;
 }
 // init
 renderDrawerList();
