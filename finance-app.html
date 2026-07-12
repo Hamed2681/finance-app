@@ -16,6 +16,8 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;display:flex;flex-direction:column;}
+/* توضيح الخط بالقسم التجاري كله: لون أفتح وأوضح تباين للنصوص الثانوية (muted) */
+#pg-workspace,#pg-biz-detail,#biz-expand-overlay,#collect-modal{--muted:#aab8cb;}
 
 /* ── TOP SUMMARY ── */
 .top-bar{flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:6px 8px;position:relative;}
@@ -5462,7 +5464,7 @@ function refreshBizDashboard(){
   },0);
   let inventoryVal=0;
   (typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).forEach(w=>{inventoryVal+=warehouseTotals(w.id).val;});
-  const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+Number(v.amount||0),0);
+  const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0);
   setTxt('ws-liq-total',fmt(treasuryVal));
   setTxt('ws-liq-treasury',fmt(treasuryVal));
   setTxt('ws-liq-bank',fmt(0));
@@ -5502,7 +5504,7 @@ const COA_STRUCTURE=[
     {id:'assets_other_debit',name:'أخرى مدينة'}
   ]},
   {id:'liabilities',name:'الخصوم',ico:'📕',children:[
-    {id:'liab_equity',name:'حقوق ملكية'},
+    {id:'liab_equity',name:'حساب الشركاء'},
     {id:'liab_obligations',name:'التزامات'},
     {id:'liab_suppliers',name:'موردين'},
     {id:'liab_other_credit',name:'أخرى دائنة'}
@@ -5518,6 +5520,13 @@ const COA_LINK_NODES={
 };
 const COA_CLASS_TYPES={assets_customers:'customer',liab_suppliers:'supplier'};
 const COA_CLASS_LABELS={customer:'المبيعات/العملاء',supplier:'المشتريات/الموردين'};
+/* حسابات أساسية محسوبة تلقائياً (مش بتتضاف يدوياً) داخل «أصول متداولة» */
+const COA_BUILTIN_ROWS={
+  assets_current:[
+    {key:'goods',name:'بضائع',calc:()=>(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)},
+    {key:'funds',name:'أموال',calc:()=>loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0)}
+  ]
+};
 function loadCoaAccounts(){return JSON.parse(_getItem('fm_coa_accounts')||'{}');}
 function saveCoaAccounts(o){_setItem('fm_coa_accounts',JSON.stringify(o));}
 function loadClassifications(){return JSON.parse(_getItem('fm_classifications')||'{"customer":[],"supplier":[]}');}
@@ -5651,7 +5660,8 @@ function toggleCoaClassPanel(subId){
 function coaSubHtml(sub,data,isTop){
   const link=COA_LINK_NODES[sub.id];
   const accs=data[sub.id]||[];
-  const totalAmt=accs.reduce((s,a)=>s+(Number(a.amount)||0),0);
+  const builtins=(COA_BUILTIN_ROWS[sub.id]||[]).map(b=>({name:b.name,amount:b.calc()}));
+  const totalAmt=accs.reduce((s,a)=>s+(Number(a.amount)||0),0)+builtins.reduce((s,b)=>s+(Number(b.amount)||0),0);
   if(link){
     const type=COA_CLASS_TYPES[sub.id];
     const clsOpen=!!coaClassOpen[sub.id];
@@ -5668,7 +5678,8 @@ function coaSubHtml(sub,data,isTop){
     </div>`;
   }
   const open=!!coaExpanded[sub.id];
-  const bodyHtml=`${accs.length?accs.map(a=>`<div class="coa-acc-row"><span>${esc(a.name)}</span><b>${fmt(a.amount)}</b><span class="coa-acc-del" onclick="deleteCoaAccount('${sub.id}','${a.id}')">✕</span></div>`).join(''):'<div class="biz-po-empty">لا توجد حسابات مضافة بعد</div>'}
+  const builtinHtml=builtins.map(b=>`<div class="coa-acc-row" style="opacity:.9;"><span>🔒 ${esc(b.name)}<span style="color:var(--muted);font-size:9px;"> (محسوب تلقائياً)</span></span><b>${fmt(b.amount)}</b></div>`).join('');
+  const bodyHtml=`${builtinHtml}${accs.length?accs.map(a=>`<div class="coa-acc-row"><span>${esc(a.name)}</span><b>${fmt(a.amount)}</b><span class="coa-acc-del" onclick="deleteCoaAccount('${sub.id}','${a.id}')">✕</span></div>`).join(''):(builtins.length?'':'<div class="biz-po-empty">لا توجد حسابات مضافة بعد</div>')}
         <div id="coa-addform-${sub.id}"></div>
         <button class="coa-add-btn" onclick="openCoaAddForm('${sub.id}')">+ إضافة حساب</button>`;
   if(isTop){
@@ -5820,6 +5831,12 @@ function confirmedReceiptAmount(v){
 }
 function loadTreasuryPayments(){return JSON.parse(_getItem('fm_treasury_payments')||'[]');}
 function saveTreasuryPayments(l){_setItem('fm_treasury_payments',JSON.stringify(l));}
+/* أذون الصرف الناتجة عن دفع فواتير شراء (نوع "شراء") تُسجَّل بحالة pending زى إذن القبض تحصيل بالظبط،
+   ولا تُخصم من السيولة إلا بعد تأكيد المبلغ فعلياً؛ باقي أذون الصرف تُعتبر مؤكدة افتراضياً */
+function confirmedPaymentAmount(v){
+  if(v.status==='pending')return 0;
+  return Number(v.confirmedAmount!=null?v.confirmedAmount:v.amount)||0;
+}
 /* ── رصيد افتتاحي للسيولة النقدية (الخزينة) ── */
 function loadTreasuryOpening(){return Number(_getItem('fm_treasury_opening')||0);}
 function saveTreasuryOpening(v){_setItem('fm_treasury_opening',String(v));}
@@ -5845,44 +5862,47 @@ function renderLiquidityDetail(){
   renderPendingVouchers();
   switchLiquidityTab(liquidityTab);
 }
-/* ── الأذون المعلقة: أذون قبض من تحصيل مديونية العملاء لسه محتاجة تأكيد المبلغ ── */
+/* ── الأذون المعلقة: إذن قبض (تحصيل مديونية العملاء) أو إذن صرف (دفع فواتير شراء) لسه محتاجين تأكيد المبلغ ── */
 function pendingReceipts(){return loadTreasuryReceipts().filter(v=>v.status==='pending');}
+function pendingPayments(){return loadTreasuryPayments().filter(v=>v.status==='pending');}
 function renderPendingVouchers(){
   const wrap=document.getElementById('liq-pending-wrap');
   if(!wrap)return;
-  const list=pendingReceipts();
+  const list=[...pendingReceipts().map(v=>({v,kind:'receipt'})),...pendingPayments().map(v=>({v,kind:'payment'}))];
   if(!list.length){wrap.innerHTML='';return;}
   wrap.innerHTML=`
     <div class="biz-po-form-title" style="color:var(--yellow);padding:0;">⏳ أذون معلقة تحتاج تأكيد (${list.length})</div>
-    <div class="biz-po-list">${list.map(v=>`
+    <div class="biz-po-list">${list.map(({v,kind})=>`
       <div class="biz-po-row">
-        <div class="biz-po-row-top"><b>${esc(v.name)}</b><span>#${v.seq}</span></div>
+        <div class="biz-po-row-top"><b>${esc(v.name)}</b><span>#${v.seq} · ${kind==='receipt'?'قبض':'صرف'}</span></div>
         <div class="biz-po-row-bottom"><span>${v.date||''}${v.lines?' · '+v.lines.length+' عميل':''}</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
         <div class="biz-po-btns" style="margin-top:6px;">
-          <button class="biz-po-btn save" onclick="openConfirmVoucher('${v.id}')">تأكيد المبلغ</button>
+          <button class="biz-po-btn save" onclick="openConfirmVoucher('${kind}','${v.id}')">تأكيد المبلغ</button>
         </div>
       </div>`).join('')}</div>
     <div id="confirm-voucher-slot"></div>`;
 }
-function openConfirmVoucher(id){
-  const v=pendingReceipts().find(x=>x.id===id);
+function openConfirmVoucher(kind,id){
+  const v=(kind==='receipt'?pendingReceipts():pendingPayments()).find(x=>x.id===id);
   if(!v)return;
   const slot=document.getElementById('confirm-voucher-slot');
   if(!slot)return;
+  const title=kind==='receipt'?'تأكيد إذن قبض':'تأكيد إذن صرف';
+  const ph=kind==='receipt'?'أدخل المبلغ الفعلى المستلم':'أدخل المبلغ الفعلى المصروف';
   slot.innerHTML=`
     <div class="biz-po-form">
-      <div class="biz-po-form-title">تأكيد إذن قبض #${v.seq} — ${esc(v.name)}</div>
+      <div class="biz-po-form-title">${title} #${v.seq} — ${esc(v.name)}</div>
       <div class="biz-po-detail-line"><span>المبلغ المسجل</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
-      <div class="biz-po-frow"><input class="biz-po-inp" id="confirm-amt-inp" type="number" placeholder="أدخل المبلغ الفعلى المستلم" value="${v.amount}"></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="confirm-amt-inp" type="number" placeholder="${ph}" value="${v.amount}"></div>
       <div class="biz-po-btns">
-        <button class="biz-po-btn save" onclick="saveConfirmVoucher('${v.id}')">تأكيد</button>
+        <button class="biz-po-btn save" onclick="saveConfirmVoucher('${kind}','${v.id}')">تأكيد</button>
         <button class="biz-po-btn cancel" onclick="document.getElementById('confirm-voucher-slot').innerHTML=''">إلغاء</button>
       </div>
     </div>`;
 }
-function saveConfirmVoucher(id){
-  const receipts=loadTreasuryReceipts();
-  const v=receipts.find(x=>x.id===id);
+function saveConfirmVoucher(kind,id){
+  const list=kind==='receipt'?loadTreasuryReceipts():loadTreasuryPayments();
+  const v=list.find(x=>x.id===id);
   if(!v)return;
   const inp=document.getElementById('confirm-amt-inp');
   const confirmedAmount=Number(inp?inp.value:0)||0;
@@ -5890,20 +5910,20 @@ function saveConfirmVoucher(id){
   v.status='confirmed';
   v.confirmedAmount=confirmedAmount;
   v.confirmedDate=todayStr();
-  saveTreasuryReceipts(receipts);
-  if(diff>0.001)addCollectorShortfallDebt(v.name,diff,v.seq);
+  if(kind==='receipt')saveTreasuryReceipts(list);else saveTreasuryPayments(list);
+  if(diff>0.001)addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
   const slot=document.getElementById('confirm-voucher-slot');
   if(slot)slot.innerHTML='';
   renderPendingVouchers();
-  renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));
+  switchLiquidityTab(liquidityTab);
   refreshBizDashboard();
   pgConfirm(diff>0.001?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
 }
-/* تسجيل الفرق بين المحصَّل والمؤكَّد كحساب "أخرى مدينة" على المحصِّل فى شجرة الحسابات */
-function addCollectorShortfallDebt(collectorName,amount,voucherSeq){
+/* تسجيل الفرق بين المسجَّل والمؤكَّد (تحصيل ناقص أو صرف أقل من المتوقع) كحساب "أخرى مدينة" فى شجرة الحسابات */
+function addVoucherDiffDebt(personName,amount,voucherSeq,label){
   const data=loadCoaAccounts();
   if(!data.assets_other_debit)data.assets_other_debit=[];
-  data.assets_other_debit.push({id:'acc_'+Date.now(),name:collectorName+' — فرق تحصيل إذن #'+voucherSeq,amount});
+  data.assets_other_debit.push({id:'acc_'+Date.now(),name:personName+' — فرق '+label+' إذن #'+voucherSeq,amount});
   saveCoaAccounts(data);
   coaExpanded.assets_other_debit=true;
   renderCoaTree();
@@ -5957,8 +5977,8 @@ function renderReceiptTab(c){
 }
 /* ── إذن صرف ── */
 const VOUCHER_TYPES={
-  payment:['شراء','مصروف','سداد سلفة','سداد عهدة','تحويل','مسحوبات شريك','مردود مبيعات','أخرى'],
-  receipt:['تحصيل','إيراد','تسوية صرف','سداد عهدة','سداد سلفة','إيداع شريك','مردود مشتريات','تحويل','أخرى']
+  payment:['مصروف','سداد سلفة','سداد عهدة','تحويل','مسحوبات شريك','أخرى'],
+  receipt:['إيراد','تسوية صرف','سداد عهدة','سداد سلفة','إيداع شريك','تحويل','أخرى']
 };
 function renderPaymentTab(c){
   const list=loadTreasuryPayments().slice().reverse();
@@ -6220,7 +6240,16 @@ function saveInvoice(){
     notes:document.getElementById('pinv-notes').value.trim()};
   inv.postedItems=postPurchaseToInventory(inv);
   const list=loadPInvoices();list.push(inv);savePInvoices(list);
+  if(paid>0){
+    const payments=loadTreasuryPayments();
+    payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:supplierName,amount:paid,type:'شراء',
+      date:inv.date,desc:'دفعة فاتورة مشتريات '+(inv.invNo?'#'+inv.invNo:'#'+inv.seq),notes:'',
+      status:'pending',sourceInvId:inv.id});
+    saveTreasuryPayments(payments);
+  }
   closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
+  refreshBizDashboard();
+  if(paid>0)pgConfirm('تم حفظ الفاتورة، وسُجّل إذن صرف معلق بقيمة '+fmt(paid)+' فى انتظار تأكيد المبلغ فعلياً من قسم الخزينة',()=>{},'تمام');
 }
 function viewInvoice(id){
   const inv=loadPInvoices().find(x=>x.id===id);
@@ -6255,9 +6284,11 @@ function deleteInvoice(id){
     saveInvItems(items);
   }
   savePInvoices(list.filter(x=>x.id!==id));
+  saveTreasuryPayments(loadTreasuryPayments().filter(p=>p.sourceInvId!==id));
   closeInvoiceForm();
   if(bizEntityDetail&&bizEntityDetail.type==='supplier')renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
   else renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
+  refreshBizDashboard();
 }
 
 /* ── مردود مشتريات ── */
@@ -6356,9 +6387,16 @@ function saveReturn(print){
     notes:document.getElementById('pret-notes').value.trim()};
   commitReturnRef(refNo);
   const list=loadPReturns();list.push(r);savePReturns(list);
+  if(r.settleMethod==='استرداد نقدي'&&r.returnValue>0){
+    const receipts=loadTreasuryReceipts();
+    receipts.push({id:'rcpt_'+Date.now(),seq:nextSeq(),name:supplierName,amount:r.returnValue,type:'مردود مشتريات',
+      date:r.date,desc:'مسترد نقدى — مردود مشتريات مرجع #'+refNo,notes:'',sourceRetId:r.id});
+    saveTreasuryReceipts(receipts);
+  }
   closeReturnForm();
   if(bizEntityDetail&&bizEntityDetail.type==='supplier')renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
   else renderReturnTab(document.getElementById('biz-purchase-tab-content'));
+  refreshBizDashboard();
   if(print)setTimeout(()=>window.print(),300);
 }
 function viewReturn(id){
@@ -6385,9 +6423,11 @@ function viewReturn(id){
 }
 function deleteReturn(id){
   savePReturns(loadPReturns().filter(x=>x.id!==id));
+  saveTreasuryReceipts(loadTreasuryReceipts().filter(rc=>rc.sourceRetId!==id));
   closeReturnForm();
   if(bizEntityDetail&&bizEntityDetail.type==='supplier')renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
   else renderReturnTab(document.getElementById('biz-purchase-tab-content'));
+  refreshBizDashboard();
 }
 
 /* ── حسابات موردين ── */
@@ -6785,7 +6825,14 @@ function saveInvoiceS(){
     installmentPlan,installments,
     notes:document.getElementById('sinv-notes').value.trim()};
   const list=loadSInvoices();list.push(inv);saveSInvoices(list);
+  if(paid>0){
+    const receipts=loadTreasuryReceipts();
+    receipts.push({id:'rcpt_'+Date.now(),seq:nextSeq(),name:customerName,amount:paid,type:'بيع نقدي',
+      date:inv.date,desc:'دفعة فاتورة مبيعات '+(inv.invNo?'#'+inv.invNo:'#'+inv.seq),notes:'',sourceInvId:inv.id});
+    saveTreasuryReceipts(receipts);
+  }
   closeInvoiceFormS();renderInvoiceTabS(document.getElementById('biz-sales-tab-content'));
+  refreshBizDashboard();
 }
 function viewInvoiceS(id){
   const list=loadSInvoices();
@@ -6826,8 +6873,13 @@ function paySInstallment(invId,no){
     inv.paid=Number(inv.paid)+Number(inst.amount);
     inv.remaining=Math.max(inv.total-inv.paid,0);
     saveSInvoices(list);
+    const receipts=loadTreasuryReceipts();
+    receipts.push({id:'rcpt_'+Date.now(),seq:nextSeq(),name:inv.customerName,amount:Number(inst.amount),type:'بيع نقدي',
+      date:todayStr(),desc:'سداد قسط '+no+' — فاتورة '+(inv.invNo?'#'+inv.invNo:'#'+inv.seq),notes:'',sourceInvId:inv.id});
+    saveTreasuryReceipts(receipts);
     viewInvoiceS(invId);
     if(bizSalesTab==='customers')renderCustomersTab(document.getElementById('biz-sales-tab-content'));
+    refreshBizDashboard();
   },'تأكيد السداد');
 }
 
@@ -6952,9 +7004,11 @@ function saveCollection(){
 }
 function deleteInvoiceS(id){
   saveSInvoices(loadSInvoices().filter(x=>x.id!==id));
+  saveTreasuryReceipts(loadTreasuryReceipts().filter(rc=>rc.sourceInvId!==id));
   closeInvoiceFormS();
   if(bizEntityDetail&&bizEntityDetail.type==='customer')renderCustomersTab(document.getElementById('biz-sales-tab-content'));
   else renderInvoiceTabS(document.getElementById('biz-sales-tab-content'));
+  refreshBizDashboard();
 }
 
 /* ── مردود مبيعات ── */
@@ -7053,9 +7107,16 @@ function saveReturnS(print){
     notes:document.getElementById('sret-notes').value.trim()};
   commitReturnRefS(refNo);
   const list=loadSReturns();list.push(r);saveSReturns(list);
+  if(r.settleMethod==='استرداد نقدي'&&r.returnValue>0){
+    const payments=loadTreasuryPayments();
+    payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:customerName,amount:r.returnValue,type:'مردود مبيعات',
+      date:r.date,desc:'استرداد نقدى — مردود مبيعات مرجع #'+refNo,notes:'',sourceRetId:r.id});
+    saveTreasuryPayments(payments);
+  }
   closeReturnFormS();
   if(bizEntityDetail&&bizEntityDetail.type==='customer')renderCustomersTab(document.getElementById('biz-sales-tab-content'));
   else renderReturnTabS(document.getElementById('biz-sales-tab-content'));
+  refreshBizDashboard();
   if(print)setTimeout(()=>window.print(),300);
 }
 function viewReturnS(id){
@@ -7082,9 +7143,11 @@ function viewReturnS(id){
 }
 function deleteReturnS(id){
   saveSReturns(loadSReturns().filter(x=>x.id!==id));
+  saveTreasuryPayments(loadTreasuryPayments().filter(p=>p.sourceRetId!==id));
   closeReturnFormS();
   if(bizEntityDetail&&bizEntityDetail.type==='customer')renderCustomersTab(document.getElementById('biz-sales-tab-content'));
   else renderReturnTabS(document.getElementById('biz-sales-tab-content'));
+  refreshBizDashboard();
 }
 
 /* ── حسابات عملاء ── */
@@ -7209,6 +7272,56 @@ function renderInvRoot(){
 }
 
 /* ── قائمة المخازن ── */
+/* ── رمز تلقائي للصنف حسب اسمه، يظهر جوه بطاقة الصنف بالمخزون ── */
+const ITEM_ICON_RULES=[
+  [/موبايل|هاتف|تليفون|فون|iphone|samsung|phone/,'📱'],
+  [/لابتوب|كمبيوتر|laptop|computer|pc\b/,'💻'],
+  [/شاشة|تلفزيون|tv\b|monitor/,'📺'],
+  [/سماعة|سماعات|headphone|earphone/,'🎧'],
+  [/كابل|شاحن|charger|cable/,'🔌'],
+  [/بطارية|battery/,'🔋'],
+  [/قميص|تيشرت|بلوزة|shirt/,'👕'],
+  [/بنطلون|جينز|pants|jeans/,'👖'],
+  [/فستان|dress/,'👗'],
+  [/حذاء|جزمة|شوز|shoe/,'👟'],
+  [/شنطة|حقيبة|bag/,'👜'],
+  [/ساعة|watch/,'⌚'],
+  [/نظارة|glasses/,'👓'],
+  [/كتاب|book|مصحف/,'📚'],
+  [/قلم|pen\b|pencil/,'✏️'],
+  [/ورق|paper|كشكول|دفتر|كراسة/,'📒'],
+  [/أرز|رز\b|rice/,'🍚'],
+  [/سكر|sugar/,'🧂'],
+  [/زيت|oil/,'🧴'],
+  [/شاي|tea\b/,'🍵'],
+  [/قهوة|coffee|نسكافيه/,'☕'],
+  [/لبن|حليب|milk/,'🥛'],
+  [/جبنة|جبن|cheese/,'🧀'],
+  [/خبز|عيش|bread/,'🍞'],
+  [/تفاح|موز|برتقال|فاكهة|فواكه|fruit/,'🍎'],
+  [/خضار|خضروات|طماطم|بطاطس|vegetable/,'🥦'],
+  [/لحمة|لحم|فراخ|دجاج|meat|chicken/,'🍗'],
+  [/سمك|فسيخ|fish/,'🐟'],
+  [/مياه|مياة|ماية|water/,'💧'],
+  [/عصير|juice/,'🧃'],
+  [/دواء|علاج|أقراص|كبسول|medicine|pharma/,'💊'],
+  [/صابون|شامبو|منظف|soap|shampoo|detergent/,'🧼'],
+  [/معجون|فرشاة|toothpaste|toothbrush/,'🪥'],
+  [/مفك|مطرقة|عدة|أدوات|tool/,'🔧'],
+  [/دهان|بويه|paint/,'🎨'],
+  [/كرسي|طاولة|ترابيزة|furniture|chair|table/,'🪑'],
+  [/لمبة|إضاءة|light|lamp/,'💡'],
+  [/لعبة|العاب|toy/,'🧸'],
+  [/سيارة|عربية|car\b/,'🚗'],
+  [/دراجة|عجلة|bike/,'🚲'],
+  [/زهور|ورد|flower/,'🌸'],
+  [/سجاير|دخان|cigarette/,'🚬']
+];
+function itemIcon(name){
+  const n=(name||'').toLowerCase();
+  for(const[re,ico] of ITEM_ICON_RULES){if(re.test(n))return ico;}
+  return '📦';
+}
 function warehouseTotals(whId){
   const items=loadInvItems().filter(i=>i.whId===whId);
   const qty=items.reduce((s,i)=>s+Number(i.qty||0),0);
@@ -7353,7 +7466,7 @@ function renderInvItemsTab(c){
       <div id="item-form-slot"></div>
       ${directItems.length?`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
         ${directItems.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
-          <span class="m">${i+1}</span><span>${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
+          <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
         </div>`).join('')}
       </div>`:''}
       <div style="display:flex;flex-direction:column;gap:6px;">
@@ -7396,7 +7509,7 @@ function groupBlockHtml(grp){
       <div class="inv-addlink" onclick="event.stopPropagation();openAddItemForm('${grp.id}')">+ إضافة صنف</div>
       ${items.length?`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
         ${items.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
-          <span class="m">${i+1}</span><span>${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
+          <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
         </div>`).join('')}
       </div>`:'<div class="biz-po-empty" style="padding:8px;">لا توجد أصناف بهذه المجموعة</div>'}
     </div>`}
@@ -7491,7 +7604,7 @@ function editInvItem(id){
   if(!it)return;
   document.getElementById('item-form-slot').innerHTML=`
     <div class="biz-po-form">
-      <div class="biz-po-form-title">تعديل الصنف</div>
+      <div class="biz-po-form-title">تعديل الصنف ${itemIcon(it.name)}</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="itm-e-name" value="${esc(it.name)}"></div>
       <div class="biz-po-frow2">
         <input class="biz-po-inp" id="itm-e-qty" type="number" value="${it.qty}">
