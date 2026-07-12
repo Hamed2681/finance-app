@@ -738,6 +738,15 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .ws-name-btns button{flex:1;padding:9px;border-radius:8px;border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
 .ws-name-cancel{background:var(--card2);color:var(--muted);}
 .ws-name-save{background:var(--blue);color:#fff;}
+.collect-modal{position:fixed;inset:0;z-index:750;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
+.collect-modal.show{opacity:1;visibility:visible;pointer-events:auto;}
+.collect-box{background:var(--card);border-radius:14px;padding:16px;width:92vw;max-width:420px;max-height:85vh;display:flex;flex-direction:column;gap:10px;box-shadow:0 15px 50px rgba(0,0,0,.8);}
+.collect-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:40px;}
+.collect-row{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;}
+.collect-row-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--txt);}
+.collect-row-inp{background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--green);font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;padding:7px 9px;width:100%;outline:none;text-align:center;}
+.collect-row-inp:focus{border-color:var(--blue);}
+.collect-total-bar{display:flex;justify-content:space-between;font-size:12px;font-weight:800;padding:8px 4px;border-top:1px solid var(--border);}
 /* ══ WORKSPACE SCROLL BAR (أسفل الشاشة فوق الـ bnav) ══ */
 .ws-bar{position:fixed;bottom:52px;left:0;right:0;z-index:99;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;padding:0 4px;height:36px;}
 .ws-bar::-webkit-scrollbar{display:none;}
@@ -1642,20 +1651,16 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="width:20px;height:20px;border-radius:6px;background:rgba(224,176,48,.16);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">💼</span>
           <div class="biz-lbl" style="flex:1;">إجمالي السيولة</div>
-          <div style="font-size:14px;font-weight:800;color:var(--txt);">0</div>
-          <div style="font-size:9.5px;color:var(--yellow);font-weight:800;">0%</div>
-        </div>
-        <div style="height:8px;background:var(--card2);border-radius:4px;overflow:hidden;">
-          <div style="height:100%;width:0%;background:var(--yellow);"></div>
+          <div style="font-size:14px;font-weight:800;color:var(--txt);" id="ws-liq-total">0</div>
         </div>
         <div style="display:flex;gap:6px;">
           <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 6px;display:flex;align-items:center;justify-content:space-between;">
             <span class="biz-lbl">💵 الخزينة</span>
-            <span style="font-size:10.5px;font-weight:800;color:var(--yellow);">0</span>
+            <span style="font-size:10.5px;font-weight:800;color:var(--yellow);" id="ws-liq-treasury">0</span>
           </div>
           <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 6px;display:flex;align-items:center;justify-content:space-between;">
             <span class="biz-lbl">🏦 البنك</span>
-            <span style="font-size:10.5px;font-weight:800;color:var(--yellow);">0</span>
+            <span style="font-size:10.5px;font-weight:800;color:var(--yellow);" id="ws-liq-bank">0</span>
           </div>
         </div>
         <div class="biz-card-ftr">
@@ -1740,6 +1745,21 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div class="ws-name-btns">
       <button class="ws-name-cancel" onclick="closeExcessModal()">تجاهل</button>
       <button class="ws-name-save" onclick="saveExcessAsDebtor()">حفظ في المدين</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ تحصيل مديونية العملاء MODAL ══ -->
+<div class="collect-modal" id="collect-modal">
+  <div class="collect-box">
+    <div class="ws-name-title" style="text-align:center;">💰 تحصيل مديونية العملاء</div>
+    <input class="ws-name-inp" id="collect-collector-name" placeholder="اسم المحصل">
+    <input class="ws-name-inp" id="collect-date" type="date">
+    <div class="collect-list" id="collect-list"></div>
+    <div class="collect-total-bar"><span>الإجمالي المحصل</span><b id="collect-total-val" style="color:var(--green);">0.00</b></div>
+    <div class="ws-name-btns">
+      <button class="ws-name-cancel" onclick="closeCollectModal()">إلغاء</button>
+      <button class="ws-name-save" onclick="saveCollection()">حفظ</button>
     </div>
   </div>
 </div>
@@ -5443,7 +5463,10 @@ function refreshBizDashboard(){
   },0);
   let inventoryVal=0;
   (typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).forEach(w=>{inventoryVal+=warehouseTotals(w.id).val;});
-  const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+Number(v.amount||0),0)-loadTreasuryPayments().reduce((s,v)=>s+Number(v.amount||0),0);
+  const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+Number(v.amount||0),0);
+  setTxt('ws-liq-total',fmt(treasuryVal));
+  setTxt('ws-liq-treasury',fmt(treasuryVal));
+  setTxt('ws-liq-bank',fmt(0));
   const coa=loadCoaAccounts();
   const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
   const manualAssets=sumCoa(['assets_fixed','assets_current','assets_other_debit']);
@@ -5781,6 +5804,12 @@ function deleteClassification(subId,type,clsId){
    ══════════════════════════════════════════════ */
 function loadTreasuryReceipts(){return JSON.parse(_getItem('fm_treasury_receipts')||'[]');}
 function saveTreasuryReceipts(l){_setItem('fm_treasury_receipts',JSON.stringify(l));}
+/* أذون القبض الناتجة عن "تحصيل مديونية العملاء" تُسجَّل بحالة pending ولا تُسمَّع بالخزينة
+   إلا بعد تأكيد المبلغ فعلياً؛ أذون القبض العادية (بدون status) تُعتبر مؤكدة افتراضياً */
+function confirmedReceiptAmount(v){
+  if(v.status==='pending')return 0;
+  return Number(v.confirmedAmount!=null?v.confirmedAmount:v.amount)||0;
+}
 function loadTreasuryPayments(){return JSON.parse(_getItem('fm_treasury_payments')||'[]');}
 function saveTreasuryPayments(l){_setItem('fm_treasury_payments',JSON.stringify(l));}
 /* ── رصيد افتتاحي للسيولة النقدية (الخزينة) ── */
@@ -5798,13 +5827,78 @@ function renderLiquidityDetail(){
       <b id="liq-opening-val" style="color:var(--yellow);">${fmt(loadTreasuryOpening())}</b>
     </div>
     <div id="liq-opening-form-slot"></div>
+    <div id="liq-pending-wrap"></div>
     <div class="biz-po-tabs">
       <button class="ptab" id="ltab-receipt" onclick="switchLiquidityTab('receipt')">إذن قبض</button>
       <button class="ptab" id="ltab-payment" onclick="switchLiquidityTab('payment')">إذن صرف</button>
     </div>
     <div id="biz-liquidity-tab-content"></div>`;
   body.appendChild(wrap);
+  renderPendingVouchers();
   switchLiquidityTab(liquidityTab);
+}
+/* ── الأذون المعلقة: أذون قبض من تحصيل مديونية العملاء لسه محتاجة تأكيد المبلغ ── */
+function pendingReceipts(){return loadTreasuryReceipts().filter(v=>v.status==='pending');}
+function renderPendingVouchers(){
+  const wrap=document.getElementById('liq-pending-wrap');
+  if(!wrap)return;
+  const list=pendingReceipts();
+  if(!list.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=`
+    <div class="biz-po-form-title" style="color:var(--yellow);padding:0;">⏳ أذون معلقة تحتاج تأكيد (${list.length})</div>
+    <div class="biz-po-list">${list.map(v=>`
+      <div class="biz-po-row">
+        <div class="biz-po-row-top"><b>${esc(v.name)}</b><span>#${v.seq}</span></div>
+        <div class="biz-po-row-bottom"><span>${v.date||''}${v.lines?' · '+v.lines.length+' عميل':''}</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
+        <div class="biz-po-btns" style="margin-top:6px;">
+          <button class="biz-po-btn save" onclick="openConfirmVoucher('${v.id}')">تأكيد المبلغ</button>
+        </div>
+      </div>`).join('')}</div>
+    <div id="confirm-voucher-slot"></div>`;
+}
+function openConfirmVoucher(id){
+  const v=pendingReceipts().find(x=>x.id===id);
+  if(!v)return;
+  const slot=document.getElementById('confirm-voucher-slot');
+  if(!slot)return;
+  slot.innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">تأكيد إذن قبض #${v.seq} — ${esc(v.name)}</div>
+      <div class="biz-po-detail-line"><span>المبلغ المسجل</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="confirm-amt-inp" type="number" placeholder="أدخل المبلغ الفعلى المستلم" value="${v.amount}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveConfirmVoucher('${v.id}')">تأكيد</button>
+        <button class="biz-po-btn cancel" onclick="document.getElementById('confirm-voucher-slot').innerHTML=''">إلغاء</button>
+      </div>
+    </div>`;
+}
+function saveConfirmVoucher(id){
+  const receipts=loadTreasuryReceipts();
+  const v=receipts.find(x=>x.id===id);
+  if(!v)return;
+  const inp=document.getElementById('confirm-amt-inp');
+  const confirmedAmount=Number(inp?inp.value:0)||0;
+  const diff=Math.round((Number(v.amount)-confirmedAmount)*100)/100;
+  v.status='confirmed';
+  v.confirmedAmount=confirmedAmount;
+  v.confirmedDate=todayStr();
+  saveTreasuryReceipts(receipts);
+  if(diff>0.001)addCollectorShortfallDebt(v.name,diff,v.seq);
+  const slot=document.getElementById('confirm-voucher-slot');
+  if(slot)slot.innerHTML='';
+  renderPendingVouchers();
+  renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));
+  refreshBizDashboard();
+  pgConfirm(diff>0.001?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
+}
+/* تسجيل الفرق بين المحصَّل والمؤكَّد كحساب "أخرى مدينة" على المحصِّل فى شجرة الحسابات */
+function addCollectorShortfallDebt(collectorName,amount,voucherSeq){
+  const data=loadCoaAccounts();
+  if(!data.assets_other_debit)data.assets_other_debit=[];
+  data.assets_other_debit.push({id:'acc_'+Date.now(),name:collectorName+' — فرق تحصيل إذن #'+voucherSeq,amount});
+  saveCoaAccounts(data);
+  coaExpanded.assets_other_debit=true;
+  renderCoaTree();
 }
 function openTreasuryOpeningForm(){
   const slot=document.getElementById('liq-opening-form-slot');
@@ -5845,7 +5939,10 @@ function renderReceiptTab(c){
   const list=loadTreasuryReceipts().slice().reverse();
   c.innerHTML=`
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <button class="biz-po-addbtn" onclick="openVoucherForm('receipt')">+ إذن قبض جديد</button>
+      <div style="display:flex;gap:8px;">
+        <button class="biz-po-addbtn" style="flex:1;" onclick="openVoucherForm('receipt')">+ إذن قبض جديد</button>
+        <button class="biz-po-addbtn" style="flex:1;background:rgba(62,207,106,.15);color:var(--green);border-color:rgba(62,207,106,.35);" onclick="openCollectModal()">💰 تحصيل</button>
+      </div>
       <div id="receipt-form-slot"></div>
       <div class="biz-po-list">${list.length?list.map(v=>voucherRowHtml(v,'receipt')).join(''):'<div class="biz-po-empty">لا توجد أذون قبض مسجلة بعد</div>'}</div>
     </div>`;
@@ -5862,8 +5959,9 @@ function renderPaymentTab(c){
 }
 function voucherRowHtml(v,kind){
   const color=kind==='receipt'?'var(--green)':'var(--red)';
+  const pendingBadge=v.status==='pending'?' <span style="font-size:9px;color:var(--yellow);">⏳ معلق</span>':'';
   return `<div class="biz-po-row" onclick="viewVoucher('${kind}','${v.id}')">
-    <div class="biz-po-row-top"><b>${esc(v.name)||'—'}</b><span>#${v.seq}</span></div>
+    <div class="biz-po-row-top"><b>${esc(v.name)||'—'}${pendingBadge}</b><span>#${v.seq}</span></div>
     <div class="biz-po-row-bottom"><span>${v.date||''}</span><b style="color:${color};">${fmt(v.amount)}</b></div>
   </div>`;
 }
@@ -6269,6 +6367,9 @@ function buildEntityLedger(type,name){
     (inv.installments||[]).filter(x=>x.paid).forEach(x=>{
       rows.push({date:x.paidDate||x.dueDate||'',invNo:label+' — قسط '+x.no,debit:0,credit:Number(x.amount)||0,_sd:x.paidDate||x.dueDate||''});
     });
+    (inv.collections||[]).forEach(cItem=>{
+      rows.push({date:cItem.date||'',invNo:label+(cItem.voucherSeq?' — تحصيل #'+cItem.voucherSeq:' — تحصيل'),debit:0,credit:Number(cItem.amount)||0,_sd:cItem.date||''});
+    });
   });
   returns.filter(r=>(r[nameField]||'—')===name).forEach(r=>{
     rows.push({date:r.date||'',invNo:'مرتجع #'+r.refNo,debit:0,credit:r.returnValue,_sd:r.date||''});
@@ -6659,6 +6760,121 @@ function paySInstallment(invId,no){
     viewInvoiceS(invId);
     if(bizSalesTab==='customers')renderCustomersTab(document.getElementById('biz-sales-tab-content'));
   },'تأكيد السداد');
+}
+
+/* ══════════════════════════════════════════════
+   تحصيل مديونية العملاء: نافذة تجمع كل العملاء
+   المستحق عليهم سداد وتسجل تحصيل الكل فى إذن قبض واحد
+   ══════════════════════════════════════════════ */
+function customerDueList(){
+  const today=todayStr();
+  const map={};
+  loadSInvoices().forEach(inv=>{
+    const total=Number(inv.total)||0;
+    const remaining=Math.max(total-Number(inv.paid||0),0);
+    if(remaining<=0)return;
+    const items=[];
+    if(inv.installments&&inv.installments.length){
+      inv.installments.filter(x=>!x.paid&&x.dueDate&&x.dueDate<=today).forEach(x=>{
+        items.push({invId:inv.id,no:x.no,amount:Number(x.amount)||0,dueDate:x.dueDate});
+      });
+    } else {
+      items.push({invId:inv.id,no:null,amount:remaining,dueDate:inv.date||today});
+    }
+    if(!items.length)return;
+    const k=inv.customerName||'—';
+    if(!map[k])map[k]={name:k,dueTotal:0,items:[]};
+    items.forEach(it=>{map[k].dueTotal+=it.amount;map[k].items.push(it);});
+  });
+  const out=Object.values(map).filter(c=>c.dueTotal>0);
+  out.forEach(c=>c.items.sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||'')));
+  out.sort((a,b)=>b.dueTotal-a.dueTotal);
+  return out;
+}
+let _collectDue=[];
+function openCollectModal(){
+  _collectDue=customerDueList();
+  const nameEl=document.getElementById('collect-collector-name');if(nameEl)nameEl.value='';
+  const dateEl=document.getElementById('collect-date');if(dateEl)dateEl.value=todayStr();
+  renderCollectList();
+  document.getElementById('collect-modal').classList.add('show');
+}
+function closeCollectModal(){document.getElementById('collect-modal').classList.remove('show');}
+function renderCollectList(){
+  const wrap=document.getElementById('collect-list');
+  if(!wrap)return;
+  if(!_collectDue.length){wrap.innerHTML='<div class="biz-po-empty">لا يوجد عملاء مستحق عليهم سداد حالياً</div>';updCollectTotal();return;}
+  wrap.innerHTML=_collectDue.map((c,i)=>`
+    <div class="collect-row">
+      <div class="collect-row-top"><span>${esc(c.name)}</span><span style="color:var(--red);">مستحق: ${fmt(c.dueTotal)}</span></div>
+      <input class="collect-row-inp" type="number" id="collect-amt-${i}" value="${c.dueTotal}" oninput="updCollectTotal()">
+    </div>`).join('');
+  updCollectTotal();
+}
+function updCollectTotal(){
+  const total=_collectDue.reduce((s,c,i)=>{const el=document.getElementById('collect-amt-'+i);return s+(el?Number(el.value||0):0);},0);
+  const el=document.getElementById('collect-total-val');if(el)el.textContent=fmt(total);
+}
+function saveCollection(){
+  const collector=(document.getElementById('collect-collector-name').value||'').trim();
+  if(!collector){pgConfirm('من فضلك أدخل اسم المحصل',()=>{},'حسناً');return;}
+  const date=document.getElementById('collect-date').value||todayStr();
+  const lines=[];
+  _collectDue.forEach((c,i)=>{
+    const el=document.getElementById('collect-amt-'+i);
+    const amt=el?Number(el.value||0):0;
+    if(amt>0)lines.push({customerName:c.name,amount:amt,items:c.items});
+  });
+  if(!lines.length){pgConfirm('من فضلك أدخل مبلغ عميل واحد على الأقل',()=>{},'حسناً');return;}
+  const sInv=loadSInvoices();
+  const seq=nextSeq();
+  lines.forEach(line=>{
+    let left=line.amount;
+    line.items.forEach(it=>{
+      if(left<=0)return;
+      const inv=sInv.find(x=>x.id===it.invId);
+      if(!inv)return;
+      if(it.no!=null){
+        const inst=(inv.installments||[]).find(x=>x.no===it.no);
+        if(inst&&!inst.paid&&left>=inst.amount-0.001){
+          inst.paid=true;inst.paidDate=date;
+          inv.paid=Number(inv.paid||0)+Number(inst.amount);
+          left-=Number(inst.amount);
+          inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+        }
+      } else {
+        const apply=Math.min(left,it.amount);
+        inv.paid=Number(inv.paid||0)+apply;
+        inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+        if(!inv.collections)inv.collections=[];
+        inv.collections.push({amount:apply,date,voucherSeq:seq});
+        left-=apply;
+      }
+    });
+    if(left>0.001){
+      const openInv=sInv.find(x=>x.customerName===line.customerName&&Math.max(Number(x.total)-Number(x.paid||0),0)>0);
+      if(openInv){
+        openInv.paid=Number(openInv.paid||0)+left;
+        openInv.remaining=Math.max(Number(openInv.total)-Number(openInv.paid||0),0);
+        if(!openInv.collections)openInv.collections=[];
+        openInv.collections.push({amount:left,date,voucherSeq:seq});
+      }
+    }
+  });
+  saveSInvoices(sInv);
+  const total=Math.round(lines.reduce((s,l)=>s+l.amount,0)*100)/100;
+  const v={id:'rcpt_'+Date.now(),seq,name:collector,amount:total,date,
+    desc:'تحصيل مديونية عملاء ('+lines.length+' عميل)',
+    notes:lines.map(l=>l.customerName+': '+fmt(l.amount)).join(' — '),
+    lines:lines.map(l=>({customerName:l.customerName,amount:l.amount})),
+    status:'pending',collector};
+  const receipts=loadTreasuryReceipts();receipts.push(v);saveTreasuryReceipts(receipts);
+  closeCollectModal();
+  if(bizEntityDetail&&bizEntityDetail.type==='customer')bizEntityDetail=null;
+  if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));
+  if(document.getElementById('biz-liquidity-tab-content')){renderPendingVouchers();switchLiquidityTab(liquidityTab);}
+  refreshBizDashboard();
+  pgConfirm('تم تسجيل التحصيل بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة',()=>{},'تمام');
 }
 function deleteInvoiceS(id){
   saveSInvoices(loadSInvoices().filter(x=>x.id!==id));
