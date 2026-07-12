@@ -5417,7 +5417,11 @@ function refreshBizDashboard(){
   const sTotal=sInv.reduce((s,i)=>s+Number(i.total||0),0);
   const sCollected=sInv.reduce((s,i)=>s+Number(i.paid||0),0);
   const sReturned=sRet.reduce((s,r)=>s+Number(r.returnValue||0),0);
-  const sRemaining=Math.max(sTotal-sCollected-sReturned,0);
+  const custOpenings=loadCustomerOpenings();
+  const sRemaining=buildEntityMap('customer').reduce((s,cu)=>{
+    const opening=Number(custOpenings[cu.name]||0);
+    return s+Math.max(cu.total-cu.paid-cu.returned+opening,0);
+  },0);
   setTxt('ws-sale-total',fmt(sTotal));
   setTxt('ws-sale-collected',fmt(sCollected));
   setTxt('ws-sale-rem',fmt(sRemaining));
@@ -5511,6 +5515,66 @@ function getClassifiedNamesSet(type){
 function findEntityClass(type,name){
   const cls=(loadClassifications()[type]||[]);
   return cls.find(c=>c.members.includes(name))||null;
+}
+
+/* ── تصنيفات العملاء/الموردين: تبويب + إزاحة للتنقل بين التصنيفات ── */
+let bizClsFilter={customer:'all',supplier:'all'};
+function entClsSlots(type){
+  const list=(loadClassifications()[type]||[]);
+  const slots=['all',...list.map(c=>c.id)];
+  const classifiedSet=getClassifiedNamesSet(type);
+  if(getEntityNames(type).some(n=>!classifiedSet.has(n)))slots.push('unclassified');
+  return slots;
+}
+function entClsLabel(type,slotId){
+  if(slotId==='all')return'الكل';
+  if(slotId==='unclassified')return'غير مصنف';
+  const c=(loadClassifications()[type]||[]).find(x=>x.id===slotId);
+  return c?c.name:'—';
+}
+function entClsActive(type){
+  const slots=entClsSlots(type);
+  const cur=bizClsFilter[type]||'all';
+  return slots.includes(cur)?cur:'all';
+}
+function filterEntitiesByCls(type,list){
+  const slot=entClsActive(type);
+  if(slot==='all')return list;
+  if(slot==='unclassified'){
+    const classifiedSet=getClassifiedNamesSet(type);
+    return list.filter(e=>!classifiedSet.has(e.name));
+  }
+  const c=(loadClassifications()[type]||[]).find(x=>x.id===slot);
+  if(!c)return list;
+  return list.filter(e=>c.members.includes(e.name));
+}
+function entClsBarHtml(type){
+  const slots=entClsSlots(type);
+  if(slots.length<=1)return'';
+  const active=entClsActive(type);
+  return `<div class="debt-cats-bar">${slots.map(s=>`<div class="debt-cat-chip ${s===active?'active':''}" onclick="switchEntCls('${type}','${s}')">${esc(entClsLabel(type,s))}</div>`).join('')}</div>`;
+}
+function switchEntCls(type,slotId){
+  bizClsFilter[type]=slotId;
+  if(type==='customer')renderCustomersTab(document.getElementById('biz-sales-tab-content'));
+  else renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
+}
+function initEntClsSwipe(type,containerId){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  let sx=null;
+  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  el.addEventListener('touchend',e=>{
+    if(sx===null)return;
+    const dx=e.changedTouches[0].clientX-sx;sx=null;
+    if(Math.abs(dx)<40)return;
+    const slots=entClsSlots(type);
+    if(slots.length<=1)return;
+    let idx=slots.indexOf(entClsActive(type));
+    if(idx<0)idx=0;
+    idx=dx>0?Math.max(0,idx-1):Math.min(slots.length-1,idx+1);
+    switchEntCls(type,slots[idx]);
+  });
 }
 function renderAccountsDetail(){
   const body=document.getElementById('biz-detail-body');
@@ -6300,13 +6364,17 @@ function saveManualEntity(type){
 }
 function renderSuppliersTab(c){
   if(bizEntityDetail&&bizEntityDetail.type==='supplier'){c.innerHTML=entityDetailHtml('supplier',bizEntityDetail.name);return;}
-  const suppliers=buildEntityMap('supplier');
+  const allSuppliers=buildEntityMap('supplier');
+  const suppliers=filterEntitiesByCls('supplier',allSuppliers);
   const clsStore=loadClassifications();
   const openings=loadSupplierOpenings();
+  const emptyMsg=allSuppliers.length?'لا يوجد موردون فى هذا التصنيف':'لا يوجد موردون مسجلون بعد<br>سيظهر الموردون هنا تلقائياً بعد تسجيل أول فاتورة مشتريات';
   c.innerHTML=`
     <button class="biz-po-addbtn" onclick="openManualEntityForm('supplier')">+ مورد سابق برصيد افتتاحي</button>
     <div id="sup-opening-form-slot"></div>
-    <div class="biz-po-list">${suppliers.length?suppliers.map(s=>supplierCardHtml(s,clsStore,openings)).join(''):'<div class="biz-po-empty">لا يوجد موردون مسجلون بعد<br>سيظهر الموردون هنا تلقائياً بعد تسجيل أول فاتورة مشتريات</div>'}</div>`;
+    ${entClsBarHtml('supplier')}
+    <div class="biz-po-list" id="sup-po-list">${suppliers.length?suppliers.map(s=>supplierCardHtml(s,clsStore,openings)).join(''):`<div class="biz-po-empty">${emptyMsg}</div>`}</div>`;
+  initEntClsSwipe('supplier','sup-po-list');
 }
 function openSupplierOpeningForm(name){
   const slot=document.getElementById('sup-opening-form-slot');
@@ -6732,13 +6800,17 @@ function deleteReturnS(id){
 /* ── حسابات عملاء ── */
 function renderCustomersTab(c){
   if(bizEntityDetail&&bizEntityDetail.type==='customer'){c.innerHTML=entityDetailHtml('customer',bizEntityDetail.name);return;}
-  const customers=buildEntityMap('customer');
+  const allCustomers=buildEntityMap('customer');
+  const customers=filterEntitiesByCls('customer',allCustomers);
   const clsStore=loadClassifications();
   const openings=loadCustomerOpenings();
+  const emptyMsg=allCustomers.length?'لا يوجد عملاء فى هذا التصنيف':'لا يوجد عملاء مسجلون بعد<br>سيظهر العملاء هنا تلقائياً بعد تسجيل أول فاتورة مبيعات';
   c.innerHTML=`
     <button class="biz-po-addbtn" onclick="openManualEntityForm('customer')">+ عميل سابق برصيد افتتاحي</button>
     <div id="cus-opening-form-slot"></div>
-    <div class="biz-po-list">${customers.length?customers.map(cu=>customerCardHtml(cu,clsStore,openings)).join(''):'<div class="biz-po-empty">لا يوجد عملاء مسجلون بعد<br>سيظهر العملاء هنا تلقائياً بعد تسجيل أول فاتورة مبيعات</div>'}</div>`;
+    ${entClsBarHtml('customer')}
+    <div class="biz-po-list" id="cus-po-list">${customers.length?customers.map(cu=>customerCardHtml(cu,clsStore,openings)).join(''):`<div class="biz-po-empty">${emptyMsg}</div>`}</div>`;
+  initEntClsSwipe('customer','cus-po-list');
 }
 function openCustomerOpeningForm(name){
   const slot=document.getElementById('cus-opening-form-slot');
