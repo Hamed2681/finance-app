@@ -17,7 +17,7 @@
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;display:flex;flex-direction:column;}
 /* توضيح الخط بالقسم التجاري كله: لون أفتح وأوضح تباين للنصوص الثانوية (muted) */
-#pg-workspace,#pg-biz-detail,#biz-expand-overlay,#collect-modal{--muted:#aab8cb;}
+#pg-workspace,#pg-biz-detail,#biz-expand-overlay,#collect-modal,#pay-modal{--muted:#aab8cb;}
 
 /* ── TOP SUMMARY ── */
 .top-bar{flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:6px 8px;position:relative;}
@@ -622,7 +622,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-card-ftr{display:flex;align-items:center;justify-content:center;gap:6px;margin:auto -7px -7px -7px;background:var(--card2);border-top:1px solid var(--border);border-radius:0 0 11px 11px;padding:4px 8px;}
 .biz-expand-overlay .biz-card-ftr{margin:auto -16px -16px -16px;padding:8px 16px;border-radius:0 0 16px 16px;}
 .biz-card-title{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:center;}
-.biz-expand-btn{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:5px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;cursor:pointer;color:var(--muted);z-index:2;}
+.biz-expand-btn{position:absolute;bottom:6px;left:6px;width:18px;height:18px;border-radius:5px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;cursor:pointer;color:var(--muted);z-index:2;}
 .biz-expand-btn:active{background:var(--border);}
 .biz-expand-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease;}
 .biz-expand-overlay.show{opacity:1;pointer-events:auto;}
@@ -630,13 +630,24 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-expand-overlay.show .biz-card{transform:scale(1);opacity:1;}
 .biz-expand-overlay .biz-card:active{transform:none;}
 .biz-expand-overlay .biz-card-title{font-size:14px;}
-.biz-expand-overlay .biz-expand-btn{top:14px;right:14px;width:24px;height:24px;font-size:11px;}
+.biz-expand-overlay .biz-expand-btn{bottom:14px;right:14px;top:auto;left:auto;width:24px;height:24px;font-size:11px;}
 .biz-expand-overlay .biz-val{font-size:20px;}
 .biz-expand-overlay .biz-lbl{font-size:11px;}
 .biz-expand-overlay .biz-sub{font-size:10.5px;}
 .biz-expand-overlay .biz-split-lbls{font-size:10.5px;}
 .biz-expand-overlay .biz-split-lbls b{font-size:13px;}
 .biz-expand-overlay .biz-ico{width:30px;height:30px;font-size:15px;}
+/* ── تكبير الخط وتقليل ارتفاع الصفوف العلوية لكرت الملخص فى صفحات التفاصيل ── */
+#biz-detail-body>.biz-card{gap:2px;padding:7px 10px;}
+#biz-detail-body>.biz-card .biz-card-hdr{margin-bottom:-14px;}
+#biz-detail-body>.biz-card .biz-ico{width:18px;height:18px;font-size:9px;}
+#biz-detail-body>.biz-card .biz-lbl{font-size:12.5px;line-height:1;}
+#biz-detail-body>.biz-card .biz-val{font-size:19px;line-height:1.1;}
+#biz-detail-body>.biz-card .biz-sub{font-size:11.5px;line-height:1;}
+#biz-detail-body>.biz-card .biz-split-lbls{font-size:11.5px;padding-top:3px;gap:2px;}
+#biz-detail-body>.biz-card .biz-split-lbls b{font-size:15px;line-height:1.2;}
+#biz-detail-body>.biz-card .biz-split-lbls small{font-size:10px;}
+#biz-detail-body>.biz-card .biz-bar{height:3px;}
 
 /* ══ قسم المشتريات: فاتورة / مردود / حسابات موردين ══ */
 .biz-po-tabs{display:flex;gap:6px;}
@@ -1506,6 +1517,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       <option value="expense">مصروفات</option>
       <option value="commit">التزامات</option>
       <option value="debt">ديون</option>
+      <option value="biz">قيود تجارية</option>
     </select>
   </div>
   <div style="flex-shrink:0;position:relative;background:var(--card);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:5px;">
@@ -1766,6 +1778,21 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
   </div>
 </div>
 
+<!-- ══ سداد مديونية الموردين MODAL ══ -->
+<div class="collect-modal" id="pay-modal">
+  <div class="collect-box">
+    <div class="ws-name-title" style="text-align:center;">💸 سداد مديونية الموردين</div>
+    <input class="ws-name-inp" id="pay-payer-name" placeholder="اسم الصارف">
+    <input class="ws-name-inp" id="pay-date" type="date">
+    <div class="collect-list" id="pay-list"></div>
+    <div class="collect-total-bar"><span>الإجمالي المسدد</span><b id="pay-total-val" style="color:var(--red);">0.00</b></div>
+    <div class="ws-name-btns">
+      <button class="ws-name-cancel" onclick="closePayModal()">إلغاء</button>
+      <button class="ws-name-save" onclick="savePayment()">حفظ</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ BUDGET MODAL (قائمة بنود الميزانية) ══ -->
 <div class="budget-modal" id="budget-modal">
   <div class="budget-box">
@@ -1994,6 +2021,17 @@ function nextSeq(){
   const s=Number(_getItem('fm_seq')||0)+1;
   _setItem('fm_seq',s);
   return s;
+}
+// سجل قيود القسم التجاري — كل معاملة تجارية (فواتير/مردودات/أذون/أرصدة افتتاحية) تُقيَّد هنا
+// برقم مسلسل عام (نفس عداد nextSeq) وتُدمج مع سجل العمليات بالقسم الشخصي بنفس الشكل والترتيب
+function loadBizJournal(){return JSON.parse(_getItem('fm_biz_journal')||'[]');}
+function saveBizJournal(l){_setItem('fm_biz_journal',JSON.stringify(l));}
+function pushBizJournal(name,amount,side,lbl,color,date){
+  amount=Number(amount)||0;
+  if(!amount)return;
+  const list=loadBizJournal();
+  list.push({name,amount,_side:side,_lbl:lbl,_color:color,date:date||todayStr(),_seq:nextSeq()});
+  saveBizJournal(list);
 }
 function todayStr(){return new Date().toISOString().slice(0,10);}
 let _genericConfirmCb=null;
@@ -5183,6 +5221,10 @@ function renderLogPage(){
       entries.push({date:t.date||r.date,amount:t.amount,pay:t.pay,_type:'debt',_side:isFor?'in':'out',_lbl:'مدين · '+(isFor?'سداد':'إضافة'),_color:'var(--blue)',_name:r.name,_seq:t._seq});
     });});
   }
+  // ── قيود القسم التجاري (فواتير/مردودات/أذون/أرصدة افتتاحية) — بنفس شكل وترتيب سجل العمليات الشخصي ──
+  if(filter==='all'||filter==='biz'){
+    loadBizJournal().forEach(j=>{entries.push({...j,_type:'biz',_name:j.name});});
+  }
   entries=entries.filter(r=>inRange(r.date||'',rf,rt));
   // ── ترتيب أسبقية التسجيل: البنود الأقدم في الإدخال تظهر أولًا داخل نفس اليوم/العمود ──
   // (بدل الترتيب حسب نوع البند دخل/مصروف/التزام/دين كمجموعات منفصلة)
@@ -5205,7 +5247,8 @@ function renderLogPage(){
     const bar=`<div style="width:2px;align-self:stretch;border-radius:1px;background:${r._color};flex-shrink:0;"></div>`;
     const loanTag=r.isLoan?`<span style="font-size:8px;background:rgba(224,176,48,.18);color:#e0b030;border-radius:3px;padding:0 3px;font-weight:700;flex-shrink:0;">سلفة</span>`:'';
     const paidTag=(!r.isLoan&&r.fromDebt)?`<span style="font-size:8px;background:rgba(77,168,240,.18);color:var(--blue);border-radius:3px;padding:0 3px;font-weight:700;flex-shrink:0;">سداد</span>`:'';
-    const name=`<div style="min-width:0;flex:1;display:flex;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--txt);overflow:hidden;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r._name}</span>${loanTag}${paidTag}</div>`;
+    const seqTag=r._seq?`<span style="font-size:8px;color:var(--muted);flex-shrink:0;">#${String(r._seq).padStart(2,'0')}</span>`:'';
+    const name=`<div style="min-width:0;flex:1;display:flex;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--txt);overflow:hidden;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r._name}</span>${loanTag}${paidTag}${seqTag}</div>`;
     const amt=`<div style="font-size:13px;font-weight:800;color:${r._color};flex-shrink:0;">${fmt(r.amount)}</div>`;
     // المبلغ دايمًا في المنتصف (جهة الخط الفاصل) لصفوف الوارد والصادر، وباقي البند (الاسم + الشريط) دايمًا على الأجناب (الحافة الخارجية للشاشة)
     const content=side==='out'?amt+name+bar:bar+name+amt;
@@ -5875,7 +5918,7 @@ function renderPendingVouchers(){
     <div class="biz-po-list">${list.map(({v,kind})=>`
       <div class="biz-po-row">
         <div class="biz-po-row-top"><b>${esc(v.name)}</b><span>#${v.seq} · ${kind==='receipt'?'قبض':'صرف'}</span></div>
-        <div class="biz-po-row-bottom"><span>${v.date||''}${v.lines?' · '+v.lines.length+' عميل':''}</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
+        <div class="biz-po-row-bottom"><span>${v.date||''}${v.lines?' · '+v.lines.length+(kind==='receipt'?' عميل':' مورد'):''}</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
         <div class="biz-po-btns" style="margin-top:6px;">
           <button class="biz-po-btn save" onclick="openConfirmVoucher('${kind}','${v.id}')">تأكيد المبلغ</button>
         </div>
@@ -5944,7 +5987,9 @@ function openTreasuryOpeningForm(){
 function closeTreasuryOpeningForm(){const s=document.getElementById('liq-opening-form-slot');if(s)s.innerHTML='';}
 function saveTreasuryOpeningVal(){
   const val=Number(document.getElementById('liq-opening-inp').value||0);
+  const old=loadTreasuryOpening();
   saveTreasuryOpening(val);
+  if(val!==old)pushBizJournal('رصيد افتتاحي — الخزينة',Math.abs(val),val>=0?'in':'out','رصيد افتتاحي خزينة','var(--blue)');
   closeTreasuryOpeningForm();
   const el=document.getElementById('liq-opening-val');
   if(el)el.textContent=fmt(val);
@@ -5984,7 +6029,10 @@ function renderPaymentTab(c){
   const list=loadTreasuryPayments().slice().reverse();
   c.innerHTML=`
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <button class="biz-po-addbtn" onclick="openVoucherForm('payment')">+ إذن صرف جديد</button>
+      <div style="display:flex;gap:8px;">
+        <button class="biz-po-addbtn" style="flex:1;" onclick="openVoucherForm('payment')">+ إذن صرف جديد</button>
+        <button class="biz-po-addbtn" style="flex:1;background:rgba(192,57,43,.15);color:var(--red);border-color:rgba(192,57,43,.35);" onclick="openPayModal()">💸 سداد</button>
+      </div>
       <div id="payment-form-slot"></div>
       <div class="biz-po-list">${list.length?list.map(v=>voucherRowHtml(v,'payment')).join(''):'<div class="biz-po-empty">لا توجد أذون صرف مسجلة بعد</div>'}</div>
     </div>`;
@@ -6033,6 +6081,7 @@ function saveVoucher(kind){
     notes:document.getElementById(`vch-${kind}-notes`).value.trim()};
   if(kind==='receipt'){const l=loadTreasuryReceipts();l.push(v);saveTreasuryReceipts(l);}
   else{const l=loadTreasuryPayments();l.push(v);saveTreasuryPayments(l);}
+  pushBizJournal(name,amount,kind==='receipt'?'in':'out',(kind==='receipt'?'إذن قبض #':'إذن صرف #')+v.seq,kind==='receipt'?'var(--green)':'var(--red)',v.date);
   closeVoucherForm(kind);
   if(kind==='receipt')renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));
   else renderPaymentTab(document.getElementById('biz-liquidity-tab-content'));
@@ -6043,20 +6092,55 @@ function viewVoucher(kind,id){
   if(!v)return;
   const title=kind==='receipt'?'إذن قبض':'إذن صرف';
   const nameLbl=kind==='receipt'?'المستلم منه':'المصروف له';
+  const pendingNote=v.status==='pending'?`<div class="biz-po-detail-line"><span>الحالة</span><b style="color:var(--yellow);">⏳ معلق — فى انتظار تأكيد المبلغ</b></div>`:'';
+  const confirmedNote=(v.status==='confirmed'&&v.confirmedAmount!=null)?`<div class="biz-po-detail-line"><span>المبلغ المؤكَّد فعلياً</span><b style="color:var(--green);">${fmt(v.confirmedAmount)}</b></div>`:'';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">${title} #${v.seq}</div>
       ${v.type?`<div class="biz-po-detail-line"><span>النوع</span><b style="color:var(--blue);">${esc(v.type)}</b></div>`:''}
       <div class="biz-po-detail-line"><span>${nameLbl}</span><b>${esc(v.name)}</b></div>
       <div class="biz-po-detail-line"><span>التاريخ</span><b>${v.date}</b></div>
-      <div class="biz-po-detail-line"><span>المبلغ</span><b style="color:${kind==='receipt'?'var(--green)':'var(--red)'};">${fmt(v.amount)}</b></div>
+      <div class="biz-po-detail-line"><span>${v.status==='pending'?'المبلغ المسجل':'المبلغ'}</span><b style="color:${kind==='receipt'?'var(--green)':'var(--red)'};">${fmt(v.amount)}</b></div>
+      ${pendingNote}${confirmedNote}
       ${v.desc?`<div class="biz-po-detail-line"><span>البيان</span><b>${esc(v.desc)}</b></div>`:''}
       ${v.notes?`<div class="biz-po-detail-line"><span>ملاحظات</span><b>${esc(v.notes)}</b></div>`:''}
       <div class="biz-po-btns">
+        ${v.status==='pending'?`<button class="biz-po-btn save" onclick="confirmFromVoucherView('${kind}','${v.id}')">تأكيد المبلغ</button>`:''}
         <button class="biz-po-btn cancel" onclick="pgConfirm('هل تريد حذف هذا الإذن؟',()=>deleteVoucher('${kind}','${v.id}'))">حذف</button>
         <button class="biz-po-btn save" onclick="closeVoucherForm('${kind}')">إغلاق</button>
       </div>
     </div>`;
+}
+/* تأكيد مبلغ إذن معلق (قبض تحصيل أو صرف شراء) من داخل شاشة عرض الإذن مباشرة */
+function confirmFromVoucherView(kind,id){
+  const v=(kind==='receipt'?loadTreasuryReceipts():loadTreasuryPayments()).find(x=>x.id===id);
+  if(!v)return;
+  const ph=kind==='receipt'?'أدخل المبلغ الفعلى المستلم':'أدخل المبلغ الفعلى المصروف';
+  document.getElementById(voucherFormSlotId(kind)).innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">تأكيد ${kind==='receipt'?'إذن قبض':'إذن صرف'} #${v.seq} — ${esc(v.name)}</div>
+      <div class="biz-po-detail-line"><span>المبلغ المسجل</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="confirm-amt-inp-vch" type="number" placeholder="${ph}" value="${v.amount}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveConfirmFromVoucherView('${kind}','${v.id}')">تأكيد</button>
+        <button class="biz-po-btn cancel" onclick="viewVoucher('${kind}','${v.id}')">رجوع</button>
+      </div>
+    </div>`;
+}
+function saveConfirmFromVoucherView(kind,id){
+  const list=kind==='receipt'?loadTreasuryReceipts():loadTreasuryPayments();
+  const v=list.find(x=>x.id===id);
+  if(!v)return;
+  const inp=document.getElementById('confirm-amt-inp-vch');
+  const confirmedAmount=Number(inp?inp.value:0)||0;
+  const diff=Math.round((Number(v.amount)-confirmedAmount)*100)/100;
+  v.status='confirmed';v.confirmedAmount=confirmedAmount;v.confirmedDate=todayStr();
+  if(kind==='receipt')saveTreasuryReceipts(list);else saveTreasuryPayments(list);
+  if(diff>0.001)addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
+  if(document.getElementById('liq-pending-wrap'))renderPendingVouchers();
+  refreshBizDashboard();
+  viewVoucher(kind,id);
+  pgConfirm(diff>0.001?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
 }
 function deleteVoucher(kind,id){
   if(kind==='receipt'){saveTreasuryReceipts(loadTreasuryReceipts().filter(x=>x.id!==id));renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));}
@@ -6074,6 +6158,8 @@ function savePReturns(l){_setItem('fm_biz_purchase_returns',JSON.stringify(l));}
 /* ── رصيد افتتاحي للموردين: يُضاف بعد ظهور المورد (أي بعد أول فاتورة له) ── */
 function loadSupplierOpenings(){return JSON.parse(_getItem('fm_supplier_openings')||'{}');}
 function saveSupplierOpenings(o){_setItem('fm_supplier_openings',JSON.stringify(o));}
+function loadSupplierDueDates(){return JSON.parse(_getItem('fm_supplier_duedates')||'{}');}
+function saveSupplierDueDates(o){_setItem('fm_supplier_duedates',JSON.stringify(o));}
 
 let bizPurchaseTab='invoice';
 let _pInvItems=[],_pRetItems=[];
@@ -6236,10 +6322,11 @@ function saveInvoice(){
     invNo:document.getElementById('pinv-no').value.trim(),
     date:document.getElementById('pinv-date').value||todayStr(),
     whId:whId||null,
-    items,total,paid,remaining:Math.max(total-paid,0),
+    items,total,initialPaid:paid,paid,remaining:Math.max(total-paid,0),
     notes:document.getElementById('pinv-notes').value.trim()};
   inv.postedItems=postPurchaseToInventory(inv);
   const list=loadPInvoices();list.push(inv);savePInvoices(list);
+  pushBizJournal(supplierName,total,'out','فاتورة مشتريات #'+inv.seq,'#8b6cf0',inv.date);
   if(paid>0){
     const payments=loadTreasuryPayments();
     payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:supplierName,amount:paid,type:'شراء',
@@ -6387,6 +6474,7 @@ function saveReturn(print){
     notes:document.getElementById('pret-notes').value.trim()};
   commitReturnRef(refNo);
   const list=loadPReturns();list.push(r);savePReturns(list);
+  pushBizJournal(supplierName,r.returnValue,'in','مردود مشتريات #'+refNo,'#8b6cf0',r.date);
   if(r.settleMethod==='استرداد نقدي'&&r.returnValue>0){
     const receipts=loadTreasuryReceipts();
     receipts.push({id:'rcpt_'+Date.now(),seq:nextSeq(),name:supplierName,amount:r.returnValue,type:'مردود مشتريات',
@@ -6476,6 +6564,9 @@ function buildEntityLedger(type,name){
     });
     (inv.collections||[]).forEach(cItem=>{
       rows.push({date:cItem.date||'',invNo:label+(cItem.voucherSeq?' — تحصيل #'+cItem.voucherSeq:' — تحصيل'),debit:0,credit:Number(cItem.amount)||0,_sd:cItem.date||''});
+    });
+    (inv.payments||[]).forEach(pItem=>{
+      rows.push({date:pItem.date||'',invNo:label+(pItem.voucherSeq?' — سداد #'+pItem.voucherSeq:' — سداد'),debit:0,credit:Number(pItem.amount)||0,_sd:pItem.date||''});
     });
   });
   returns.filter(r=>(r[nameField]||'—')===name).forEach(r=>{
@@ -6576,12 +6667,14 @@ function renderSuppliersTab(c){
   const suppliers=filterEntitiesByCls('supplier',allSuppliers);
   const clsStore=loadClassifications();
   const openings=loadSupplierOpenings();
+  const dueDates=loadSupplierDueDates();
   const emptyMsg=allSuppliers.length?'لا يوجد موردون فى هذا التصنيف':'لا يوجد موردون مسجلون بعد<br>سيظهر الموردون هنا تلقائياً بعد تسجيل أول فاتورة مشتريات';
   c.innerHTML=`
     <button class="biz-po-addbtn" onclick="openManualEntityForm('supplier')">+ مورد سابق برصيد افتتاحي</button>
     <div id="sup-opening-form-slot"></div>
+    <div id="sup-duedate-form-slot"></div>
     ${entClsBarHtml('supplier')}
-    <div class="biz-po-list" id="sup-po-list">${suppliers.length?suppliers.map(s=>supplierCardHtml(s,clsStore,openings)).join(''):`<div class="biz-po-empty">${emptyMsg}</div>`}</div>`;
+    <div class="biz-po-list" id="sup-po-list">${suppliers.length?suppliers.map(s=>supplierCardHtml(s,clsStore,openings,dueDates)).join(''):`<div class="biz-po-empty">${emptyMsg}</div>`}</div>`;
   initEntClsSwipe('supplier','sup-po-list');
 }
 function openSupplierOpeningForm(name){
@@ -6602,17 +6695,43 @@ function closeSupplierOpeningForm(){const s=document.getElementById('sup-opening
 function saveSupplierOpening(name){
   const val=Number(document.getElementById('sup-opening-val').value||0);
   const o=loadSupplierOpenings();
+  const old=Number(o[name]||0);
   o[name]=val;
   saveSupplierOpenings(o);
+  if(val!==old)pushBizJournal(name,Math.abs(val),val>=0?'out':'in','رصيد افتتاحي مورد','#8b6cf0');
   closeSupplierOpeningForm();
   renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
 }
-function supplierCardHtml(s,clsStore,openings){
+function openSupplierDueDateForm(name){
+  const slot=document.getElementById('sup-duedate-form-slot');
+  if(!slot)return;
+  const dueDates=loadSupplierDueDates();
+  slot.innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">تاريخ استحقاق السداد — ${esc(name)}</div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="sup-duedate-val" type="date" value="${dueDates[name]||''}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveSupplierDueDate('${esc(name)}')">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="closeSupplierDueDateForm()">إلغاء</button>
+      </div>
+    </div>`;
+}
+function closeSupplierDueDateForm(){const s=document.getElementById('sup-duedate-form-slot');if(s)s.innerHTML='';}
+function saveSupplierDueDate(name){
+  const val=document.getElementById('sup-duedate-val').value||'';
+  const o=loadSupplierDueDates();
+  if(val)o[name]=val;else delete o[name];
+  saveSupplierDueDates(o);
+  closeSupplierDueDateForm();
+  renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
+}
+function supplierCardHtml(s,clsStore,openings,dueDates){
   const opening=Number((openings&&openings[s.name])||0);
   const balance=Math.max(s.total-s.paid-s.returned+opening,0);
   const cls=((clsStore&&clsStore.supplier)||[]).find(c=>c.members.includes(s.name));
-  return `<div class="biz-po-sup-card" onclick="openEntityDetail('supplier','${esc(s.name)}')">
-    <div class="biz-po-sup-top"><span>${esc(s.name)}${cls?` <span style="font-size:9.5px;color:var(--blue);background:rgba(77,168,240,.15);border-radius:5px;padding:1px 6px;margin-right:4px;">${esc(cls.name)}</span>`:''}</span><span style="color:${balance>0?'var(--red)':'var(--green)'};font-size:12px;">${fmt(balance)}</span></div>
+  const dueDate=(dueDates&&dueDates[s.name])||'';
+  const dueOverdue=dueDate&&dueDate<=todayStr();
+  return `<div class="biz-po-sup-card" onclick="openEntityDetail('supplier','${esc(s.name)}')">    <div class="biz-po-sup-top"><span>${esc(s.name)}${cls?` <span style="font-size:9.5px;color:var(--blue);background:rgba(77,168,240,.15);border-radius:5px;padding:1px 6px;margin-right:4px;">${esc(cls.name)}</span>`:''}</span><span style="color:${balance>0?'var(--red)':'var(--green)'};font-size:12px;">${fmt(balance)}</span></div>
     <div class="biz-po-sup-bottom">
       <span>${s.phone?esc(s.phone):'—'}</span>
       <span>إجمالي: ${fmt(s.total)} · مدفوع: ${fmt(s.paid)}${s.returned?' · مردود: '+fmt(s.returned):''}</span>
@@ -6620,6 +6739,9 @@ function supplierCardHtml(s,clsStore,openings){
     <div class="biz-po-sup-bottom" style="margin-top:2px;">
       <span onclick="event.stopPropagation();openSupplierOpeningForm('${esc(s.name)}')" style="cursor:pointer;color:var(--yellow);">✏️ رصيد افتتاحي: ${fmt(opening)}</span>
     </div>
+    ${balance>0?`<div class="biz-po-sup-bottom" style="margin-top:2px;">
+      <span onclick="event.stopPropagation();openSupplierDueDateForm('${esc(s.name)}')" style="cursor:pointer;color:${dueOverdue?'var(--red)':'var(--blue)'};">📅 تاريخ استحقاق: ${dueDate||'غير محدد'}</span>
+    </div>`:''}
   </div>`;
 }
 /* ══════════════════════════════════════════════
@@ -6825,6 +6947,7 @@ function saveInvoiceS(){
     installmentPlan,installments,
     notes:document.getElementById('sinv-notes').value.trim()};
   const list=loadSInvoices();list.push(inv);saveSInvoices(list);
+  pushBizJournal(customerName,total,'in','فاتورة مبيعات #'+inv.seq,'var(--green)',inv.date);
   if(paid>0){
     const receipts=loadTreasuryReceipts();
     receipts.push({id:'rcpt_'+Date.now(),seq:nextSeq(),name:customerName,amount:paid,type:'بيع نقدي',
@@ -6995,6 +7118,7 @@ function saveCollection(){
     lines:lines.map(l=>({customerName:l.customerName,amount:l.amount})),
     status:'pending',collector};
   const receipts=loadTreasuryReceipts();receipts.push(v);saveTreasuryReceipts(receipts);
+  pushBizJournal(collector,total,'in','تحصيل عملاء #'+seq,'var(--green)',date);
   closeCollectModal();
   if(bizEntityDetail&&bizEntityDetail.type==='customer')bizEntityDetail=null;
   if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));
@@ -7002,6 +7126,100 @@ function saveCollection(){
   refreshBizDashboard();
   pgConfirm('تم تسجيل التحصيل بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة',()=>{},'تمام');
 }
+
+/* ══════════════════════════════════════════════
+   سداد مديونية الموردين: نافذة تجمع كل الموردين
+   المستحق عليهم سداد وتسجل سداد الكل فى إذن صرف واحد
+   ══════════════════════════════════════════════ */
+function supplierDueList(){
+  const today=todayStr();
+  const dueDates=loadSupplierDueDates();
+  const map={};
+  loadPInvoices().forEach(inv=>{
+    const total=Number(inv.total)||0;
+    const remaining=Math.max(total-Number(inv.paid||0),0);
+    if(remaining<=0)return;
+    const supDue=dueDates[inv.supplierName||''];
+    if(!(supDue&&supDue<=today))return;
+    const k=inv.supplierName||'—';
+    if(!map[k])map[k]={name:k,dueTotal:0,items:[]};
+    map[k].dueTotal+=remaining;
+    map[k].items.push({invId:inv.id,amount:remaining,dueDate:supDue});
+  });
+  const out=Object.values(map).filter(s=>s.dueTotal>0);
+  out.forEach(s=>s.items.sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||'')));
+  out.sort((a,b)=>b.dueTotal-a.dueTotal);
+  return out;
+}
+let _payDue=[];
+function openPayModal(){
+  _payDue=supplierDueList();
+  const nameEl=document.getElementById('pay-payer-name');if(nameEl)nameEl.value='';
+  const dateEl=document.getElementById('pay-date');if(dateEl)dateEl.value=todayStr();
+  renderPayList();
+  document.getElementById('pay-modal').classList.add('show');
+}
+function closePayModal(){document.getElementById('pay-modal').classList.remove('show');}
+function renderPayList(){
+  const wrap=document.getElementById('pay-list');
+  if(!wrap)return;
+  if(!_payDue.length){wrap.innerHTML='<div class="biz-po-empty">لا يوجد موردون مستحق عليهم سداد حالياً</div>';updPayTotal();return;}
+  wrap.innerHTML=_payDue.map((s,i)=>`
+    <div class="collect-row">
+      <div class="collect-row-top"><span>${esc(s.name)}</span><span style="color:var(--red);">مستحق: ${fmt(s.dueTotal)}</span></div>
+      <input class="collect-row-inp" type="number" id="pay-amt-${i}" value="${s.dueTotal}" oninput="updPayTotal()">
+    </div>`).join('');
+  updPayTotal();
+}
+function updPayTotal(){
+  const total=_payDue.reduce((s,c,i)=>{const el=document.getElementById('pay-amt-'+i);return s+(el?Number(el.value||0):0);},0);
+  const el=document.getElementById('pay-total-val');if(el)el.textContent=fmt(total);
+}
+function savePayment(){
+  const payer=(document.getElementById('pay-payer-name').value||'').trim();
+  if(!payer){pgConfirm('من فضلك أدخل اسم الصارف',()=>{},'حسناً');return;}
+  const date=document.getElementById('pay-date').value||todayStr();
+  const lines=[];
+  _payDue.forEach((s,i)=>{
+    const el=document.getElementById('pay-amt-'+i);
+    const amt=el?Number(el.value||0):0;
+    if(amt>0)lines.push({supplierName:s.name,amount:amt,items:s.items});
+  });
+  if(!lines.length){pgConfirm('من فضلك أدخل مبلغ مورد واحد على الأقل',()=>{},'حسناً');return;}
+  const pInv=loadPInvoices();
+  const seq=nextSeq();
+  lines.forEach(line=>{
+    let left=line.amount;
+    line.items.forEach(it=>{
+      if(left<=0)return;
+      const inv=pInv.find(x=>x.id===it.invId);
+      if(!inv)return;
+      const apply=Math.min(left,it.amount);
+      inv.paid=Number(inv.paid||0)+apply;
+      inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+      if(!inv.payments)inv.payments=[];
+      inv.payments.push({amount:apply,date,voucherSeq:seq});
+      left-=apply;
+    });
+  });
+  savePInvoices(pInv);
+  const total=Math.round(lines.reduce((s,l)=>s+l.amount,0)*100)/100;
+  const v={id:'pymt_'+Date.now(),seq,name:payer,amount:total,date,
+    type:'سداد',
+    desc:'سداد مديونية موردين ('+lines.length+' مورد)',
+    notes:lines.map(l=>l.supplierName+': '+fmt(l.amount)).join(' — '),
+    lines:lines.map(l=>({supplierName:l.supplierName,amount:l.amount})),
+    status:'pending',payer};
+  const payments=loadTreasuryPayments();payments.push(v);saveTreasuryPayments(payments);
+  pushBizJournal(payer,total,'out','سداد موردين #'+seq,'var(--red)',date);
+  closePayModal();
+  if(bizEntityDetail&&bizEntityDetail.type==='supplier')bizEntityDetail=null;
+  if(document.getElementById('biz-purchase-tab-content'))renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
+  if(document.getElementById('biz-liquidity-tab-content')){renderPendingVouchers();switchLiquidityTab(liquidityTab);}
+  refreshBizDashboard();
+  pgConfirm('تم تسجيل السداد بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة',()=>{},'تمام');
+}
+
 function deleteInvoiceS(id){
   saveSInvoices(loadSInvoices().filter(x=>x.id!==id));
   saveTreasuryReceipts(loadTreasuryReceipts().filter(rc=>rc.sourceInvId!==id));
@@ -7107,6 +7325,7 @@ function saveReturnS(print){
     notes:document.getElementById('sret-notes').value.trim()};
   commitReturnRefS(refNo);
   const list=loadSReturns();list.push(r);saveSReturns(list);
+  pushBizJournal(customerName,r.returnValue,'out','مردود مبيعات #'+refNo,'var(--red)',r.date);
   if(r.settleMethod==='استرداد نقدي'&&r.returnValue>0){
     const payments=loadTreasuryPayments();
     payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:customerName,amount:r.returnValue,type:'مردود مبيعات',
@@ -7185,8 +7404,10 @@ function closeCustomerOpeningForm(){const s=document.getElementById('cus-opening
 function saveCustomerOpening(name){
   const val=Number(document.getElementById('cus-opening-val').value||0);
   const o=loadCustomerOpenings();
+  const old=Number(o[name]||0);
   o[name]=val;
   saveCustomerOpenings(o);
+  if(val!==old)pushBizJournal(name,Math.abs(val),val>=0?'in':'out','رصيد افتتاحي عميل','var(--green)');
   closeCustomerOpeningForm();
   renderCustomersTab(document.getElementById('biz-sales-tab-content'));
 }
@@ -7434,7 +7655,11 @@ function saveWhOpening(){
   const val=Number(document.getElementById('wh-opening-val').value||0);
   const list=loadInvWarehouses();
   const wh=list.find(w=>w.id===invCurrentWh);
-  if(wh){wh.opening=val;saveInvWarehouses(list);}
+  if(wh){
+    const old=Number(wh.opening||0);
+    wh.opening=val;saveInvWarehouses(list);
+    if(val!==old)pushBizJournal(wh.name||'مخزن',Math.abs(val),val>=0?'out':'in','رصيد افتتاحي مخزن — '+(wh.name||''),'#4da8f0');
+  }
   closeWhOpeningForm();
   refreshInvHeader();
 }
