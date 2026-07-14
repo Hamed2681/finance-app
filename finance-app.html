@@ -6086,7 +6086,8 @@ function renderLiquidityDetail(){
     </div>
     <div id="liq-bank-opening-form-slot"></div>
 
-    <div class="biz-po-form-title" style="text-align:right;padding:0;">🔁 تحويل بين الخزينة والبنك</div>
+    <div class="biz-po-form-title" style="text-align:right;padding:0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleSettingsSection('liq-transfer-body',this)">🔁 تحويل بين الخزينة والبنك<span class="s-collapse-arrow open">›</span></div>
+    <div id="liq-transfer-body" class="s-collapse-body" style="display:block;">
     <div style="display:flex;align-items:center;gap:6px;">
       <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center;">
         <div style="font-size:9.5px;color:var(--muted);">💵 رصيد الخزينة</div>
@@ -6105,6 +6106,7 @@ function renderLiquidityDetail(){
       <button class="biz-po-btn save" onclick="saveLiqTransfer()">تنفيذ التحويل</button>
     </div>
     <div id="liq-transfer-list"></div>
+    </div>
 
     <div id="liq-pending-wrap"></div>
     <div class="biz-po-tabs">
@@ -6917,7 +6919,7 @@ function buildEntityLedger(type,name){
     const paidNow=Number(inv.initialPaid!=null?inv.initialPaid:inv.paid)||0;
     if(paidNow>0)rows.push({date:inv.date||'',invNo:label+' (سداد)',debit:0,credit:paidNow,_sd:inv.date||''});
     (inv.installments||[]).filter(x=>x.paid).forEach(x=>{
-      rows.push({date:x.paidDate||x.dueDate||'',invNo:label+' — قسط '+x.no,debit:0,credit:Number(x.amount)||0,_sd:x.paidDate||x.dueDate||''});
+      rows.push({date:x.paidDate||x.dueDate||'',invNo:label+' — قسط '+x.no+(x.voucherSeq?' — تحصيل #'+x.voucherSeq:''),debit:0,credit:Number(x.amount)||0,_sd:x.paidDate||x.dueDate||''});
     });
     (inv.collections||[]).forEach(cItem=>{
       rows.push({date:cItem.date||'',invNo:label+(cItem.voucherSeq?' — تحصيل #'+cItem.voucherSeq:' — تحصيل'),debit:0,credit:Number(cItem.amount)||0,_sd:cItem.date||''});
@@ -7462,11 +7464,9 @@ function applyPaymentToSInvoice(inv,amountAvailable,date,voucherSeq){
       if(remain<=0.001)break;
       const instAmt=Number(inst.amount)||0;
       if(remain>=instAmt-0.001){
-        inst.paid=true;inst.paidDate=date;
+        inst.paid=true;inst.paidDate=date;inst.voucherSeq=voucherSeq;
         inv.paid=Number(inv.paid||0)+instAmt;
         remain-=instAmt;
-        if(!inv.collections)inv.collections=[];
-        inv.collections.push({amount:instAmt,date,voucherSeq});
       } else break; // المبلغ المتبقي ميكفيش القسط ده؛ يتحط كرصيد عام على الفاتورة تحت بدل ما يتخطى للقسط اللى بعده
     }
   }
