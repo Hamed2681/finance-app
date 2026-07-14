@@ -1408,6 +1408,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div class="s-sec"><div class="s-sec-title">🎨 السمة</div><div class="s-row"><span class="s-lbl">وضع العرض</span><div class="s-tgl-g"><button class="s-tgl active" id="theme-dark" onclick="setTheme('dark')">🌙 داكن</button><button class="s-tgl" id="theme-light" onclick="setTheme('light')">☀️ فاتح</button></div></div></div>
     <div id="set-biz-group" style="display:none;">
       <div class="s-sec">
+        <div class="s-sec-title">🌳 شجرة الحسابات</div>
+        <div id="set-coa-wrap"></div>
+      </div>
+      <div class="s-sec">
         <div class="s-sec-title">➕ الإضافات</div>
         <div class="s-row"><span class="s-lbl">ملحق التقسيط بفاتورة البيع</span><label class="sw"><input type="checkbox" id="s-addon-installments" onchange="toggleAddon('addonInstallments',this.checked)"><span class="sw-sl"></span></label></div>
         <div class="s-row"><span class="s-lbl">حسابات شركاء</span><label class="sw"><input type="checkbox" id="s-addon-partners" onchange="toggleAddon('addonPartners',this.checked)"><span class="sw-sl"></span></label></div>
@@ -5163,14 +5167,8 @@ function renderBizReportsPage(){
     {lbl:'مردودات مشتريات',val:fmt(purchasesReturns),c:'#8b6cf0'},
     {lbl:'إجمالي الربح التقديري',val:fmt(grossProfit),c:grossProfit>=0?'var(--blue)':'var(--red)'},
   ].map(x=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--muted);">${x.lbl}</div><div style="font-size:16px;font-weight:800;color:${x.c};">${x.val}</div><div style="font-size:8px;color:var(--muted);">${sym}</div></div>`).join('');}
-  const customersReceivable=buildEntityMap('customer').reduce((s,cu)=>{
-    const opening=Number(loadCustomerOpenings()[cu.name]||0);
-    return s+Math.max(cu.total-cu.paid-cu.returned+opening,0);
-  },0);
-  const suppliersPayable=buildEntityMap('supplier').reduce((s,sp)=>{
-    const opening=Number(loadSupplierOpenings()[sp.name]||0);
-    return s+Math.max(sp.total-sp.paid-sp.returned+opening,0);
-  },0);
+  const customersReceivable=customersReceivableTotal();
+  const suppliersPayable=suppliersPayableTotal();
   let inventoryVal=0;
   (typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).forEach(w=>{inventoryVal+=warehouseTotals(w.id).val;});
   const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0);
@@ -5495,7 +5493,7 @@ function openBizDetail(key){
   }else if(key==='inventory'){
     renderInventoryDetail();
   }else if(key==='accounts'){
-    renderAccountsDetail();
+    renderAccountsCardView();
   }else if(key==='liquidity'){
     renderLiquidityDetail();
   }else{
@@ -5553,14 +5551,8 @@ function refreshBizDashboard(){
 
   /* حسابات: أصول = مديونية العملاء + المخزون + الخزينة + حسابات أصول يدوية
              خصوم = مديونية الموردين + حسابات خصوم/حقوق ملكية يدوية */
-  const customersReceivable=buildEntityMap('customer').reduce((s,cu)=>{
-    const opening=Number(loadCustomerOpenings()[cu.name]||0);
-    return s+Math.max(cu.total-cu.paid-cu.returned+opening,0);
-  },0);
-  const suppliersPayable=buildEntityMap('supplier').reduce((s,sp)=>{
-    const opening=Number(loadSupplierOpenings()[sp.name]||0);
-    return s+Math.max(sp.total-sp.paid-sp.returned+opening,0);
-  },0);
+  const customersReceivable=customersReceivableTotal();
+  const suppliersPayable=suppliersPayableTotal();
   let inventoryVal=0;
   (typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).forEach(w=>{inventoryVal+=warehouseTotals(w.id).val;});
   const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0);
@@ -5569,7 +5561,7 @@ function refreshBizDashboard(){
   setTxt('ws-liq-bank',fmt(0));
   const coa=loadCoaAccounts();
   const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
-  const manualAssets=sumCoa(['assets_fixed','assets_current','assets_other_debit']);
+  const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_funds','assets_other_debit']);
   const manualLiab=sumCoa(['liab_equity','liab_obligations','liab_other_credit']);
   const totalAssets=customersReceivable+inventoryVal+treasuryVal+manualAssets;
   const totalLiab=suppliersPayable+manualLiab+partnersEquityTotal();
@@ -5598,14 +5590,15 @@ function refreshBizDashboard(){
 const COA_STRUCTURE=[
   {id:'assets',name:'الأصول',ico:'🏛️',children:[
     {id:'assets_fixed',name:'أصول ثابتة'},
-    {id:'assets_current',name:'أصول متداولة'},
+    {id:'assets_goods',name:'بضائع'},
+    {id:'assets_funds',name:'أموال'},
     {id:'assets_customers',name:'عملاء'},
     {id:'assets_other_debit',name:'أخرى مدينة'}
   ]},
   {id:'liabilities',name:'الخصوم',ico:'📕',children:[
     {id:'liab_equity',name:'حساب الشركاء'},
-    {id:'liab_obligations',name:'التزامات'},
     {id:'liab_suppliers',name:'موردين'},
+    {id:'liab_obligations',name:'التزامات'},
     {id:'liab_other_credit',name:'أخرى دائنة'}
   ]},
   {id:'revenue',name:'الإيرادات',ico:'📈'},
@@ -5613,25 +5606,21 @@ const COA_STRUCTURE=[
 ];
 let coaExpanded={};
 let coaClassOpen={};
-// ── إضافة (Add-on): حسابات شركاء — عند التفعيل تُضاف عقدة رئيسية "شركاء" لشجرة الحسابات،
-// كل شريك بيتحط تحته حسابين ثابتين محسوبين من رصيديه الافتتاحيين (رأس المال + جاري) ──
+// ── إضافة (Add-on): حسابات شركاء — عند التفعيل، كل شريك بيتحط كصف واحد داخل «حساب الشركاء»
+// فى الخصوم، بقيمة إجمالية = رأس المال + الحساب الجاري (بدل عقدة منفصلة لكل شريك) ──
 function registerPartnerCoaBuiltins(){
-  loadPartners().forEach(p=>{
-    COA_BUILTIN_ROWS['partner_'+p.id]=[
-      {key:'capital',name:'رأس المال',calc:()=>Number(p.capitalOpening||0)},
-      {key:'current',name:'حساب جاري',calc:()=>Number(p.currentOpening||0)}
-    ];
-  });
-}
-function buildPartnersCoaNode(){
-  return{id:'partners',name:'شركاء',ico:'🤝',children:loadPartners().map(p=>({id:'partner_'+p.id,name:p.name,ico:'👤'}))};
+  COA_BUILTIN_ROWS['liab_equity']=loadPartners().map(p=>({
+    key:'partner_'+p.id,
+    name:p.name,
+    calc:()=>Number(p.capitalOpening||0)+Number(p.currentOpening||0)
+  }));
 }
 function getCoaStructure(){
   const structure=COA_STRUCTURE.slice();
   if(getSettings().addonPartners){
     registerPartnerCoaBuiltins();
-    const idx=structure.findIndex(n=>n.id==='liabilities');
-    structure.splice(idx+1,0,buildPartnersCoaNode());
+  }else{
+    delete COA_BUILTIN_ROWS['liab_equity'];
   }
   return structure;
 }
@@ -5643,12 +5632,30 @@ const COA_LINK_NODES={
   assets_customers:{bizKey:'sales'},
   liab_suppliers:{bizKey:'purchases',tab:'suppliers'}
 };
+function customersReceivableTotal(){
+  return buildEntityMap('customer').reduce((s,cu)=>{
+    const opening=Number(loadCustomerOpenings()[cu.name]||0);
+    return s+Math.max(cu.total-cu.paid-cu.returned+opening,0);
+  },0);
+}
+function suppliersPayableTotal(){
+  return buildEntityMap('supplier').reduce((s,sp)=>{
+    const opening=Number(loadSupplierOpenings()[sp.name]||0);
+    return s+Math.max(sp.total-sp.paid-sp.returned+opening,0);
+  },0);
+}
+const COA_LINK_TOTALS={
+  assets_customers:()=>customersReceivableTotal(),
+  liab_suppliers:()=>suppliersPayableTotal()
+};
 const COA_CLASS_TYPES={assets_customers:'customer',liab_suppliers:'supplier'};
 const COA_CLASS_LABELS={customer:'المبيعات/العملاء',supplier:'المشتريات/الموردين'};
 /* حسابات أساسية محسوبة تلقائياً (مش بتتضاف يدوياً) داخل «أصول متداولة» */
 const COA_BUILTIN_ROWS={
-  assets_current:[
-    {key:'goods',name:'بضائع',calc:()=>(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)},
+  assets_goods:[
+    {key:'goods',name:'بضائع',calc:()=>(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)}
+  ],
+  assets_funds:[
     {key:'funds',name:'أموال',calc:()=>loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0)}
   ]
 };
@@ -5739,11 +5746,82 @@ function initEntClsSwipe(type,containerId){
   });
 }
 function renderAccountsDetail(){
-  const body=document.getElementById('biz-detail-body');
+  const holder=document.getElementById('set-coa-wrap');
+  if(!holder)return;
+  holder.innerHTML='';
   const wrap=document.createElement('div');
   wrap.id='coa-tree-wrap';
-  body.appendChild(wrap);
+  holder.appendChild(wrap);
   renderCoaTree();
+}
+/* ── عرض للقراءة فقط لكرت «حسابات» فى لوحة النشاط: الحسابات الرئيسية بأرصدتها +
+   أى حساب فرعى تمت إضافته لها فى شجرة الحسابات (صفحة الإعدادات) ── */
+function coaRowTotal(subId,data){
+  if(COA_LINK_TOTALS[subId])return COA_LINK_TOTALS[subId]();
+  const accs=data[subId]||[];
+  const builtins=(COA_BUILTIN_ROWS[subId]||[]);
+  return accs.reduce((s,a)=>s+(Number(a.amount)||0),0)+builtins.reduce((s,b)=>s+(Number(b.calc())||0),0);
+}
+function coaCardSubHtml(sub,data,isTop){
+  if(COA_LINK_TOTALS[sub.id]){
+    const total=COA_LINK_TOTALS[sub.id]();
+    return `<div class="${isTop?'coa-node':'coa-sub'}">
+      <div class="${isTop?'coa-node-hdr':'coa-sub-hdr'}" style="cursor:default;">
+        <span class="coa-name">${sub.ico?sub.ico+' ':''}${esc(sub.name)}<span class="coa-count">${fmt(total)}</span></span>
+      </div>
+    </div>`;
+  }
+  const builtins=(COA_BUILTIN_ROWS[sub.id]||[]).map(b=>({name:b.name,amount:b.calc()}));
+  const accs=data[sub.id]||[];
+  const rows=[...builtins,...accs];
+  const total=rows.reduce((s,a)=>s+(Number(a.amount)||0),0);
+  const rowsHtml=rows.length?rows.map(a=>`<div class="coa-acc-row"><span>${esc(a.name)}</span><b>${fmt(a.amount)}</b></div>`).join(''):'<div class="biz-po-empty">لا توجد حسابات مضافة بعد</div>';
+  const open=!!coaExpanded[sub.id];
+  return `<div class="${isTop?'coa-node':'coa-sub'}">
+    <div class="${isTop?'coa-node-hdr':'coa-sub-hdr'}" onclick="toggleCoaCardNode('${sub.id}')">
+      <span class="coa-name">${sub.ico?sub.ico+' ':''}${esc(sub.name)}<span class="coa-count">${fmt(total)}</span></span>
+      <span class="coa-arrow ${open?'open':''}">◀</span>
+    </div>
+    <div class="${isTop?'coa-node-body':'coa-sub-body'} ${open?'open':''}">${rowsHtml}</div>
+  </div>`;
+}
+function coaCardNodeHtml(node,data){
+  if(node.children&&node.children.length){
+    const total=node.children.reduce((s,sub)=>s+coaRowTotal(sub.id,data),0);
+    const open=!!coaExpanded[node.id];
+    return `<div class="coa-node">
+      <div class="coa-node-hdr" onclick="toggleCoaCardNode('${node.id}')">
+        <span class="coa-name">${node.ico||''} ${esc(node.name)}<span class="coa-count">${fmt(total)}</span></span>
+        <span class="coa-arrow ${open?'open':''}">◀</span>
+      </div>
+      <div class="coa-node-body ${open?'open':''}">
+        ${node.children.map(sub=>coaCardSubHtml(sub,data)).join('')}
+      </div>
+    </div>`;
+  }
+  return coaCardSubHtml(node,data,true);
+}
+function toggleCoaCardNode(id){
+  coaExpanded[id]=!coaExpanded[id];
+  renderCoaCardTree();
+}
+function renderCoaCardTree(){
+  const wrap=document.getElementById('coa-card-tree-wrap');
+  if(!wrap)return;
+  const data=loadCoaAccounts();
+  wrap.innerHTML=getCoaStructure().map(node=>coaCardNodeHtml(node,data)).join('');
+}
+function renderAccountsCardView(){
+  const body=document.getElementById('biz-detail-body');
+  const hint=document.createElement('div');
+  hint.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-size:11px;color:var(--muted);';
+  hint.innerHTML=`<span>لإضافة أو حذف حسابات فرعية، ادخل شجرة الحسابات من الإعدادات</span><button class="coa-add-btn" style="flex-shrink:0;" onclick="closeBizDetail();showPage('settings');">⚙️ الإعدادات</button>`;
+  body.appendChild(hint);
+  const wrap=document.createElement('div');
+  wrap.id='coa-card-tree-wrap';
+  wrap.className='coa-tree';
+  body.appendChild(wrap);
+  renderCoaCardTree();
 }
 function renderCoaTree(){
   const wrap=document.getElementById('coa-tree-wrap');
@@ -5788,9 +5866,10 @@ function coaSubHtml(sub,data,isTop){
     const type=COA_CLASS_TYPES[sub.id];
     const clsOpen=!!coaClassOpen[sub.id];
     const wrapCls=isTop?'coa-node':'coa-sub';
+    const linkTotal=COA_LINK_TOTALS[sub.id]?COA_LINK_TOTALS[sub.id]():0;
     return `<div class="${wrapCls}">
       <div class="${isTop?'coa-node-hdr':'coa-sub-hdr'}">
-        <span class="coa-name" style="cursor:pointer;" onclick="toggleCoaClassPanel('${sub.id}')">${sub.ico?sub.ico+' ':''}${esc(sub.name)}</span>
+        <span class="coa-name" style="cursor:pointer;" onclick="toggleCoaClassPanel('${sub.id}')">${sub.ico?sub.ico+' ':''}${esc(sub.name)}<span class="coa-count">${fmt(linkTotal)}</span></span>
         <span style="display:flex;align-items:center;gap:10px;">
           <span class="coa-arrow ${clsOpen?'open':''}" style="color:${clsOpen?'var(--blue)':''};cursor:pointer;" title="إدارة التصنيفات" onclick="toggleCoaClassPanel('${sub.id}')">🏷</span>
           <span class="coa-arrow" style="cursor:pointer;" title="الذهاب إلى ${esc(sub.name)}" onclick="navigateCoaLink('${sub.id}')">↗</span>
@@ -8319,6 +8398,7 @@ function loadSettingsPage(){
     if(s.addonPartners)renderPartnersList();
     renderClsTags('customer','tags-cls-customer');
     renderClsTags('supplier','tags-cls-supplier');
+    renderAccountsDetail();
     return;
   }
   if(document.getElementById('s-notif-commit'))document.getElementById('s-notif-commit').checked=!!s.notifCommit;
@@ -8364,6 +8444,7 @@ function toggleAddon(key,val){
     if(pg)pg.style.display=val?'block':'none';
     if(val)renderPartnersList();
     refreshBizDashboard();
+    renderAccountsDetail();
   }
 }
 function renderPartnersList(){
@@ -8395,6 +8476,7 @@ function addPartner(){
   document.getElementById('new-partner-current').value='';
   renderPartnersList();
   refreshBizDashboard();
+  renderAccountsDetail();
 }
 function updatePartner(id,field,val){
   const list=loadPartners();
@@ -8403,13 +8485,14 @@ function updatePartner(id,field,val){
   p[field]=Number(val||0);
   savePartners(list);
   refreshBizDashboard();
+  renderAccountsDetail();
 }
 function removePartner(id){
-  pgConfirm('حذف هذا الشريك؟ سيتم حذف حسابيه (رأس المال والجاري) من شجرة الحسابات.',()=>{
+  pgConfirm('حذف هذا الشريك؟ سيتم حذف حسابه (رأس المال والجاري) من شجرة الحسابات.',()=>{
     savePartners(loadPartners().filter(x=>x.id!==id));
-    delete COA_BUILTIN_ROWS['partner_'+id];
     renderPartnersList();
     refreshBizDashboard();
+    renderAccountsDetail();
   });
 }
 function renderTags(sk,cid){
