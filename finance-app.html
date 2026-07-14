@@ -55,7 +55,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .scard.has-side-chart{padding-left:60px;}
 .fa-row{flex:1;overflow:hidden;max-width:0;max-height:0;opacity:0;transition:max-width .35s ease, max-height .35s ease, opacity .25s ease;background:linear-gradient(135deg,rgba(77,168,240,.16),rgba(62,207,106,.12));border:1px solid rgba(77,168,240,.3);border-radius:14px;display:flex;align-items:center;}
 .fa-row.open{max-width:2000px;max-height:120px;min-height:36px;opacity:1;}
-.fa-row.open{max-width:2000px;opacity:1;}
 .scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
 .scard-side-chart svg{width:54px;height:54px;opacity:.85;}
 
@@ -196,9 +195,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .btn-ft-add{width:30px;padding:0;justify-content:center;font-size:22px;font-weight:800;line-height:1;}
 /* table body */
 .ftable-body{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg);}
-.tbl-wrap{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#2a3240 transparent;}
+.tbl-wrap{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#2a3240 transparent;position:relative;}
 /* ── جدول الصفوف الموحّد: نفس اللون للكل + خط متقطع أبيض بين الصفوف + حواف منحنية + flip على السكرول ── */
-.tbl-wrap{position:relative;}
 .tbl-wrap::-webkit-scrollbar{width:3px;}
 .tbl-wrap::-webkit-scrollbar-thumb{background:#2a3240;border-radius:3px;}
 table{width:100%;border-collapse:separate;border-spacing:0 2px;table-layout:fixed;}
@@ -427,15 +425,11 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 #pg-settings{display:none;}
 .s-scroll{flex:1;overflow-y:auto;padding:8px 10px 70px;}
 .commit-add-form{margin-top:8px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:8px;}
-.commit-item-row{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);gap:4px;}
-.commit-item-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
-.commit-item-name{font-size:12px;color:var(--txt);font-weight:600;}
-.commit-item-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
-.commit-badge{font-size:9px;border-radius:4px;padding:1px 5px;font-weight:700;}
-.commit-badge.permanent{background:rgba(77,168,240,.15);color:var(--blue);}
-.commit-badge.recurring{background:rgba(62,207,106,.15);color:var(--green);}
-.commit-item-req{font-size:11px;color:var(--muted);}
-.commit-item-due{font-size:10px;color:var(--yellow);}
+.budget-item-row{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);gap:4px;}
+.budget-item-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.budget-item-name{font-size:12px;color:var(--txt);font-weight:600;}
+.budget-item-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+.budget-item-req{font-size:11px;color:var(--muted);}
 .s-sec{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
 .s-sec-title{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .s-sec-title.s-collapsible{cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
@@ -503,11 +497,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .commit-page-summary{display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;padding:8px 10px;border-top:1px solid var(--border);flex-shrink:0;background:var(--card);overflow-x:auto;scrollbar-width:none;}
 .commit-page-summary::-webkit-scrollbar{display:none;}
 .commit-page-sum-cell{flex:1 1 0;min-width:0;background:var(--card2);border-radius:7px;padding:5px;text-align:center;}
-.commit-page-sum-lbl{white-space:nowrap;}
-.commit-page-sum-val{white-space:nowrap;}
-/* commit-page-sum-cell base moved up to be next to commit-page-summary */
-.commit-page-sum-lbl{font-size:9px;color:var(--muted);display:block;}
-.commit-page-sum-val{font-size:13px;font-weight:800;display:block;margin-top:1px;}
+.commit-page-sum-lbl{white-space:nowrap;font-size:9px;color:var(--muted);display:block;}
+.commit-page-sum-val{white-space:nowrap;font-size:13px;font-weight:800;display:block;margin-top:1px;}
 /* ── صف مجموع الديون (يظهر تحت الجدول دائماً مثل الالتزامات) ── */
 .debt-sep-row td{user-select:none;-webkit-user-select:none;}
 .debt-sep-row:hover td{filter:brightness(1.15);}
@@ -618,7 +609,6 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-split-lbls>div{display:flex;flex-direction:column;gap:0;flex:1;min-width:0;}
 .biz-split-lbls b{font-size:9.5px;font-weight:800;}
 .biz-split-bar{display:flex;height:4px;border-radius:3px;overflow:hidden;}
-.biz-ptab.active{background:rgba(77,168,240,.15);border-color:var(--blue);color:var(--blue);}
 .biz-card-ftr{display:flex;align-items:center;justify-content:center;gap:6px;margin:auto -7px -7px -7px;background:var(--card2);border-top:1px solid var(--border);border-radius:0 0 11px 11px;padding:4px 8px;}
 .biz-expand-overlay .biz-card-ftr{margin:auto -16px -16px -16px;padding:8px 16px;border-radius:0 0 16px 16px;}
 .biz-card-title{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:center;}
@@ -2085,6 +2075,7 @@ const BIZ_SCOPED_KEYS=new Set(['fm_biz_journal','fm_biz_purchase_invoices','fm_b
   'fm_partners','fm_pinv_no_seq','fm_return_ref_seq','fm_return_ref_seq_sales','fm_seq',
   'fm_sinv_no_seq','fm_supplier_duedates','fm_supplier_openings','fm_treasury_opening',
   'fm_treasury_payments','fm_treasury_receipts']);
+let currentWs='personal'; // النشاط الحالي (شخصي أو أحد الأنشطة التجارية) — لازم يتعرّف الأول قبل أي استخدام لـ _scopedKey
 function _scopedKey(key){
   if(typeof currentWs!=='undefined'&&currentWs&&currentWs!=='personal'&&BIZ_SCOPED_KEYS.has(key)){
     return key+'__ws_'+currentWs;
@@ -2361,11 +2352,6 @@ function renderDebtCats(){
   const catSpan=active!=='الكل'?` <span style="font-size:10px;background:rgba(77,168,240,.18);color:#4da8f0;border-radius:5px;padding:1px 7px;font-weight:700;vertical-align:middle;">${active}</span>`:'';
   const titleEl=document.getElementById('ft-debt-title');
   if(titleEl)titleEl.innerHTML=`الديون — ${mode}${catSpan}`;
-}
-function switchDebtCat(cat){
-  debtCat=cat;
-  renderDebtCats();
-  renderDebt();
 }
 function setDebtMode(mode){
   debtMode=mode;debtCat=null;// reset لأول تصنيف
@@ -2816,13 +2802,6 @@ function isBeforeOrEqual(dStr, toDate) {
     if (!toDate) return true;
     const d = new Date(dStr + 'T00:00:00');
     return d <= toDate;
-}
-
-function getDebtSummary() {
-    // ملخص الديون (المتبقي الإجمالي) — كل البنود كل الأزمنة
-    const c = debtTotalsInMode('creditor', null, null);
-    const db = debtTotalsInMode('debtor', null, null);
-    return { req: c.allReq + db.allReq, paid: c.paid + db.paid, rem: (c.allReq - c.paid) + (db.allReq - db.paid) };
 }
 
 function updateSummary(){
@@ -3724,37 +3703,7 @@ function deleteSelected(type){
 //  ADD / EDIT ROW (نافذة عائمة فى منتصف الشاشة)
 // ══════════════════════════════════════════════
 let _editIdx={income:null,expense:null,commit:null,debt:null};
-const FORM_FIELDS={
-  income:['fi-name','fi-amount','fi-pay'],
-  expense:['fe-name','fe-amount','fe-pay','fe-cat'],
-  commit:['fc-name','fc-req','fc-paid','fc-pay'],
-  debt:['fd-name','fd-req','fd-pay','fd-cat']
-};
-const FORM_ADD_TITLE={income:'إضافة دخل',expense:'إضافة مصروف',commit:'إضافة التزام',debt:'إضافة دين'};
 const FORM_EDIT_TITLE={income:'تعديل دخل',expense:'تعديل مصروف',commit:'تعديل التزام',debt:'تعديل دين'};
-function clearFormFields(type){
-  (FORM_FIELDS[type]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-}
-function refreshPaySelects(type){
-  const payMethods=getSettings().payMethods||['كاش','تحويل بنكي','بطاقة','instapay'];
-  const opts='<option value="">طريقة الدفع</option>'+payMethods.map(p=>`<option>${p}</option>`).join('');
-  const ids={income:'fi-pay',expense:'fe-pay',commit:'fc-pay',debt:'fd-pay'};
-  if(ids[type]){const sel=document.getElementById(ids[type]);if(sel){const cur=sel.value;sel.innerHTML=opts;sel.value=cur;}}
-}
-function showForm(type){
-  document.getElementById('form-'+type).classList.add('show');
-  document.getElementById('overlay').classList.add('show');
-  setupAutocomplete(type);
-  refreshPaySelects(type);
-  if(type==='debt')refreshDebtCatSelect();
-  if(type==='expense')refreshExpenseCatSelect();
-}
-function closeForm(type){
-  document.getElementById('form-'+type).classList.remove('show');
-  _editIdx[type]=null;
-  if(type==='income')resetLoanField();
-  if(!currentFT&&!currentEM&&debtHistIdx===null)document.getElementById('overlay').classList.remove('show');
-}
 /* ══ SLIDE FORMS ══ */
 let _slideFormType=null;
 
@@ -4103,14 +4052,6 @@ function saveCommitPay(){
 }
 
 
-function _legacyOpenForm(type){
-  _editIdx[type]=null;
-  clearFormFields(type);
-  if(type==='income'){resetLoanField();setLoanRowVisible(true);}
-  const title=document.getElementById('form-'+type+'-title');
-  if(title)title.textContent=FORM_ADD_TITLE[type]||'إضافة';
-  showForm(type);
-}
 function populateFormForEdit(type,idx){
   if(type==='notes'){openNotesForm(idx);return;}
   const key=type==='debt'?debtKey():type;
@@ -4159,31 +4100,6 @@ function populateFormForEdit(type,idx){
   if(title)title.textContent=FORM_EDIT_TITLE[type]||'تعديل';
 }
 // ──── قرض مستلم: ربط دخل بتصنيف "دائن" تلقائيًا ────
-let _loanMode=false;
-function resetLoanField(){
-  _loanMode=false;
-  const btn=document.getElementById('fi-loan-toggle');
-  const row=document.getElementById('fi-loan-cat-row');
-  if(btn)btn.classList.remove('active');
-  if(row)row.style.display='none';
-}
-function setLoanRowVisible(visible){
-  const row=document.getElementById('fi-loan-row');
-  if(row)row.style.display=visible?'flex':'none';
-}
-function toggleLoanField(){
-  _loanMode=!_loanMode;
-  const btn=document.getElementById('fi-loan-toggle');
-  const row=document.getElementById('fi-loan-cat-row');
-  if(btn)btn.classList.toggle('active',_loanMode);
-  if(row)row.style.display=_loanMode?'flex':'none';
-  if(_loanMode)refreshLoanCatSelect();
-}
-function refreshLoanCatSelect(){
-  const sel=document.getElementById('fi-loan-cat');if(!sel)return;
-  sel.innerHTML='<option value="">اختر تصنيف "دائن"</option>';
-  getDebtCats('creditor').forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
-}
 function addCreditorDebtFromLoan(name,amount,pay,cat){
   const arr=loadData('debt_creditor');
   // هل البند موجود بالفعل؟ → أضف كدفعة تراكمية
@@ -4315,13 +4231,6 @@ function editSelectedEM(type){
 function getExpenseCats(){
   const s=getSettings();
   return (s.expenseCats&&s.expenseCats.length)?s.expenseCats:[];
-}
-function refreshExpenseCatSelect(){
-  const sel=document.getElementById('fe-cat');if(!sel)return;
-  const cur=sel.value;
-  sel.innerHTML='<option value="">الفئة</option>';
-  getExpenseCats().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
-  sel.value=cur;
 }
 function expenseCatSelectHTML(idx,selected,ctx){
   const label = selected || 'بدون';
@@ -4464,76 +4373,7 @@ window.addEventListener('scroll', ()=>{
   const pop = document.getElementById('cat-popover');
   if(pop && pop.classList.contains('open')) positionCatPopover();
 }, true);
-function refreshDebtCatSelect(){
-  const sel=document.getElementById('fd-cat');if(!sel)return;
-  const cats=getDebtCats(debtMode);
-  sel.innerHTML='<option value="الكل">التصنيف (الكل)</option>';
-  cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
-}
-function saveRow(type){
-  if(type==='income'){
-    const name=document.getElementById('fi-name').value.trim();
-    const amount=document.getElementById('fi-amount').value;
-    const pay=document.getElementById('fi-pay').value;
-    if(!name||!amount)return;
-    const arr=loadData('income');
-    const isNewEntry=_editIdx.income==null;
-    const loanCat=isNewEntry&&_loanMode?(document.getElementById('fi-loan-cat')?.value||''):'';
-    if(!isNewEntry&&arr[_editIdx.income]){
-      arr[_editIdx.income]={...arr[_editIdx.income],name,amount:Number(amount),pay};
-    } else {
-      const row={name,amount:Number(amount),pay,date:todayStr(),_seq:nextSeq()};
-      if(loanCat)row.isLoan=true;
-      arr.push(row);
-    }
-    saveData('income',arr);
-    if(loanCat)addCreditorDebtFromLoan(name,Number(amount),pay,loanCat);
-    renderIncome();
-  } else if(type==='expense'){
-    const name=document.getElementById('fe-name').value.trim();
-    const amount=document.getElementById('fe-amount').value;
-    const pay=document.getElementById('fe-pay').value;
-    const cat=document.getElementById('fe-cat')?.value||'';
-    if(!name||!amount)return;
-    const arr=loadData('expense');
-    if(_editIdx.expense!=null&&arr[_editIdx.expense]){
-      arr[_editIdx.expense]={...arr[_editIdx.expense],name,amount:Number(amount),pay,cat};
-    } else {
-      arr.push({name,amount:Number(amount),pay,cat,date:todayStr(),_seq:nextSeq()});
-    }
-    saveData('expense',arr);
-    renderExpense();
-  } else if(type==='commit'){
-    const name=document.getElementById('fc-name').value.trim();
-    const req=document.getElementById('fc-req').value;
-    const paid=document.getElementById('fc-paid').value||0;
-    const pay=document.getElementById('fc-pay').value;
-    if(!name||!req)return;
-    const arr=loadData('commit');
-    if(_editIdx.commit!=null&&arr[_editIdx.commit]){
-      arr[_editIdx.commit]={...arr[_editIdx.commit],name,req:Number(req),paid:Number(paid),pay};
-    } else {
-      arr.push({name,req:Number(req),paid:Number(paid),pay,date:todayStr()});
-    }
-    saveData('commit',arr);
-    renderCommit();
-  } else if(type==='debt'){
-    const name=document.getElementById('fd-name').value.trim();
-    const req=document.getElementById('fd-req').value;
-    const pay=document.getElementById('fd-pay').value;
-    const cat=document.getElementById('fd-cat')?.value||'الكل';
-    if(!name||!req)return;
-    const arr=loadData(debtKey());
-    if(_editIdx.debt!=null&&arr[_editIdx.debt]){
-      arr[_editIdx.debt]={...arr[_editIdx.debt],name,req:Number(req),pay,cat};
-    } else {
-      arr.push({name,req:Number(req),transactions:[],pay,cat,date:todayStr()});
-    }
-    saveData(debtKey(),arr);
-    renderDebt();
-  }
-  closeForm(type);
-}
+
 
 // ══════════════════════════════════════════════
 //  DEBT HISTORY MODAL
@@ -4756,6 +4596,8 @@ function editDebtTransaction(di,ti){
 function deleteDebtTransaction(di,ti){
   const arr=loadData(debtKey());
   if(!arr[di]||!arr[di].transactions)return;
+  const txn=arr[di].transactions[ti];
+  if(txn&&txn.linkedToIncome)removeIncomeLinked(di,ti);
   arr[di].transactions.splice(ti,1);
   saveData(debtKey(),arr);
   if(_dhmEditTxnIdx===ti){
@@ -4885,12 +4727,12 @@ function renderBudgetSettings(){
   el.innerHTML='';
   budgetItems.forEach((b,i)=>{
     const row=document.createElement('div');
-    row.className='commit-item-row';
+    row.className='budget-item-row';
     row.innerHTML=`
-      <div class="commit-item-info">
-        <div class="commit-item-name">${b.name}</div>
-        ${b.opening?`<div class="commit-item-meta"><span class="commit-item-req">رصيد افتتاحي: ${fmt(b.opening)}</span></div>`:''}
-        ${b.extraAmounts&&b.extraAmounts.length?`<div class="commit-item-meta"><span style="font-size:9px;color:var(--blue);">إضافات: ${fmt(b.extraAmounts.reduce((s,x)=>s+x.amount,0))}</span></div>`:''}
+      <div class="budget-item-info">
+        <div class="budget-item-name">${b.name}</div>
+        ${b.opening?`<div class="budget-item-meta"><span class="budget-item-req">رصيد افتتاحي: ${fmt(b.opening)}</span></div>`:''}
+        ${b.extraAmounts&&b.extraAmounts.length?`<div class="budget-item-meta"><span style="font-size:9px;color:var(--blue);">إضافات: ${fmt(b.extraAmounts.reduce((s,x)=>s+x.amount,0))}</span></div>`:''}
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0;">
         <button class="btn-budget-add-amt" onclick="openBudgetAddAmt('${b.id}')" title="إضافة مبلغ مستلم">+ مبلغ</button>
@@ -5035,7 +4877,6 @@ function getBudgetNotes(budgetId){
 let _wsType=null; // نوع النشاط اللي بيتضاف
 let _wsEditId=null; // معرّف النشاط اللي بيتعدّل (لو null يبقى إضافة جديدة)
 let workspaces=JSON.parse(_getItem('fm_workspaces')||'[]');
-let currentWs='personal';
 // ── ترحيل بيانات تجارية قديمة كانت مشتركة بالغلط بين كل الأنشطة (قبل إصلاح فصل البيانات)
 //    إلى أول نشاط تجاري مسجَّل، بحيث لا تُفقد ولا تظهر فى أي نشاط جديد ──
 (function migrateLegacyBizDataToFirstWorkspace(){
@@ -5600,10 +5441,6 @@ function switchWorkspace(id){
     closeFTable();closeEModal();
   }
 }
-function setBizPeriod(btn){
-  document.querySelectorAll('.biz-ptab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
 
 /* ── كروت لوحة النشاط التجاري: تكبير + صفحة تفاصيل ── */
 const BIZ_CARD_META={
@@ -5842,11 +5679,6 @@ function getClassifiedNamesSet(type){
   cls.forEach(c=>c.members.forEach(m=>set.add(m)));
   return set;
 }
-function findEntityClass(type,name){
-  const cls=(loadClassifications()[type]||[]);
-  return cls.find(c=>c.members.includes(name))||null;
-}
-
 /* ── تصنيفات العملاء/الموردين: تبويب + إزاحة للتنقل بين التصنيفات ── */
 let bizClsFilter={customer:'all',supplier:'all'};
 function entClsSlots(type){
