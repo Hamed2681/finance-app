@@ -749,7 +749,14 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .collect-row-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--txt);}
 .collect-row-inp{background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--green);font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;padding:7px 9px;width:100%;outline:none;text-align:center;}
 .collect-row-inp:focus{border-color:var(--blue);}
+.collect-row-bottom2{display:flex;gap:6px;}
+.collect-row-select{background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;font-weight:700;padding:7px 4px;outline:none;flex:1;min-width:0;}
+.collect-search-results{display:flex;flex-direction:column;gap:5px;}
+.collect-search-item{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--txt);cursor:pointer;display:flex;justify-content:space-between;}
+.collect-search-item:active{border-color:var(--blue);}
 .collect-total-bar{display:flex;justify-content:space-between;font-size:12px;font-weight:800;padding:8px 4px;border-top:1px solid var(--border);}
+.liq-arrow-btn{width:36px;height:36px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:var(--card2);color:var(--blue);font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .35s ease,background .2s,color .2s;}
+.liq-arrow-btn:active{background:var(--blue);color:#fff;}
 /* ══ WORKSPACE SCROLL BAR (أسفل الشاشة فوق الـ bnav) ══ */
 .ws-bar{position:fixed;bottom:52px;left:0;right:0;z-index:99;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;padding:0 4px;height:36px;}
 .ws-bar::-webkit-scrollbar{display:none;}
@@ -1840,6 +1847,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div class="ws-name-title" style="text-align:center;">💰 تحصيل مديونية العملاء</div>
     <input class="ws-name-inp" id="collect-collector-name" placeholder="اسم المحصل">
     <input class="ws-name-inp" id="collect-date" type="date">
+    <input class="ws-name-inp" id="collect-search-inp" placeholder="🔍 بحث لإضافة عميل آخر" oninput="filterCollectSearch()" autocomplete="off">
+    <div class="collect-search-results" id="collect-search-results"></div>
     <div class="collect-list" id="collect-list"></div>
     <div class="collect-total-bar"><span>الإجمالي المحصل</span><b id="collect-total-val" style="color:var(--green);">0.00</b></div>
     <div class="ws-name-btns">
@@ -5171,13 +5180,15 @@ function renderBizReportsPage(){
   const suppliersPayable=suppliersPayableTotal();
   let inventoryVal=0;
   (typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).forEach(w=>{inventoryVal+=warehouseTotals(w.id).val;});
-  const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0);
+  const treasuryVal=treasuryCashVal();
+  const bankVal=bankCashVal();
   const pg=document.getElementById('rep-biz-position-grid');
   if(pg){pg.innerHTML=[
     {lbl:'مديونية العملاء',val:fmt(customersReceivable),c:'var(--green)'},
     {lbl:'مديونية الموردين',val:fmt(suppliersPayable),c:'#8b6cf0'},
     {lbl:'قيمة المخزون',val:fmt(inventoryVal),c:'#2dd4a7'},
     {lbl:'رصيد الخزينة',val:fmt(treasuryVal),c:'var(--blue)'},
+    {lbl:'رصيد البنك',val:fmt(bankVal),c:'var(--blue)'},
   ].map(x=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--muted);">${x.lbl}</div><div style="font-size:16px;font-weight:800;color:${x.c};">${x.val}</div><div style="font-size:8px;color:var(--muted);">${sym}</div></div>`).join('');}
   const barRow=(name,pct,color,rightLbl)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;"><div style="flex:1;min-width:0;"><div style="font-size:11px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(name)}</div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px;"></div></div></div><div style="text-align:left;flex-shrink:0;"><div style="font-size:10px;font-weight:800;color:${color};">${rightLbl}</div></div></div>`;
   const custEl=document.getElementById('rep-biz-top-customers');
@@ -5555,15 +5566,16 @@ function refreshBizDashboard(){
   const suppliersPayable=suppliersPayableTotal();
   let inventoryVal=0;
   (typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).forEach(w=>{inventoryVal+=warehouseTotals(w.id).val;});
-  const treasuryVal=loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0);
-  setTxt('ws-liq-total',fmt(treasuryVal));
+  const treasuryVal=treasuryCashVal();
+  const bankVal=bankCashVal();
+  setTxt('ws-liq-total',fmt(treasuryVal+bankVal));
   setTxt('ws-liq-treasury',fmt(treasuryVal));
-  setTxt('ws-liq-bank',fmt(0));
+  setTxt('ws-liq-bank',fmt(bankVal));
   const coa=loadCoaAccounts();
   const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
   const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_funds','assets_other_debit']);
   const manualLiab=sumCoa(['liab_equity','liab_obligations','liab_other_credit']);
-  const totalAssets=customersReceivable+inventoryVal+treasuryVal+manualAssets;
+  const totalAssets=customersReceivable+inventoryVal+treasuryVal+bankVal+manualAssets;
   const totalLiab=suppliersPayable+manualLiab+partnersEquityTotal();
   const invItemsAll=loadInvItems();
   const invItemCount=invItemsAll.length;
@@ -5656,7 +5668,7 @@ const COA_BUILTIN_ROWS={
     {key:'goods',name:'بضائع',calc:()=>(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)}
   ],
   assets_funds:[
-    {key:'funds',name:'أموال',calc:()=>loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0)}
+    {key:'funds',name:'أموال',calc:()=>treasuryCashVal()+bankCashVal()}
   ]
 };
 function loadCoaAccounts(){return JSON.parse(_getItem('fm_coa_accounts')||'{}');}
@@ -6041,6 +6053,19 @@ function confirmedPaymentAmount(v){
 /* ── رصيد افتتاحي للسيولة النقدية (الخزينة) ── */
 function loadTreasuryOpening(){return Number(_getItem('fm_treasury_opening')||0);}
 function saveTreasuryOpening(v){_setItem('fm_treasury_opening',String(v));}
+/* ── رصيد افتتاحي للبنك + تحويلات بين الخزينة والبنك ── */
+function loadBankOpening(){return Number(_getItem('fm_bank_opening')||0);}
+function saveBankOpening(v){_setItem('fm_bank_opening',String(v));}
+function loadLiqTransfers(){return JSON.parse(_getItem('fm_liq_transfers')||'[]');}
+function saveLiqTransfers(l){_setItem('fm_liq_transfers',JSON.stringify(l));}
+function liqTransferredToBank(){return loadLiqTransfers().filter(t=>t.dir==='toBank').reduce((s,t)=>s+Number(t.amount||0),0);}
+function liqTransferredToTreasury(){return loadLiqTransfers().filter(t=>t.dir==='toTreasury').reduce((s,t)=>s+Number(t.amount||0),0);}
+function treasuryCashVal(){
+  return loadTreasuryOpening()+loadTreasuryReceipts().reduce((s,v)=>s+confirmedReceiptAmount(v),0)-loadTreasuryPayments().reduce((s,v)=>s+confirmedPaymentAmount(v),0)-liqTransferredToBank()+liqTransferredToTreasury();
+}
+function bankCashVal(){
+  return loadBankOpening()+liqTransferredToBank()-liqTransferredToTreasury();
+}
 let liquidityTab='receipt';
 function renderLiquidityDetail(){
   const body=document.getElementById('biz-detail-body');
@@ -6053,6 +6078,34 @@ function renderLiquidityDetail(){
       <b id="liq-opening-val" style="color:var(--yellow);">${fmt(loadTreasuryOpening())}</b>
     </div>
     <div id="liq-opening-form-slot"></div>
+
+    <div class="biz-po-form-title" style="text-align:right;padding:0;">🏦 قسم البنك</div>
+    <div class="biz-po-total-row" onclick="openBankOpeningForm()" style="cursor:pointer;">
+      <span>رصيد افتتاحي<span style="color:var(--muted);font-size:9.5px;"> ✏️</span></span>
+      <b id="liq-bank-opening-val" style="color:var(--yellow);">${fmt(loadBankOpening())}</b>
+    </div>
+    <div id="liq-bank-opening-form-slot"></div>
+
+    <div class="biz-po-form-title" style="text-align:right;padding:0;">🔁 تحويل بين الخزينة والبنك</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center;">
+        <div style="font-size:9.5px;color:var(--muted);">💵 رصيد الخزينة</div>
+        <div id="liq-transfer-treasury-val" style="font-size:13px;font-weight:800;color:var(--yellow);">${fmt(treasuryCashVal())}</div>
+      </div>
+      <button class="liq-arrow-btn" id="liq-transfer-arrow" onclick="toggleTransferDir()">←</button>
+      <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center;">
+        <div style="font-size:9.5px;color:var(--muted);">🏦 رصيد البنك</div>
+        <div id="liq-transfer-bank-val" style="font-size:13px;font-weight:800;color:var(--yellow);">${fmt(bankCashVal())}</div>
+      </div>
+    </div>
+    <div id="liq-transfer-dir-label" style="text-align:center;font-size:11px;font-weight:700;color:var(--blue);"></div>
+    <div class="biz-po-frow"><input class="biz-po-inp" id="liq-transfer-amt" type="number" placeholder="المبلغ"></div>
+    <div class="biz-po-frow"><input class="biz-po-inp" id="liq-transfer-date" type="date" value="${todayStr()}"></div>
+    <div class="biz-po-btns">
+      <button class="biz-po-btn save" onclick="saveLiqTransfer()">تنفيذ التحويل</button>
+    </div>
+    <div id="liq-transfer-list"></div>
+
     <div id="liq-pending-wrap"></div>
     <div class="biz-po-tabs">
       <button class="ptab" id="ltab-receipt" onclick="switchLiquidityTab('receipt')">إذن قبض</button>
@@ -6062,6 +6115,97 @@ function renderLiquidityDetail(){
   body.appendChild(wrap);
   renderPendingVouchers();
   switchLiquidityTab(liquidityTab);
+  updateTransferDirLabel();
+  renderLiqTransferList();
+}
+let liqTransferDir='toBank';
+function toggleTransferDir(){
+  liqTransferDir=liqTransferDir==='toBank'?'toTreasury':'toBank';
+  updateTransferDirLabel();
+}
+function updateTransferDirLabel(){
+  const lbl=document.getElementById('liq-transfer-dir-label');
+  if(lbl)lbl.textContent=liqTransferDir==='toBank'?'التحويل: من الخزينة ➜ إلى البنك':'التحويل: من البنك ➜ إلى الخزينة';
+  const btn=document.getElementById('liq-transfer-arrow');
+  if(btn)btn.style.transform=liqTransferDir==='toBank'?'rotate(0deg)':'rotate(180deg)';
+}
+function refreshLiqTransferBalances(){
+  const t=document.getElementById('liq-transfer-treasury-val');
+  const b=document.getElementById('liq-transfer-bank-val');
+  if(t)t.textContent=fmt(treasuryCashVal());
+  if(b)b.textContent=fmt(bankCashVal());
+}
+function saveLiqTransfer(){
+  const amtInp=document.getElementById('liq-transfer-amt');
+  const dateInp=document.getElementById('liq-transfer-date');
+  const amount=Number(amtInp?.value||0);
+  if(!amount||amount<=0){pgConfirm('من فضلك أدخل مبلغ صحيح',()=>{},'حسناً');return;}
+  const date=dateInp?.value||todayStr();
+  const dir=liqTransferDir;
+  const avail=dir==='toBank'?treasuryCashVal():bankCashVal();
+  if(amount>avail+0.001){
+    pgConfirm(dir==='toBank'?'رصيد الخزينة الحالي غير كافٍ لهذا التحويل':'رصيد البنك الحالي غير كافٍ لهذا التحويل',()=>{},'حسناً');
+    return;
+  }
+  const id='trf_'+Date.now();
+  const list=loadLiqTransfers();
+  list.push({id,dir,amount,date});
+  saveLiqTransfers(list);
+  const lbl=dir==='toBank'?'خزينة → بنك':'بنك → خزينة';
+  const jl=loadBizJournal();
+  jl.push({name:dir==='toBank'?'تحويل إلى البنك':'تحويل إلى الخزينة',amount,_side:'out',_lbl:lbl,_color:'var(--blue)',date,_seq:nextSeq(),transferId:id});
+  jl.push({name:dir==='toBank'?'تحويل من الخزينة':'تحويل من البنك',amount,_side:'in',_lbl:lbl,_color:'var(--blue)',date,_seq:nextSeq(),transferId:id});
+  saveBizJournal(jl);
+  amtInp.value='';
+  refreshLiqTransferBalances();
+  renderLiqTransferList();
+  refreshBizDashboard();
+  pgConfirm('تم تنفيذ التحويل بنجاح',()=>{},'تمام');
+}
+function renderLiqTransferList(){
+  const el=document.getElementById('liq-transfer-list');
+  if(!el)return;
+  const list=loadLiqTransfers().slice().reverse();
+  if(!list.length){el.innerHTML='<div class="biz-po-empty">لا توجد تحويلات مسجلة بعد</div>';return;}
+  el.innerHTML=`<div class="biz-po-list">${list.map(t=>`
+    <div class="biz-po-row" style="cursor:default;">
+      <div class="biz-po-row-top"><b>${t.dir==='toBank'?'💵 خزينة ← 🏦 بنك':'🏦 بنك ← 💵 خزينة'}</b><span>${t.date||''}</span></div>
+      <div class="biz-po-row-bottom"><span></span><span style="display:flex;align-items:center;gap:8px;"><b style="color:var(--yellow);">${fmt(t.amount)}</b><span class="coa-acc-del" onclick="deleteLiqTransfer('${t.id}')">✕</span></span></div>
+    </div>`).join('')}</div>`;
+}
+function deleteLiqTransfer(id){
+  pgConfirm('هل تريد حذف هذا التحويل؟',()=>{
+    saveLiqTransfers(loadLiqTransfers().filter(t=>t.id!==id));
+    saveBizJournal(loadBizJournal().filter(j=>j.transferId!==id));
+    refreshLiqTransferBalances();
+    renderLiqTransferList();
+    refreshBizDashboard();
+  });
+}
+function openBankOpeningForm(){
+  const slot=document.getElementById('liq-bank-opening-form-slot');
+  if(!slot)return;
+  slot.innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">رصيد افتتاحي — البنك</div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="liq-bank-opening-inp" type="number" placeholder="القيمة" value="${loadBankOpening()}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveBankOpeningVal()">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="closeBankOpeningForm()">إلغاء</button>
+      </div>
+    </div>`;
+}
+function closeBankOpeningForm(){const s=document.getElementById('liq-bank-opening-form-slot');if(s)s.innerHTML='';}
+function saveBankOpeningVal(){
+  const val=Number(document.getElementById('liq-bank-opening-inp').value||0);
+  const old=loadBankOpening();
+  saveBankOpening(val);
+  if(val!==old)pushBizJournal('رصيد افتتاحي — البنك',Math.abs(val),val>=0?'in':'out','رصيد افتتاحي بنك','var(--blue)');
+  closeBankOpeningForm();
+  const el=document.getElementById('liq-bank-opening-val');
+  if(el)el.textContent=fmt(val);
+  refreshLiqTransferBalances();
+  refreshBizDashboard();
 }
 /* ── الأذون المعلقة: إذن قبض (تحصيل مديونية العملاء) أو إذن صرف (دفع فواتير شراء) لسه محتاجين تأكيد المبلغ ── */
 function pendingReceipts(){return loadTreasuryReceipts().filter(v=>v.status==='pending');}
@@ -6117,6 +6261,7 @@ function saveConfirmVoucher(kind,id){
   if(slot)slot.innerHTML='';
   renderPendingVouchers();
   switchLiquidityTab(liquidityTab);
+  refreshLiqTransferBalances();
   refreshBizDashboard();
   pgConfirm(diff>0.001?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
 }
@@ -6151,6 +6296,8 @@ function saveTreasuryOpeningVal(){
   closeTreasuryOpeningForm();
   const el=document.getElementById('liq-opening-val');
   if(el)el.textContent=fmt(val);
+  refreshLiqTransferBalances();
+  refreshBizDashboard();
 }
 function switchLiquidityTab(tab){
   liquidityTab=tab;
@@ -7279,24 +7426,130 @@ function customerDueList(){
   out.sort((a,b)=>b.dueTotal-a.dueTotal);
   return out;
 }
+/* ── كل بنود العميل المفتوحة (سواء مستحقة أو لسه) — تُستخدم لما نضيف عميل يدويًا من مربع البحث ── */
+function customerOpenItems(name){
+  const dueDates=loadCustomerDueDates();
+  const items=[];
+  loadSInvoices().filter(inv=>(inv.customerName||'—')===name).forEach(inv=>{
+    const total=Number(inv.total)||0;
+    const remaining=Math.max(total-Number(inv.paid||0),0);
+    if(remaining<=0)return;
+    if(inv.installments&&inv.installments.length){
+      inv.installments.filter(x=>!x.paid).forEach(x=>{
+        items.push({invId:inv.id,no:x.no,amount:Number(x.amount)||0,dueDate:x.dueDate||''});
+      });
+    } else {
+      items.push({invId:inv.id,no:null,amount:remaining,dueDate:dueDates[name]||''});
+    }
+  });
+  items.sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
+  return items;
+}
+const COLLECT_PAY_METHODS=['نقدي','بنك','شيك','بطاقة'];
+/* ══════════════════════════════════════════════
+   محرك توزيع السداد على فواتير العميل (أو أقساطها):
+   بيمشي على فواتير العميل المفتوحة بترتيب التاريخ (الأقدم أولاً)،
+   وجوه كل فاتورة على الأقساط المفتوحة بترتيب الاستحقاق، وبيوقف عند
+   أول قسط ميكفيش له المبلغ المتبقي بدل ما يتخطاه لقسط بعده —
+   وكل مبلغ بيتخصم فورًا من "المتبقي" اللى بيتمرر للفاتورة/العميل اللى بعده،
+   فمفيش احتمال إن نفس الجنيه يتحسب مرتين على أكتر من فاتورة أو قسط ══════════════════════════════════════════════ */
+function applyPaymentToSInvoice(inv,amountAvailable,date,voucherSeq){
+  let remain=Number(amountAvailable)||0;
+  if(remain<=0.001)return remain;
+  if(inv.installments&&inv.installments.length){
+    const unpaid=inv.installments.filter(x=>!x.paid).sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
+    for(const inst of unpaid){
+      if(remain<=0.001)break;
+      const instAmt=Number(inst.amount)||0;
+      if(remain>=instAmt-0.001){
+        inst.paid=true;inst.paidDate=date;
+        inv.paid=Number(inv.paid||0)+instAmt;
+        remain-=instAmt;
+        if(!inv.collections)inv.collections=[];
+        inv.collections.push({amount:instAmt,date,voucherSeq});
+      } else break; // المبلغ المتبقي ميكفيش القسط ده؛ يتحط كرصيد عام على الفاتورة تحت بدل ما يتخطى للقسط اللى بعده
+    }
+  }
+  if(remain>0.001){
+    const invRemaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+    const apply=Math.min(remain,invRemaining);
+    if(apply>0.001){
+      inv.paid=Number(inv.paid||0)+apply;
+      if(!inv.collections)inv.collections=[];
+      inv.collections.push({amount:apply,date,voucherSeq});
+      remain-=apply;
+    }
+  }
+  inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+  return remain; // أي مبلغ زيادة عن كل مديونية العميل (لو حصل) بيترحّل للفاتورة اللى بعدها، ولو فضل فى الآخر يبقى دفع زيادة عن المستحق
+}
+function distributeCustomerPayment(sInv,customerName,amount,date,voucherSeq){
+  let left=Number(amount)||0;
+  if(left<=0.001)return 0;
+  const invs=sInv.filter(inv=>(inv.customerName||'—')===customerName&&Math.max(Number(inv.total)-Number(inv.paid||0),0)>0.001)
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  for(const inv of invs){
+    if(left<=0.001)break;
+    left=applyPaymentToSInvoice(inv,left,date,voucherSeq);
+  }
+  return left;
+}
 let _collectDue=[];
 function openCollectModal(){
   _collectDue=customerDueList();
   const nameEl=document.getElementById('collect-collector-name');if(nameEl)nameEl.value='';
   const dateEl=document.getElementById('collect-date');if(dateEl)dateEl.value=todayStr();
+  const searchEl=document.getElementById('collect-search-inp');if(searchEl)searchEl.value='';
+  const resEl=document.getElementById('collect-search-results');if(resEl)resEl.innerHTML='';
   renderCollectList();
   document.getElementById('collect-modal').classList.add('show');
 }
 function closeCollectModal(){document.getElementById('collect-modal').classList.remove('show');}
+/* ── يحفظ المبالغ ووسائل الدفع اللى اتعدّلت فى الصفوف الحالية قبل إعادة رسم القائمة (زى بعد إضافة عميل من البحث) ── */
+function syncCollectRows(){
+  _collectDue.forEach((c,i)=>{
+    const amtEl=document.getElementById('collect-amt-'+i);
+    if(amtEl)c.amount=Number(amtEl.value||0);
+    const mEl=document.getElementById('collect-method-'+i);
+    if(mEl)c.method=mEl.value;
+  });
+}
+function filterCollectSearch(){
+  const q=(document.getElementById('collect-search-inp').value||'').trim().toLowerCase();
+  const res=document.getElementById('collect-search-results');
+  if(!res)return;
+  if(!q){res.innerHTML='';return;}
+  const already=new Set(_collectDue.map(c=>c.name));
+  const matches=buildEntityMap('customer').filter(c=>c.name&&c.name!=='—'&&c.name.toLowerCase().includes(q)&&!already.has(c.name)).slice(0,6);
+  res.innerHTML=matches.length?matches.map(c=>`<div class="collect-search-item" onclick="addCollectCustomer('${encodeURIComponent(c.name)}')"><span>${esc(c.name)}</span><span style="color:var(--muted);">+ إضافة</span></div>`).join(''):'<div class="biz-po-empty" style="padding:8px;">لا توجد نتائج مطابقة</div>';
+}
+/* ── إضافة عميل من نتائج البحث: يتحط أول اسم فى القائمة، وبتتكرر نفس العملية مع كل عميل جديد يتحدد ── */
+function addCollectCustomer(encName){
+  const name=decodeURIComponent(encName);
+  if(_collectDue.some(c=>c.name===name))return;
+  syncCollectRows();
+  const items=customerOpenItems(name);
+  const dueTotal=items.reduce((s,it)=>s+it.amount,0);
+  _collectDue.unshift({name,dueTotal,items,amount:dueTotal,method:COLLECT_PAY_METHODS[0]});
+  const searchEl=document.getElementById('collect-search-inp');if(searchEl)searchEl.value='';
+  const resEl=document.getElementById('collect-search-results');if(resEl)resEl.innerHTML='';
+  renderCollectList();
+}
 function renderCollectList(){
   const wrap=document.getElementById('collect-list');
   if(!wrap)return;
-  if(!_collectDue.length){wrap.innerHTML='<div class="biz-po-empty">لا يوجد عملاء مستحق عليهم سداد حالياً</div>';updCollectTotal();return;}
-  wrap.innerHTML=_collectDue.map((c,i)=>`
+  if(!_collectDue.length){wrap.innerHTML='<div class="biz-po-empty">لا يوجد عملاء مستحق عليهم سداد حالياً — استخدم مربع البحث لإضافة عميل</div>';updCollectTotal();return;}
+  wrap.innerHTML=_collectDue.map((c,i)=>{
+    const amt=c.amount!=null?c.amount:c.dueTotal;
+    const method=c.method||COLLECT_PAY_METHODS[0];
+    return `
     <div class="collect-row">
       <div class="collect-row-top"><span>${esc(c.name)}</span><span style="color:var(--red);">مستحق: ${fmt(c.dueTotal)}</span></div>
-      <input class="collect-row-inp" type="number" id="collect-amt-${i}" value="${c.dueTotal}" oninput="updCollectTotal()">
-    </div>`).join('');
+      <div class="collect-row-bottom2">
+        <select class="collect-row-select" id="collect-method-${i}">${COLLECT_PAY_METHODS.map(m=>`<option value="${m}" ${m===method?'selected':''}>${m}</option>`).join('')}</select>
+        <input class="collect-row-inp" type="number" id="collect-amt-${i}" value="${amt}" oninput="updCollectTotal()">
+      </div>
+    </div>`;}).join('');
   updCollectTotal();
 }
 function updCollectTotal(){
@@ -7310,52 +7563,25 @@ function saveCollection(){
   const lines=[];
   _collectDue.forEach((c,i)=>{
     const el=document.getElementById('collect-amt-'+i);
+    const mEl=document.getElementById('collect-method-'+i);
     const amt=el?Number(el.value||0):0;
-    if(amt>0)lines.push({customerName:c.name,amount:amt,items:c.items});
+    const method=mEl?mEl.value:COLLECT_PAY_METHODS[0];
+    if(amt>0)lines.push({customerName:c.name,amount:amt,method});
   });
   if(!lines.length){pgConfirm('من فضلك أدخل مبلغ عميل واحد على الأقل',()=>{},'حسناً');return;}
   const sInv=loadSInvoices();
   const seq=nextSeq();
+  let totalUnapplied=0;
   lines.forEach(line=>{
-    let left=line.amount;
-    line.items.forEach(it=>{
-      if(left<=0)return;
-      const inv=sInv.find(x=>x.id===it.invId);
-      if(!inv)return;
-      if(it.no!=null){
-        const inst=(inv.installments||[]).find(x=>x.no===it.no);
-        if(inst&&!inst.paid&&left>=inst.amount-0.001){
-          inst.paid=true;inst.paidDate=date;
-          inv.paid=Number(inv.paid||0)+Number(inst.amount);
-          left-=Number(inst.amount);
-          inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
-        }
-      } else {
-        const apply=Math.min(left,it.amount);
-        inv.paid=Number(inv.paid||0)+apply;
-        inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
-        if(!inv.collections)inv.collections=[];
-        inv.collections.push({amount:apply,date,voucherSeq:seq});
-        left-=apply;
-      }
-    });
-    if(left>0.001){
-      const openInv=sInv.find(x=>x.customerName===line.customerName&&Math.max(Number(x.total)-Number(x.paid||0),0)>0);
-      if(openInv){
-        openInv.paid=Number(openInv.paid||0)+left;
-        openInv.remaining=Math.max(Number(openInv.total)-Number(openInv.paid||0),0);
-        if(!openInv.collections)openInv.collections=[];
-        openInv.collections.push({amount:left,date,voucherSeq:seq});
-      }
-    }
+    totalUnapplied+=distributeCustomerPayment(sInv,line.customerName,line.amount,date,seq);
   });
   saveSInvoices(sInv);
   const total=Math.round(lines.reduce((s,l)=>s+l.amount,0)*100)/100;
   const v={id:'rcpt_'+Date.now(),seq,name:collector,amount:total,date,
     type:'تحصيل',
     desc:'تحصيل مديونية عملاء ('+lines.length+' عميل)',
-    notes:lines.map(l=>l.customerName+': '+fmt(l.amount)).join(' — '),
-    lines:lines.map(l=>({customerName:l.customerName,amount:l.amount})),
+    notes:lines.map(l=>l.customerName+': '+fmt(l.amount)+' ('+l.method+')').join(' — '),
+    lines:lines.map(l=>({customerName:l.customerName,amount:l.amount,method:l.method})),
     status:'pending',collector};
   const receipts=loadTreasuryReceipts();receipts.push(v);saveTreasuryReceipts(receipts);
   pushBizJournal(collector,total,'in','تحصيل عملاء #'+seq,'var(--green)',date);
@@ -7364,7 +7590,8 @@ function saveCollection(){
   if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));
   if(document.getElementById('biz-liquidity-tab-content')){renderPendingVouchers();switchLiquidityTab(liquidityTab);}
   refreshBizDashboard();
-  pgConfirm('تم تسجيل التحصيل بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة',()=>{},'تمام');
+  const overpayNote=totalUnapplied>0.001?` (تنبيه: ${fmt(totalUnapplied)} من المبلغ زيادة عن مديونية العملاء المدخلين ولم يُخصَّص على أى فاتورة)`:'';
+  pgConfirm('تم تسجيل التحصيل بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة'+overpayNote,()=>{},'تمام');
 }
 
 /* ══════════════════════════════════════════════
@@ -7390,6 +7617,32 @@ function supplierDueList(){
   out.forEach(s=>s.items.sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||'')));
   out.sort((a,b)=>b.dueTotal-a.dueTotal);
   return out;
+}
+/* ── نفس منطق توزيع السداد الآمن (بدون احتساب مزدوج)، لفواتير الموردين (بدون أقساط) ── */
+function applyPaymentToPInvoice(inv,amountAvailable,date,voucherSeq){
+  let remain=Number(amountAvailable)||0;
+  if(remain<=0.001)return remain;
+  const invRemaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+  const apply=Math.min(remain,invRemaining);
+  if(apply>0.001){
+    inv.paid=Number(inv.paid||0)+apply;
+    if(!inv.payments)inv.payments=[];
+    inv.payments.push({amount:apply,date,voucherSeq});
+    remain-=apply;
+  }
+  inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+  return remain;
+}
+function distributeSupplierPayment(pInv,supplierName,amount,date,voucherSeq){
+  let left=Number(amount)||0;
+  if(left<=0.001)return 0;
+  const invs=pInv.filter(inv=>(inv.supplierName||'—')===supplierName&&Math.max(Number(inv.total)-Number(inv.paid||0),0)>0.001)
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  for(const inv of invs){
+    if(left<=0.001)break;
+    left=applyPaymentToPInvoice(inv,left,date,voucherSeq);
+  }
+  return left;
 }
 let _payDue=[];
 function openPayModal(){
@@ -7423,24 +7676,14 @@ function savePayment(){
   _payDue.forEach((s,i)=>{
     const el=document.getElementById('pay-amt-'+i);
     const amt=el?Number(el.value||0):0;
-    if(amt>0)lines.push({supplierName:s.name,amount:amt,items:s.items});
+    if(amt>0)lines.push({supplierName:s.name,amount:amt});
   });
   if(!lines.length){pgConfirm('من فضلك أدخل مبلغ مورد واحد على الأقل',()=>{},'حسناً');return;}
   const pInv=loadPInvoices();
   const seq=nextSeq();
+  let totalUnapplied=0;
   lines.forEach(line=>{
-    let left=line.amount;
-    line.items.forEach(it=>{
-      if(left<=0)return;
-      const inv=pInv.find(x=>x.id===it.invId);
-      if(!inv)return;
-      const apply=Math.min(left,it.amount);
-      inv.paid=Number(inv.paid||0)+apply;
-      inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
-      if(!inv.payments)inv.payments=[];
-      inv.payments.push({amount:apply,date,voucherSeq:seq});
-      left-=apply;
-    });
+    totalUnapplied+=distributeSupplierPayment(pInv,line.supplierName,line.amount,date,seq);
   });
   savePInvoices(pInv);
   const total=Math.round(lines.reduce((s,l)=>s+l.amount,0)*100)/100;
@@ -7457,7 +7700,8 @@ function savePayment(){
   if(document.getElementById('biz-purchase-tab-content'))renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
   if(document.getElementById('biz-liquidity-tab-content')){renderPendingVouchers();switchLiquidityTab(liquidityTab);}
   refreshBizDashboard();
-  pgConfirm('تم تسجيل السداد بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة',()=>{},'تمام');
+  const overpayNote=totalUnapplied>0.001?` (تنبيه: ${fmt(totalUnapplied)} من المبلغ زيادة عن مديونية الموردين المدخلين ولم يُخصَّص على أى فاتورة)`:'';
+  pgConfirm('تم تسجيل السداد بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة'+overpayNote,()=>{},'تمام');
 }
 
 function deleteInvoiceS(id){
