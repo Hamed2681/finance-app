@@ -750,6 +750,12 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .collect-row-inp{background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--green);font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;padding:7px 9px;width:100%;outline:none;text-align:center;}
 .collect-row-inp:focus{border-color:var(--blue);}
 .collect-row-bottom2{display:flex;gap:6px;}
+.collect-items{display:flex;flex-direction:column;gap:5px;}
+.collect-item-row{display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:5px 8px;}
+.collect-item-label{font-size:10.5px;color:var(--txt);flex:1;}
+.collect-item-inp{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--green);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;padding:5px 6px;width:78px;flex-shrink:0;outline:none;text-align:center;}
+.collect-item-inp:focus{border-color:var(--blue);}
+.collect-row-sum{font-size:10.5px;color:var(--muted);text-align:left;padding-top:2px;}
 .collect-row-select{background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;font-weight:700;padding:7px 4px;outline:none;flex:1;min-width:0;}
 .collect-search-results{display:flex;flex-direction:column;gap:5px;}
 .collect-search-item{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--txt);cursor:pointer;display:flex;justify-content:space-between;}
@@ -2083,9 +2089,9 @@ try{
 // ══════════════════════════════════════════════
 const BIZ_SCOPED_KEYS=new Set(['fm_biz_journal','fm_biz_purchase_invoices','fm_biz_purchase_returns',
   'fm_biz_sales_invoices','fm_biz_sales_returns','fm_classifications','fm_coa_accounts',
-  'fm_customer_duedates','fm_customer_openings','fm_inv_damaged','fm_inv_groups','fm_inv_items',
+  'fm_customer_creditlimits','fm_customer_duedates','fm_customer_openings','fm_inv_damaged','fm_inv_groups','fm_inv_items',
   'fm_inv_returns','fm_inv_sections','fm_inv_warehouses','fm_manual_customers','fm_manual_suppliers',
-  'fm_partners','fm_pinv_no_seq','fm_return_ref_seq','fm_return_ref_seq_sales','fm_seq',
+  'fm_partner_current_adj','fm_partners','fm_pinv_no_seq','fm_return_ref_seq','fm_return_ref_seq_sales','fm_seq',
   'fm_sinv_no_seq','fm_supplier_duedates','fm_supplier_openings','fm_treasury_opening',
   'fm_treasury_payments','fm_treasury_receipts']);
 let currentWs='personal'; // النشاط الحالي (شخصي أو أحد الأنشطة التجارية) — لازم يتعرّف الأول قبل أي استخدام لـ _scopedKey
@@ -5621,11 +5627,12 @@ let coaClassOpen={};
 // ── إضافة (Add-on): حسابات شركاء — عند التفعيل، كل شريك بيتحط كصف واحد داخل «حساب الشركاء»
 // فى الخصوم، بقيمة إجمالية = رأس المال + الحساب الجاري (بدل عقدة منفصلة لكل شريك) ──
 function registerPartnerCoaBuiltins(){
-  COA_BUILTIN_ROWS['liab_equity']=loadPartners().map(p=>({
-    key:'partner_'+p.id,
-    name:p.name,
-    calc:()=>Number(p.capitalOpening||0)+Number(p.currentOpening||0)
-  }));
+  const rows=[];
+  loadPartners().forEach(p=>{
+    rows.push({key:'partner_'+p.id+'_capital',name:p.name+' — رأس المال',calc:()=>Number(p.capitalOpening||0)});
+    rows.push({key:'partner_'+p.id+'_current',name:p.name+' — حساب جاري',calc:()=>partnerCurrentBalance(p)});
+  });
+  COA_BUILTIN_ROWS['liab_equity']=rows;
 }
 function getCoaStructure(){
   const structure=COA_STRUCTURE.slice();
@@ -5638,7 +5645,16 @@ function getCoaStructure(){
 }
 function partnersEquityTotal(){
   if(!getSettings().addonPartners)return 0;
-  return loadPartners().reduce((s,p)=>s+Number(p.capitalOpening||0)+Number(p.currentOpening||0),0);
+  return loadPartners().reduce((s,p)=>s+Number(p.capitalOpening||0)+partnerCurrentBalance(p),0);
+}
+/* ── حساب جاري الشريك: رصيد افتتاحي + أى تسويات لاحقة (زى فرق أذون التحصيل) ── */
+function loadPartnerCurrentAdj(){return JSON.parse(_getItem('fm_partner_current_adj')||'[]');}
+function savePartnerCurrentAdj(l){_setItem('fm_partner_current_adj',JSON.stringify(l));}
+function partnerCurrentAdjTotal(partnerId){
+  return loadPartnerCurrentAdj().filter(a=>a.partnerId===partnerId).reduce((s,a)=>s+Number(a.amount||0),0);
+}
+function partnerCurrentBalance(p){
+  return Number(p.currentOpening||0)+partnerCurrentAdjTotal(p.id);
 }
 const COA_LINK_NODES={
   assets_customers:{bizKey:'sales'},
@@ -6258,23 +6274,38 @@ function saveConfirmVoucher(kind,id){
   v.confirmedAmount=confirmedAmount;
   v.confirmedDate=todayStr();
   if(kind==='receipt')saveTreasuryReceipts(list);else saveTreasuryPayments(list);
-  if(diff>0.001)addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
+  let wentToPartner=false;
+  if(diff>0.001)wentToPartner=addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
   const slot=document.getElementById('confirm-voucher-slot');
   if(slot)slot.innerHTML='';
   renderPendingVouchers();
   switchLiquidityTab(liquidityTab);
   refreshLiqTransferBalances();
   refreshBizDashboard();
-  pgConfirm(diff>0.001?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
+  const diffMsg=wentToPartner?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} بالخصم من حسابه الجارى`:`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`;
+  pgConfirm(diff>0.001?diffMsg:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
 }
-/* تسجيل الفرق بين المسجَّل والمؤكَّد (تحصيل ناقص أو صرف أقل من المتوقع) كحساب "أخرى مدينة" فى شجرة الحسابات */
+/* تسجيل الفرق بين المسجَّل والمؤكَّد (تحصيل ناقص أو صرف أقل من المتوقع):
+   - لو الشخص شريك: يتخصم من حسابه الجاري (بالسالب) بدل "أخرى مدينة"
+   - غير كده: يتسجل كحساب فرعى جديد ومستقل تحت "أخرى مدينة" (كل مرة حساب لوحده، من غير ما يتجمع مع أى فرق سابق لنفس الشخص)
+   بيرجع true لو اتسجل على حساب شريك، false لو اتسجل كـ"أخرى مدينة" */
 function addVoucherDiffDebt(personName,amount,voucherSeq,label){
+  const partner=getSettings().addonPartners?loadPartners().find(p=>p.name===personName):null;
+  if(partner){
+    const adj=loadPartnerCurrentAdj();
+    adj.push({id:'padj_'+Date.now(),partnerId:partner.id,amount:-amount,date:todayStr(),reason:'فرق '+label+' إذن #'+voucherSeq});
+    savePartnerCurrentAdj(adj);
+    coaExpanded.liab_equity=true;
+    renderCoaTree();
+    return true;
+  }
   const data=loadCoaAccounts();
   if(!data.assets_other_debit)data.assets_other_debit=[];
   data.assets_other_debit.push({id:'acc_'+Date.now(),name:personName+' — فرق '+label+' إذن #'+voucherSeq,amount});
   saveCoaAccounts(data);
   coaExpanded.assets_other_debit=true;
   renderCoaTree();
+  return false;
 }
 function openTreasuryOpeningForm(){
   const slot=document.getElementById('liq-opening-form-slot');
@@ -6446,11 +6477,13 @@ function saveConfirmFromVoucherView(kind,id){
   const diff=Math.round((Number(v.amount)-confirmedAmount)*100)/100;
   v.status='confirmed';v.confirmedAmount=confirmedAmount;v.confirmedDate=todayStr();
   if(kind==='receipt')saveTreasuryReceipts(list);else saveTreasuryPayments(list);
-  if(diff>0.001)addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
+  let wentToPartner2=false;
+  if(diff>0.001)wentToPartner2=addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
   if(document.getElementById('liq-pending-wrap'))renderPendingVouchers();
   refreshBizDashboard();
   viewVoucher(kind,id);
-  pgConfirm(diff>0.001?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
+  const diffMsg2=wentToPartner2?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} بالخصم من حسابه الجارى`:`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`;
+  pgConfirm(diff>0.001?diffMsg2:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
 }
 function deleteVoucher(kind,id){
   if(kind==='receipt'){saveTreasuryReceipts(loadTreasuryReceipts().filter(x=>x.id!==id));renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));}
@@ -7114,6 +7147,8 @@ function loadCustomerOpenings(){return JSON.parse(_getItem('fm_customer_openings
 function saveCustomerOpenings(o){_setItem('fm_customer_openings',JSON.stringify(o));}
 function loadCustomerDueDates(){return JSON.parse(_getItem('fm_customer_duedates')||'{}');}
 function saveCustomerDueDates(o){_setItem('fm_customer_duedates',JSON.stringify(o));}
+function loadCustomerCreditLimits(){return JSON.parse(_getItem('fm_customer_creditlimits')||'{}');}
+function saveCustomerCreditLimits(o){_setItem('fm_customer_creditlimits',JSON.stringify(o));}
 
 let bizSalesTab='invoice';
 let _sInvItems=[],_sRetItems=[];
@@ -7328,6 +7363,20 @@ function saveInvoiceS(){
     items,total,initialPaid:paid,paid,remaining,
     installmentPlan,installments,
     notes:document.getElementById('sinv-notes').value.trim()};
+  const creditLimit=Number(loadCustomerCreditLimits()[customerName]||0);
+  if(creditLimit>0&&remaining>0){
+    const cu=buildEntityMap('customer').find(c=>c.name===customerName);
+    const opening=Number(loadCustomerOpenings()[customerName]||0);
+    const currentBalance=cu?Math.max(cu.total-cu.paid-cu.returned+opening,0):Math.max(opening,0);
+    const projectedBalance=currentBalance+remaining;
+    if(projectedBalance>creditLimit){
+      pgConfirm('تنبيه: هذه الفاتورة هتخلى مديونية "'+customerName+'" توصل لـ '+fmt(projectedBalance)+'، وده أكتر من حد الائتمان المحدد له ('+fmt(creditLimit)+'). عايز تكمل الحفظ؟',()=>_finalizeSaveInvoiceS(inv,customerName,total,paid),'كمل الحفظ');
+      return;
+    }
+  }
+  _finalizeSaveInvoiceS(inv,customerName,total,paid);
+}
+function _finalizeSaveInvoiceS(inv,customerName,total,paid){
   commitSInvNo(Number(inv.invNo)||nextSInvNoPreview()-1);
   const stockResult=postSaleToInventory(inv);
   inv.postedItems=stockResult.posted;
@@ -7407,15 +7456,16 @@ function customerDueList(){
     const total=Number(inv.total)||0;
     const remaining=Math.max(total-Number(inv.paid||0),0);
     if(remaining<=0)return;
+    const invLabel=inv.invNo?('#'+inv.invNo):('فاتورة #'+inv.seq);
     const items=[];
     if(inv.installments&&inv.installments.length){
       inv.installments.filter(x=>!x.paid&&x.dueDate&&x.dueDate<=today).forEach(x=>{
-        items.push({invId:inv.id,no:x.no,amount:Number(x.amount)||0,dueDate:x.dueDate});
+        items.push({invId:inv.id,no:x.no,amount:Number(x.amount)||0,dueDate:x.dueDate,invLabel});
       });
     } else {
       const custDue=dueDates[inv.customerName||''];
       if(custDue&&custDue<=today){
-        items.push({invId:inv.id,no:null,amount:remaining,dueDate:custDue});
+        items.push({invId:inv.id,no:null,amount:remaining,dueDate:custDue,invLabel});
       }
     }
     if(!items.length)return;
@@ -7436,12 +7486,13 @@ function customerOpenItems(name){
     const total=Number(inv.total)||0;
     const remaining=Math.max(total-Number(inv.paid||0),0);
     if(remaining<=0)return;
+    const invLabel=inv.invNo?('#'+inv.invNo):('فاتورة #'+inv.seq);
     if(inv.installments&&inv.installments.length){
       inv.installments.filter(x=>!x.paid).forEach(x=>{
-        items.push({invId:inv.id,no:x.no,amount:Number(x.amount)||0,dueDate:x.dueDate||''});
+        items.push({invId:inv.id,no:x.no,amount:Number(x.amount)||0,dueDate:x.dueDate||'',invLabel});
       });
     } else {
-      items.push({invId:inv.id,no:null,amount:remaining,dueDate:dueDates[name]||''});
+      items.push({invId:inv.id,no:null,amount:remaining,dueDate:dueDates[name]||'',invLabel});
     }
   });
   items.sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
@@ -7505,11 +7556,13 @@ function openCollectModal(){
   document.getElementById('collect-modal').classList.add('show');
 }
 function closeCollectModal(){document.getElementById('collect-modal').classList.remove('show');}
-/* ── يحفظ المبالغ ووسائل الدفع اللى اتعدّلت فى الصفوف الحالية قبل إعادة رسم القائمة (زى بعد إضافة عميل من البحث) ── */
+/* ── يحفظ المبالغ المكتوبة على كل فاتورة ووسيلة الدفع اللى اتعدّلت فى الصفوف الحالية قبل إعادة رسم القائمة (زى بعد إضافة عميل من البحث) ── */
 function syncCollectRows(){
   _collectDue.forEach((c,i)=>{
-    const amtEl=document.getElementById('collect-amt-'+i);
-    if(amtEl)c.amount=Number(amtEl.value||0);
+    (c.items||[]).forEach((it,j)=>{
+      const el=document.getElementById('collect-item-'+i+'-'+j);
+      if(el)it.pay=Number(el.value||0);
+    });
     const mEl=document.getElementById('collect-method-'+i);
     if(mEl)c.method=mEl.value;
   });
@@ -7530,7 +7583,7 @@ function addCollectCustomer(encName){
   syncCollectRows();
   const items=customerOpenItems(name);
   const dueTotal=items.reduce((s,it)=>s+it.amount,0);
-  _collectDue.unshift({name,dueTotal,items,amount:dueTotal,method:COLLECT_PAY_METHODS[0]});
+  _collectDue.unshift({name,dueTotal,items,method:COLLECT_PAY_METHODS[0]});
   const searchEl=document.getElementById('collect-search-inp');if(searchEl)searchEl.value='';
   const resEl=document.getElementById('collect-search-results');if(resEl)resEl.innerHTML='';
   renderCollectList();
@@ -7540,41 +7593,92 @@ function renderCollectList(){
   if(!wrap)return;
   if(!_collectDue.length){wrap.innerHTML='<div class="biz-po-empty">لا يوجد عملاء مستحق عليهم سداد حالياً — استخدم مربع البحث لإضافة عميل</div>';updCollectTotal();return;}
   wrap.innerHTML=_collectDue.map((c,i)=>{
-    const amt=c.amount!=null?c.amount:c.dueTotal;
     const method=c.method||COLLECT_PAY_METHODS[0];
     return `
     <div class="collect-row">
       <div class="collect-row-top"><span>${esc(c.name)}</span><span style="color:var(--red);">مستحق: ${fmt(c.dueTotal)}</span></div>
       <div class="collect-row-bottom2">
         <select class="collect-row-select" id="collect-method-${i}">${COLLECT_PAY_METHODS.map(m=>`<option value="${m}" ${m===method?'selected':''}>${m}</option>`).join('')}</select>
-        <input class="collect-row-inp" type="number" id="collect-amt-${i}" value="${amt}" oninput="updCollectTotal()">
       </div>
+      <div class="collect-items">
+        ${(c.items||[]).map((it,j)=>`
+        <div class="collect-item-row">
+          <span class="collect-item-label">${esc(it.invLabel||'')}${it.no!=null?' — قسط '+it.no:''} <b style="color:var(--muted);font-weight:700;">(مطلوب ${fmt(it.amount)})</b></span>
+          <input class="collect-item-inp" type="number" id="collect-item-${i}-${j}" value="${it.pay!=null?it.pay:''}" placeholder="0" oninput="updCollectItemAmt(${i})">
+        </div>`).join('')}
+      </div>
+      <div class="collect-row-sum"><span>مُدخل لهذا العميل: <b id="collect-entered-${i}" style="color:var(--green);">0.00</b></span></div>
     </div>`;}).join('');
+  _collectDue.forEach((c,i)=>updCollectItemAmt(i));
+}
+/* ── يحدّث إجمالي العميل الواحد + الإجمالي الكلي فى الأسفل كل ما المستخدم يكتب مبلغ فى فاتورة ── */
+function updCollectItemAmt(i){
+  const c=_collectDue[i];
+  if(!c)return;
+  const sum=(c.items||[]).reduce((s,it,j)=>{const el=document.getElementById('collect-item-'+i+'-'+j);return s+(el?Number(el.value||0):0);},0);
+  const el=document.getElementById('collect-entered-'+i);if(el)el.textContent=fmt(sum);
   updCollectTotal();
 }
 function updCollectTotal(){
-  const total=_collectDue.reduce((s,c,i)=>{const el=document.getElementById('collect-amt-'+i);return s+(el?Number(el.value||0):0);},0);
+  let total=0;
+  _collectDue.forEach((c,i)=>{
+    (c.items||[]).forEach((it,j)=>{
+      const el=document.getElementById('collect-item-'+i+'-'+j);
+      if(el)total+=Number(el.value||0);
+    });
+  });
   const el=document.getElementById('collect-total-val');if(el)el.textContent=fmt(total);
+}
+/* ── يطبّق المبلغ اللى المستخدم كتبه على بند بعينه (فاتورة أو قسط) بدل التوزيع التلقائي ── */
+function applyManualPaymentToItem(sInv,it,amt,date,voucherSeq){
+  const inv=sInv.find(x=>x.id===it.invId);
+  if(!inv||amt<=0.001)return;
+  if(it.no!=null&&inv.installments){
+    const inst=inv.installments.find(x=>x.no===it.no);
+    if(inst&&!inst.paid){
+      const instAmt=Number(inst.amount)||0;
+      if(amt>=instAmt-0.001){
+        inst.paid=true;inst.paidDate=date;inst.voucherSeq=voucherSeq;
+        inv.paid=Number(inv.paid||0)+instAmt;
+      } else {
+        // دفعة جزئية من قسط: مش هنعلّمه مدفوع، بس نسجّلها كتحصيل جزئي على الفاتورة
+        inv.paid=Number(inv.paid||0)+amt;
+        if(!inv.collections)inv.collections=[];
+        inv.collections.push({amount:amt,date,voucherSeq,note:'دفعة جزئية من قسط '+it.no});
+      }
+    }
+  } else {
+    const invRemaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
+    const apply=Math.min(amt,invRemaining);
+    if(apply>0.001){
+      inv.paid=Number(inv.paid||0)+apply;
+      if(!inv.collections)inv.collections=[];
+      inv.collections.push({amount:apply,date,voucherSeq});
+    }
+  }
+  inv.remaining=Math.max(Number(inv.total)-Number(inv.paid||0),0);
 }
 function saveCollection(){
   const collector=(document.getElementById('collect-collector-name').value||'').trim();
   if(!collector){pgConfirm('من فضلك أدخل اسم المحصل',()=>{},'حسناً');return;}
   const date=document.getElementById('collect-date').value||todayStr();
   const lines=[];
+  const applications=[];
   _collectDue.forEach((c,i)=>{
-    const el=document.getElementById('collect-amt-'+i);
+    let custTotal=0;
+    (c.items||[]).forEach((it,j)=>{
+      const el=document.getElementById('collect-item-'+i+'-'+j);
+      const amt=el?Number(el.value||0):0;
+      if(amt>0){applications.push({it,amt});custTotal+=amt;}
+    });
     const mEl=document.getElementById('collect-method-'+i);
-    const amt=el?Number(el.value||0):0;
     const method=mEl?mEl.value:COLLECT_PAY_METHODS[0];
-    if(amt>0)lines.push({customerName:c.name,amount:amt,method});
+    if(custTotal>0)lines.push({customerName:c.name,amount:custTotal,method});
   });
-  if(!lines.length){pgConfirm('من فضلك أدخل مبلغ عميل واحد على الأقل',()=>{},'حسناً');return;}
+  if(!applications.length){pgConfirm('من فضلك أدخل مبلغ فاتورة واحدة على الأقل',()=>{},'حسناً');return;}
   const sInv=loadSInvoices();
   const seq=nextSeq();
-  let totalUnapplied=0;
-  lines.forEach(line=>{
-    totalUnapplied+=distributeCustomerPayment(sInv,line.customerName,line.amount,date,seq);
-  });
+  applications.forEach(a=>applyManualPaymentToItem(sInv,a.it,a.amt,date,seq));
   saveSInvoices(sInv);
   const total=Math.round(lines.reduce((s,l)=>s+l.amount,0)*100)/100;
   const v={id:'rcpt_'+Date.now(),seq,name:collector,amount:total,date,
@@ -7590,8 +7694,7 @@ function saveCollection(){
   if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));
   if(document.getElementById('biz-liquidity-tab-content')){renderPendingVouchers();switchLiquidityTab(liquidityTab);}
   refreshBizDashboard();
-  const overpayNote=totalUnapplied>0.001?` (تنبيه: ${fmt(totalUnapplied)} من المبلغ زيادة عن مديونية العملاء المدخلين ولم يُخصَّص على أى فاتورة)`:'';
-  pgConfirm('تم تسجيل التحصيل بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة'+overpayNote,()=>{},'تمام');
+  pgConfirm('تم تسجيل التحصيل بنجاح، وفى انتظار تأكيد المبلغ من قسم "الأذون المعلقة" بالخزينة',()=>{},'تمام');
 }
 
 /* ══════════════════════════════════════════════
@@ -7881,13 +7984,17 @@ function renderCustomersTab(c){
   const clsStore=loadClassifications();
   const openings=loadCustomerOpenings();
   const dueDates=loadCustomerDueDates();
+  const creditLimits=loadCustomerCreditLimits();
   const emptyMsg=allCustomers.length?'لا يوجد عملاء فى هذا التصنيف':'لا يوجد عملاء مسجلون بعد<br>سيظهر العملاء هنا تلقائياً بعد تسجيل أول فاتورة مبيعات';
   c.innerHTML=`
     <button class="biz-po-addbtn" onclick="openManualEntityForm('customer')">+ عميل سابق برصيد افتتاحي</button>
+    <button class="biz-po-addbtn" onclick="openCustomerDebtReport()">📊 تقرير مديونية العملاء</button>
+    <div id="cus-debt-report-slot"></div>
     <div id="cus-opening-form-slot"></div>
     <div id="cus-duedate-form-slot"></div>
+    <div id="cus-creditlimit-form-slot"></div>
     ${entClsBarHtml('customer')}
-    <div class="biz-po-list" id="cus-po-list">${customers.length?customers.map(cu=>customerCardHtml(cu,clsStore,openings,dueDates)).join(''):`<div class="biz-po-empty">${emptyMsg}</div>`}</div>`;
+    <div class="biz-po-list" id="cus-po-list">${customers.length?customers.map(cu=>customerCardHtml(cu,clsStore,openings,dueDates,creditLimits)).join(''):`<div class="biz-po-empty">${emptyMsg}</div>`}</div>`;
   initEntClsSwipe('customer','cus-po-list');
 }
 function openCustomerOpeningForm(name){
@@ -7938,20 +8045,121 @@ function saveCustomerDueDate(name){
   closeCustomerDueDateForm();
   renderCustomersTab(document.getElementById('biz-sales-tab-content'));
 }
-function customerCardHtml(cu,clsStore,openings,dueDates){
+function openCustomerCreditLimitForm(name){
+  const slot=document.getElementById('cus-creditlimit-form-slot');
+  if(!slot)return;
+  const limits=loadCustomerCreditLimits();
+  slot.innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">حد الائتمان — ${esc(name)}</div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="cus-creditlimit-val" type="number" placeholder="اتركه فارغاً = بدون حد" value="${limits[name]||''}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveCustomerCreditLimit('${esc(name)}')">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="closeCustomerCreditLimitForm()">إلغاء</button>
+      </div>
+    </div>`;
+}
+function closeCustomerCreditLimitForm(){const s=document.getElementById('cus-creditlimit-form-slot');if(s)s.innerHTML='';}
+function saveCustomerCreditLimit(name){
+  const raw=document.getElementById('cus-creditlimit-val').value;
+  const o=loadCustomerCreditLimits();
+  if(raw===''||raw==null)delete o[name];else o[name]=Number(raw);
+  saveCustomerCreditLimits(o);
+  closeCustomerCreditLimitForm();
+  renderCustomersTab(document.getElementById('biz-sales-tab-content'));
+}
+/* ── تقرير مديونية العملاء: فلتر تصنيف + مدة (حسب تاريخ إصدار الفاتورة) ── */
+function openCustomerDebtReport(){
+  const slot=document.getElementById('cus-debt-report-slot');
+  if(!slot)return;
+  if(slot.innerHTML.trim()){slot.innerHTML='';return;}
+  const clsList=(loadClassifications().customer||[]);
+  slot.innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">📊 تقرير مديونية العملاء — حسب تاريخ الفاتورة</div>
+      <div class="biz-po-frow"><select class="biz-po-inp" id="cdr-cls">
+        <option value="all">كل التصنيفات</option>
+        ${clsList.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}
+      </select></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="cdr-from" type="date" placeholder="من"></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="cdr-to" type="date" value="${todayStr()}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="renderCustomerDebtReportResults()">عرض التقرير</button>
+        <button class="biz-po-btn cancel" onclick="closeCustomerDebtReport()">إغلاق</button>
+      </div>
+      <div id="cdr-results"></div>
+    </div>`;
+}
+function closeCustomerDebtReport(){const s=document.getElementById('cus-debt-report-slot');if(s)s.innerHTML='';}
+function renderCustomerDebtReportResults(){
+  const res=document.getElementById('cdr-results');
+  if(!res)return;
+  const clsId=document.getElementById('cdr-cls').value;
+  const from=document.getElementById('cdr-from').value||'0000-01-01';
+  const to=document.getElementById('cdr-to').value||'9999-12-31';
+  const clsList=(loadClassifications().customer||[]);
+  const cls=clsList.find(c=>c.id===clsId);
+  const names=clsId==='all'?null:new Set((cls&&cls.members)||[]);
+  const invoices=loadSInvoices();
+  const returns=loadSReturns();
+  const byName={};
+  invoices.forEach(inv=>{
+    const nm=inv.customerName||'—';
+    if(names&&!names.has(nm))return;
+    const d=inv.date||'';
+    if(d<from||d>to)return;
+    if(!byName[nm])byName[nm]={total:0,paid:0,returned:0};
+    byName[nm].total+=Number(inv.total)||0;
+    byName[nm].paid+=Number(inv.paid)||0;
+  });
+  returns.forEach(r=>{
+    const nm=r.customerName||'—';
+    if(!byName[nm])return; // بنحسب المرتجع بس لو للعميل فواتير داخلة أصلاً فى نفس الفترة/التصنيف
+    const d=r.date||'';
+    if(d<from||d>to)return;
+    byName[nm].returned+=Number(r.returnValue)||0;
+  });
+  const rows=Object.keys(byName).map(nm=>{
+    const x=byName[nm];
+    const remaining=Math.max(x.total-x.paid-x.returned,0);
+    return{nm,...x,remaining};
+  }).sort((a,b)=>b.remaining-a.remaining);
+  if(!rows.length){res.innerHTML='<div class="biz-po-empty" style="margin-top:8px;">لا توجد فواتير فى الفترة/التصنيف ده</div>';return;}
+  const gTotal=rows.reduce((s,r)=>s+r.total,0);
+  const gPaid=rows.reduce((s,r)=>s+r.paid,0);
+  const gRet=rows.reduce((s,r)=>s+r.returned,0);
+  const gRem=rows.reduce((s,r)=>s+r.remaining,0);
+  res.innerHTML=`
+    <div style="margin-top:8px;">
+      <div class="biz-po-total-row"><span>إجمالي الفواتير فى الفترة</span><b>${fmt(gTotal)}</b></div>
+      <div class="biz-po-total-row"><span>المحصّل منها (حتى الآن)</span><b style="color:var(--green);">${fmt(gPaid)}</b></div>
+      ${gRet?`<div class="biz-po-total-row"><span>مردودات</span><b style="color:var(--red);">${fmt(gRet)}</b></div>`:''}
+      <div class="biz-po-total-row"><span>المتبقي (المديونية)</span><b style="color:${gRem>0?'var(--red)':'var(--green)'};">${fmt(gRem)}</b></div>
+    </div>
+    <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
+      ${rows.map(r=>`<div class="biz-po-sup-card" style="cursor:default;">
+        <div class="biz-po-sup-top"><span>${esc(r.nm)}</span><span style="color:${r.remaining>0?'var(--red)':'var(--green)'};font-size:12px;">${fmt(r.remaining)}</span></div>
+        <div class="biz-po-sup-bottom"><span>إجمالي: ${fmt(r.total)}</span><span>محصل: ${fmt(r.paid)}${r.returned?' · مردود: '+fmt(r.returned):''}</span></div>
+      </div>`).join('')}
+    </div>`;
+}
+function customerCardHtml(cu,clsStore,openings,dueDates,creditLimits){
   const opening=Number((openings&&openings[cu.name])||0);
   const balance=Math.max(cu.total-cu.paid-cu.returned+opening,0);
   const cls=((clsStore&&clsStore.customer)||[]).find(c=>c.members.includes(cu.name));
   const dueDate=(dueDates&&dueDates[cu.name])||'';
   const dueOverdue=dueDate&&dueDate<=todayStr();
+  const creditLimit=Number((creditLimits&&creditLimits[cu.name])||0);
+  const overLimit=creditLimit>0&&balance>creditLimit;
   return `<div class="biz-po-sup-card" onclick="openEntityDetail('customer','${esc(cu.name)}')">
-    <div class="biz-po-sup-top"><span>${esc(cu.name)}${cls?` <span style="font-size:9.5px;color:var(--blue);background:rgba(77,168,240,.15);border-radius:5px;padding:1px 6px;margin-right:4px;">${esc(cls.name)}</span>`:''}</span><span style="color:${balance>0?'var(--red)':'var(--green)'};font-size:12px;">${fmt(balance)}</span></div>
+    <div class="biz-po-sup-top"><span>${esc(cu.name)}${cls?` <span style="font-size:9.5px;color:var(--blue);background:rgba(77,168,240,.15);border-radius:5px;padding:1px 6px;margin-right:4px;">${esc(cls.name)}</span>`:''}${overLimit?` <span style="font-size:9.5px;color:var(--red);background:rgba(240,77,77,.15);border-radius:5px;padding:1px 6px;margin-right:4px;">⚠️ تخطى حد الائتمان</span>`:''}</span><span style="color:${balance>0?'var(--red)':'var(--green)'};font-size:12px;">${fmt(balance)}</span></div>
     <div class="biz-po-sup-bottom">
       <span>${cu.phone?esc(cu.phone):'—'}</span>
       <span>إجمالي: ${fmt(cu.total)} · محصل: ${fmt(cu.paid)}${cu.returned?' · مردود: '+fmt(cu.returned):''}</span>
     </div>
     <div class="biz-po-sup-bottom" style="margin-top:2px;">
       <span onclick="event.stopPropagation();openCustomerOpeningForm('${esc(cu.name)}')" style="cursor:pointer;color:var(--yellow);">✏️ رصيد افتتاحي: ${fmt(opening)}</span>
+      <span onclick="event.stopPropagation();openCustomerCreditLimitForm('${esc(cu.name)}')" style="cursor:pointer;color:${overLimit?'var(--red)':'var(--muted)'};">🎚️ حد الائتمان: ${creditLimit?fmt(creditLimit):'غير محدد'}</span>
     </div>
     ${balance>0?`<div class="biz-po-sup-bottom" style="margin-top:2px;">
       <span onclick="event.stopPropagation();openCustomerDueDateForm('${esc(cu.name)}')" style="cursor:pointer;color:${dueOverdue?'var(--red)':'var(--blue)'};">📅 تاريخ استحقاق: ${dueDate||'غير محدد'}</span>
@@ -8695,7 +8903,10 @@ function renderPartnersList(){
   const el=document.getElementById('partners-list');if(!el)return;
   const list=loadPartners();
   if(!list.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px;">لا يوجد شركاء مسجلون بعد</div>';return;}
-  el.innerHTML=list.map(p=>`
+  el.innerHTML=list.map(p=>{
+    const adjTotal=partnerCurrentAdjTotal(p.id);
+    const curBal=partnerCurrentBalance(p);
+    return `
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:6px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <span style="font-size:12px;font-weight:800;color:var(--txt);">👤 ${esc(p.name)}</span>
@@ -8703,9 +8914,10 @@ function renderPartnersList(){
       </div>
       <div class="s-add-row">
         <input class="s-inp" type="number" value="${p.capitalOpening||0}" placeholder="رأس المال" onchange="updatePartner('${p.id}','capitalOpening',this.value)">
-        <input class="s-inp" type="number" value="${p.currentOpening||0}" placeholder="حساب جاري" onchange="updatePartner('${p.id}','currentOpening',this.value)">
+        <input class="s-inp" type="number" value="${p.currentOpening||0}" placeholder="حساب جاري (رصيد افتتاحي)" onchange="updatePartner('${p.id}','currentOpening',this.value)">
       </div>
-    </div>`).join('');
+      ${adjTotal?`<div style="font-size:10px;color:var(--muted);margin-top:4px;">رصيد الحساب الجارى الحالى: <b style="color:${curBal<0?'var(--red)':'var(--txt)'};">${fmt(curBal)}</b> (شامل فروق مسجّلة: ${fmt(adjTotal)})</div>`:''}
+    </div>`;}).join('');
 }
 function addPartner(){
   const name=document.getElementById('new-partner-name').value.trim();
@@ -8734,6 +8946,7 @@ function updatePartner(id,field,val){
 function removePartner(id){
   pgConfirm('حذف هذا الشريك؟ سيتم حذف حسابه (رأس المال والجاري) من شجرة الحسابات.',()=>{
     savePartners(loadPartners().filter(x=>x.id!==id));
+    savePartnerCurrentAdj(loadPartnerCurrentAdj().filter(a=>a.partnerId!==id));
     renderPartnersList();
     refreshBizDashboard();
     renderAccountsDetail();
