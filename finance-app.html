@@ -449,6 +449,23 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .s-add-row{display:flex;gap:6px;align-items:center;margin-top:4px;}
 .s-btn-add{background:var(--blue);border:none;border-radius:6px;color:#fff;font-size:16px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .s-btn-act{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;}
+/* ════ WH Units Editor (وحدات المخزن) ════ */
+.wh-unit-row{display:flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 7px;margin-bottom:5px;transition:border-color .15s,box-shadow .15s;}
+.wh-unit-row.mandatory{border-color:rgba(77,168,240,.35);background:rgba(77,168,240,.06);}
+.wh-unit-row.optional{border-color:rgba(255,255,255,.05);}
+.wh-unit-row .wh-unit-lvl{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:rgba(77,168,240,.18);color:var(--blue);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.wh-unit-row.mandatory .wh-unit-lvl{background:rgba(77,168,240,.28);color:#fff;}
+.wh-unit-row .wh-unit-name{flex:1;min-width:0;background:transparent;border:1px solid transparent;border-radius:5px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;padding:4px 6px;outline:none;}
+.wh-unit-row .wh-unit-name:focus{border-color:var(--blue);background:var(--card);}
+.wh-unit-row .wh-unit-name::placeholder{color:var(--muted);font-weight:400;}
+.wh-unit-row .wh-unit-factor{width:60px;flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:5px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;text-align:center;padding:4px 4px;outline:none;}
+.wh-unit-row .wh-unit-factor:focus{border-color:var(--blue);}
+.wh-unit-row .wh-unit-eq{flex-shrink:0;font-size:11px;color:var(--muted);font-weight:700;padding:0 2px;}
+.wh-unit-row .wh-unit-tag{flex-shrink:0;font-size:8px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(77,168,240,.18);color:var(--blue);}
+.wh-unit-row .wh-unit-del{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:2px 4px;opacity:.6;flex-shrink:0;line-height:1;}
+.wh-unit-row .wh-unit-del:hover{opacity:1;}
+.wh-unit-hint{font-size:9px;color:var(--muted);padding:2px 4px 5px;line-height:1.5;}
+.wh-unit-hint .ic{color:var(--blue);font-weight:700;}
 .s-btn-dng{background:rgba(240,84,84,.15);border:1px solid rgba(240,84,84,.3);border-radius:6px;color:var(--red);font-family:'Cairo',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;}
 .sw{position:relative;display:inline-block;width:38px;height:21px;}
 .sw input{opacity:0;width:0;height:0;}
@@ -1431,6 +1448,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div class="s-row"><span class="s-lbl">ملحق التقسيط بفاتورة البيع</span><label class="sw"><input type="checkbox" id="s-addon-installments" onchange="toggleAddon('addonInstallments',this.checked)"><span class="sw-sl"></span></label></div>
         <div class="s-row"><span class="s-lbl">حسابات شركاء</span><label class="sw"><input type="checkbox" id="s-addon-partners" onchange="toggleAddon('addonPartners',this.checked)"><span class="sw-sl"></span></label></div>
         <div class="s-row"><span class="s-lbl">إضافة باركود للأصناف</span><label class="sw"><input type="checkbox" id="s-addon-barcode" onchange="toggleAddon('addonBarcode',this.checked)"><span class="sw-sl"></span></label></div>
+        <div class="s-row"><span class="s-lbl">إدارة موظفين</span><label class="sw"><input type="checkbox" id="s-addon-employees" onchange="toggleAddon('addonEmployees',this.checked)"><span class="sw-sl"></span></label></div>
       </div>
       <div id="set-partners-group" style="display:none;">
         <div class="s-sec">
@@ -1450,6 +1468,21 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       </div>
       <div class="s-sec"><div class="s-sec-title">🔖 تصنيفات العملاء</div><div class="s-tags" id="tags-cls-customer"></div><div class="s-add-row"><input class="s-inp" id="new-cls-customer" placeholder="تصنيف جديد..."><button class="s-btn-add" onclick="addClsTag('customer','new-cls-customer','tags-cls-customer')">+</button></div></div>
       <div class="s-sec"><div class="s-sec-title">🔖 تصنيفات الموردين</div><div class="s-tags" id="tags-cls-supplier"></div><div class="s-add-row"><input class="s-inp" id="new-cls-supplier" placeholder="تصنيف جديد..."><button class="s-btn-add" onclick="addClsTag('supplier','new-cls-supplier','tags-cls-supplier')">+</button></div></div>
+      <!-- ════ وحدات المخزن (5 مستويات: اكبر → اصغر) ════ -->
+      <div class="s-sec">
+        <div class="s-sec-title s-collapsible" onclick="toggleSettingsSection('wh-units-body',this)">📐 وحدات المخزن<span class="s-collapse-arrow">›</span></div>
+        <div id="wh-units-body" style="display:none;">
+          <div style="font-size:10px;color:var(--muted);line-height:1.7;margin-bottom:8px;">
+            حدد 5 وحدات للقياس من <b style="color:var(--blue);">الأكبر</b> للأصغر. <b style="color:var(--txt);">الوحدة الأولى (الأكبر) والأخيرة (الأصغر) إجباريتين</b>، والوحدات الوسطى اختيارية. كل معامل = كم وحدة من الصف التالي تساوي وحدة واحدة من الصف الحالي.<br>
+            <span style="color:var(--yellow);">مثال:</span> بالطة = 48 كرتونة → كرتونة = 1.44 متر → متر = 100 سنتيمتر
+          </div>
+          <div id="wh-units-list"></div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button class="s-btn-act" style="flex:1;" onclick="addWhUnitRow()">+ إضافة مستوى</button>
+            <button class="s-btn-act" onclick="saveWhUnits()" style="background:linear-gradient(135deg,var(--blue),#2471a3);color:#fff;border-color:var(--blue);">💾 حفظ</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="set-personal-group">
     <div class="s-sec"><div class="s-sec-title">🔖 تصنيف الدخل</div><div class="s-row"><span class="s-sub">بنود دخل أساسي</span></div><div class="s-tags" id="tags-income-basic"></div><div class="s-add-row"><input class="s-inp" id="new-income-basic-cat" placeholder="بند جديد..."><button class="s-btn-add" onclick="addCat('basicIncomeCats','new-income-basic-cat','tags-income-basic')">+</button></div><div class="s-row" style="margin-top:8px;"><span class="s-sub">بنود دخل إضافي</span></div><div class="s-tags" id="tags-income-add"></div><div class="s-add-row"><input class="s-inp" id="new-income-add-cat" placeholder="بند جديد..."><button class="s-btn-add" onclick="addCat('addIncomeCats','new-income-add-cat','tags-income-add')">+</button></div><div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.7;">💰 "قروض مستلمة" و"سداد قروض" فئتان ثابتتان تُصنَّفان تلقائيًا من جدول الديون، ولا تحتاجان بنود يدوية.</div></div>
@@ -1682,10 +1715,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div style="padding:6px 8px 10px;display:flex;flex-direction:column;gap:6px;">
 
       <!-- 3 كروت علوية: المشتريات/الموردين — المخزون — المبيعات/العملاء -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:stretch;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:stretch;background:#0a0c10;border-radius:14px;padding:6px;">
 
         <!-- المشتريات / الموردين -->
-        <div class="biz-card" style="border:none;" data-biz-key="purchases" onclick="openBizDetail('purchases')">
+        <div class="biz-card" style="border:none;background:var(--bg);" data-biz-key="purchases" onclick="openBizDetail('purchases')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">🛒</span>
@@ -1706,7 +1739,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         </div>
 
         <!-- المخزون -->
-        <div class="biz-card" style="border:none;align-items:center;text-align:center;" data-biz-key="inventory" onclick="openBizDetail('inventory')">
+        <div class="biz-card" style="border:none;align-items:center;text-align:center;background:var(--bg);" data-biz-key="inventory" onclick="openBizDetail('inventory')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('inventory')">⤢</span>
           <div class="biz-card-hdr" style="width:100%;">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">🎓</span>
@@ -1729,7 +1762,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         </div>
 
         <!-- المبيعات / العملاء -->
-        <div class="biz-card" style="border:none;" data-biz-key="sales" onclick="openBizDetail('sales')">
+        <div class="biz-card" style="border:none;background:var(--bg);" data-biz-key="sales" onclick="openBizDetail('sales')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">👥</span>
@@ -1798,8 +1831,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           </div>
           <div class="biz-lbl">إجمالي الأصول</div>
           <div class="biz-val" id="ws-acc-assets" style="font-size:13px;">0</div>
-          <div class="biz-lbl" style="margin-top:1px;">إجمالي الخصوم وحقوق الملكية</div>
+          <div class="biz-lbl" style="margin-top:1px;">إجمالي الخصوم</div>
           <div class="biz-val" id="ws-acc-liab" style="font-size:13px;">0</div>
+          <div class="biz-lbl" style="margin-top:1px;">إجمالي حقوق الملكية</div>
+          <div class="biz-val" id="ws-acc-equity" style="font-size:13px;">0</div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1px;">
             <div><div class="biz-lbl">التوازن</div><div id="ws-acc-balance" style="font-size:11px;font-weight:800;color:var(--green);">متوازن ✅</div></div>
             <span style="font-size:16px;">⚖️</span>
@@ -3256,6 +3291,54 @@ function drawPercentRing(id,pct,color,opts){
 // ══════════════════════════════════════════════
 //  FLOATING TABLE (level 1)
 // ══════════════════════════════════════════════
+/* ══════════════════════════════════════════════
+   Segmented Ring (دائرة مقسومة بشرائح بارزة)
+   - segments: عدد الشرائح (افتراضي 12)
+   - filledR/Outer: الجزء الممتلئ يدور للخارج (أكبر)
+   - emptyR/Outer: الجزء الفاضي يدور للداخل (أصغر)
+   ══════════════════════════════════════════════ */
+function drawSegmentedRing(id,pct,color,opts){
+  opts=opts||{};
+  const svg=document.getElementById(id);
+  if(!svg)return;
+  svg.innerHTML='';
+  const segs=opts.segments||12;
+  const segGapDeg=opts.gap||6;          // زاوية الفجوة بين كل شريحة
+  const innerR=opts.innerR||22;          // نصف القطر الداخلي للجزء الفاضي
+  const outerR=opts.outerR||32;          // نصف القطر الخارجي للجزء الفاضي
+  const popOuter=opts.popOuter||36;      // نصف القطر الخارجي للجزء البارز
+  const startDeg=opts.startDeg||-90;      // ابدأ من فوق
+  pct=Math.max(0,Math.min(100,pct));
+  const filledCount=Math.round((pct/100)*segs);
+  const stepDeg=360/segs;
+  const cx=39, cy=39;
+  const NS='http://www.w3.org/2000/svg';
+  const polar=(deg,r)=>{const rad=(deg-90)*Math.PI/180;return[cx+r*Math.cos(rad),cy+r*Math.sin(rad)];};
+  const arcPath=(cx,cy,r,a0,a1)=>{
+    const[x0,y0]=polar(a0,r);
+    const[x1,y1]=polar(a1,r);
+    const large=(a1-a0)>180?1:0;
+    return`M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+  };
+  for(let i=0;i<segs;i++){
+    const a0=startDeg+i*stepDeg+segGapDeg/2;
+    const a1=startDeg+(i+1)*stepDeg-segGapDeg/2;
+    const isFilled=i<filledCount;
+    const rOut=isFilled?popOuter:outerR;
+    const path=document.createElementNS(NS,'path');
+    path.setAttribute('d',`M ${polar(a0,innerR).join(' ')} L ${polar(a0,rOut).join(' ')} ${arcPath(cx,cy,rOut,a0,a1).replace('M','L')} L ${polar(a1,innerR).join(' ')} ${arcPath(cx,cy,innerR,a1,a0).replace('M','L')} Z`);
+    if(isFilled){
+      path.setAttribute('fill',color);
+      path.setAttribute('opacity','1');
+    }else{
+      path.setAttribute('fill','#2a3240');
+      path.setAttribute('opacity','0.85');
+    }
+    path.setAttribute('stroke','none');
+    svg.appendChild(path);
+  }
+}
+
 let currentFT=null;
 function openFTable(type){
   closeFTable();closeEModal();
@@ -5206,7 +5289,7 @@ function renderBizReportsPage(){
   const custEl=document.getElementById('rep-biz-top-customers');
   if(custEl){
     const list=buildEntityMap('customer').map(cu=>{
-      const opening=Number(loadCustomerOpenings()[cu.name]||0);
+      const opening=customerOpeningRemaining(cu.name);
       return{name:cu.name,due:Math.max(cu.total-cu.paid-cu.returned+opening,0)};
     }).filter(x=>x.due>0).sort((a,b)=>b.due-a.due).slice(0,5);
     if(!list.length)custEl.innerHTML='<div style="font-size:11px;color:var(--muted);text-align:center;padding:10px;">لا توجد مديونيات على العملاء</div>';
@@ -5550,7 +5633,7 @@ function refreshBizDashboard(){
   const sReturned=sRet.reduce((s,r)=>s+Number(r.returnValue||0),0);
   const custOpenings=loadCustomerOpenings();
   const sRemaining=buildEntityMap('customer').reduce((s,cu)=>{
-    const opening=Number(custOpenings[cu.name]||0);
+    const opening=customerOpeningRemaining(cu.name);
     return s+Math.max(cu.total-cu.paid-cu.returned+opening,0);
   },0);
   setTxt('ws-sale-total',fmt(sTotal));
@@ -5576,9 +5659,12 @@ function refreshBizDashboard(){
   const coa=loadCoaAccounts();
   const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
   const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_funds','assets_other_debit']);
-  const manualLiab=sumCoa(['liab_equity','liab_obligations','liab_other_credit']);
+  const manualLiabOnly=sumCoa(['liab_obligations','liab_other_credit']);
+  const manualEquity=sumCoa(['liab_equity']);
   const totalAssets=customersReceivable+inventoryVal+treasuryVal+bankVal+manualAssets;
-  const totalLiab=suppliersPayable+manualLiab+partnersEquityTotal();
+  const totalEquity=manualEquity+partnersEquityTotal();
+  const totalLiabOnly=suppliersPayable+manualLiabOnly;
+  const totalLiab=totalLiabOnly+totalEquity;
   const invItemsAll=loadInvItems();
   const invItemCount=invItemsAll.length;
   const invLowCount=invItemsAll.filter(i=>Number(i.qty||0)>0&&Number(i.qty||0)<=5).length;
@@ -5587,9 +5673,10 @@ function refreshBizDashboard(){
   setTxt('ws-inv-pct',invPct+'%');
   setTxt('ws-inv-count',invItemCount);
   setTxt('ws-inv-low',invLowCount);
-  drawPercentRing('ws-inv-ring',invPct,'var(--blue)',{sw:8});
+  drawSegmentedRing('ws-inv-ring',invPct,'var(--blue)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36});
   setTxt('ws-acc-assets',fmt(totalAssets));
-  setTxt('ws-acc-liab',fmt(totalLiab));
+  setTxt('ws-acc-liab',fmt(totalLiabOnly));
+  setTxt('ws-acc-equity',fmt(totalEquity));
   const balEl=document.getElementById('ws-acc-balance');
   if(balEl){
     const diff=Math.round((totalAssets-totalLiab)*100)/100;
@@ -5658,7 +5745,7 @@ const COA_LINK_NODES={
 };
 function customersReceivableTotal(){
   return buildEntityMap('customer').reduce((s,cu)=>{
-    const opening=Number(loadCustomerOpenings()[cu.name]||0);
+    const opening=customerOpeningRemaining(cu.name);
     return s+Math.max(cu.total-cu.paid-cu.returned+opening,0);
   },0);
 }
@@ -6357,7 +6444,7 @@ function renderReceiptTab(c){
 /* ── إذن صرف ── */
 const VOUCHER_TYPES={
   payment:['مصروف','سداد سلفة','سداد عهدة','تحويل','مسحوبات شريك','أخرى'],
-  receipt:['إيراد','تسوية صرف','سداد عهدة','سداد سلفة','إيداع شريك','تحويل','أخرى']
+  receipt:['إيراد','تسوية صرف','تسوية قبض','سداد سلفة','إيداع شريك','تحويل','أخرى']
 };
 function renderPaymentTab(c){
   const list=loadTreasuryPayments().slice().reverse();
@@ -6382,16 +6469,18 @@ function voucherRowHtml(v,kind){
 }
 function voucherFormSlotId(kind){return kind+'-form-slot';}
 let _vchReceiptCustomers=[];
+let _vchSettleKey=null;
 function openVoucherForm(kind){
   const title=kind==='receipt'?'إذن قبض جديد':'إذن صرف جديد';
   const nameLbl=kind==='receipt'?'اسم المستلم منه':'اسم المصروف له';
-  const types=VOUCHER_TYPES[kind]||[];
+  let types=(VOUCHER_TYPES[kind]||[]).slice();
+  if(kind==='receipt'&&getSettings().addonEmployees)types.splice(types.indexOf('تسوية قبض')+1,0,'تسوية عهدة');
   const suggestNames=kind==='receipt'?getAllCustomerNames():getAllSupplierNames();
-  if(kind==='receipt')_vchReceiptCustomers=[];
+  if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">${title}</div>
-      <select class="biz-po-inp" id="vch-${kind}-type">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
+      <select class="biz-po-inp" id="vch-${kind}-type" ${kind==='receipt'?'onchange="vchTypeChanged()"':''}>${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl} — اكتب أول حروف للاقتراح" autocomplete="off">
         <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
       </div>
@@ -6400,6 +6489,7 @@ function openVoucherForm(kind){
         <input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}">
       </div>
       ${kind==='receipt'?`
+      <div class="biz-po-frow" id="vch-settle-wrap" style="display:none;"><select class="biz-po-inp" id="vch-settle-target" onchange="vchSettleTargetChosen()"></select></div>
       <div class="biz-po-frow"><select class="biz-po-inp" id="vch-receipt-custsel" onchange="vchAddCustomerRow()"></select></div>
       <div id="vch-receipt-custlist"></div>`:''}
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-desc" placeholder="البيان"></div>
@@ -6410,6 +6500,67 @@ function openVoucherForm(kind){
       </div>
     </div>`;
   if(kind==='receipt')renderVchCustRows();
+}
+/* ── لما نوع الإذن يتغير لـ"تسوية قبض": نظهر قائمة منسدلة بكل فروق التحصيل المسجلة
+   (سواء على شركاء أو على "أخرى مدينة")، ونخفي قائمة تحصيل العملاء لأنها مالهاش علاقة ── */
+function vchTypeChanged(){
+  const typeEl=document.getElementById('vch-receipt-type');
+  const isSettle=typeEl&&typeEl.value==='تسوية قبض';
+  const settleWrap=document.getElementById('vch-settle-wrap');
+  const custRow=document.getElementById('vch-receipt-custsel');
+  const custList=document.getElementById('vch-receipt-custlist');
+  if(settleWrap)settleWrap.style.display=isSettle?'flex':'none';
+  if(custRow)custRow.style.display=isSettle?'none':'';
+  if(custList)custList.style.display=isSettle?'none':'';
+  _vchSettleKey=null;
+  if(isSettle)renderVchSettleOptions();
+}
+function renderVchSettleOptions(){
+  const sel=document.getElementById('vch-settle-target');
+  if(!sel)return;
+  const opts=[];
+  const coa=loadCoaAccounts();
+  (coa.assets_other_debit||[]).forEach(a=>{
+    opts.push({key:'coa:'+a.id,label:a.name+' — '+fmt(a.amount)});
+  });
+  if(getSettings().addonPartners){
+    loadPartners().forEach(p=>{
+      const bal=partnerCurrentBalance(p);
+      if(bal<-0.001)opts.push({key:'partner:'+p.id,label:p.name+' (شريك) — عليه '+fmt(-bal)});
+    });
+  }
+  sel.innerHTML=`<option value="">اختر صاحب الفرق المطلوب تحصيله...</option>`+
+    opts.map(o=>`<option value="${esc(o.key)}">${esc(o.label)}</option>`).join('');
+  if(!opts.length)sel.innerHTML=`<option value="">لا توجد فروق تحصيل مسجلة حاليًا</option>`;
+}
+function vchSettleTargetChosen(){
+  const sel=document.getElementById('vch-settle-target');
+  if(!sel||!sel.value){_vchSettleKey=null;return;}
+  _vchSettleKey=sel.value;
+  const label=sel.options[sel.selectedIndex].textContent.replace(/ — .*$/,'');
+  const nameEl=document.getElementById('vch-receipt-name');
+  if(nameEl)nameEl.value=label;
+}
+/* ── تطبيق مبلغ "تسوية قبض" فعليًا: يقفل/يقلل حساب "أخرى مدينة" أو يعدّل الحساب الجارى للشريك ── */
+function settleOtherDebitOrPartner(key,amount,date,voucherSeq){
+  if(!key||amount<=0.001)return;
+  if(key.indexOf('partner:')===0){
+    const partnerId=key.slice('partner:'.length);
+    const adj=loadPartnerCurrentAdj();
+    adj.push({id:'padj_'+Date.now(),partnerId,amount:amount,date,reason:'تسوية قبض إذن #'+voucherSeq,voucherSeq});
+    savePartnerCurrentAdj(adj);
+    return;
+  }
+  if(key.indexOf('coa:')===0){
+    const accId=key.slice('coa:'.length);
+    const data=loadCoaAccounts();
+    const acc=(data.assets_other_debit||[]).find(a=>a.id===accId);
+    if(acc){
+      acc.amount=Math.round(Math.max(Number(acc.amount||0)-amount,0)*100)/100;
+      if(acc.amount<=0.001)data.assets_other_debit=data.assets_other_debit.filter(a=>a.id!==accId);
+      saveCoaAccounts(data);
+    }
+  }
 }
 /* ── إضافة أكتر من عميل داخل إذن القبض: قائمة منسدلة بالعملاء المستحق عليهم سداد،
    وكل عميل يتم اختياره بتظهر جنبه خلية مبلغ قابلة للتعديل، ومجموع كل الخلايا ده بيتضاف على مبلغ الإذن ── */
@@ -6451,11 +6602,13 @@ function renderVchCustRows(){
     </div>`).join('')+
     `<div style="text-align:left;font-size:11px;color:var(--muted);margin-top:4px;">إجمالي العملاء: <b id="vch-cust-total" style="color:var(--green);">${fmt(_vchReceiptCustomers.reduce((s,c)=>s+Number(c.amount||0),0))}</b></div>`;
 }
-function closeVoucherForm(kind){const s=document.getElementById(voucherFormSlotId(kind));if(s)s.innerHTML='';if(kind==='receipt')_vchReceiptCustomers=[];}
+function closeVoucherForm(kind){const s=document.getElementById(voucherFormSlotId(kind));if(s)s.innerHTML='';if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}}
 function saveVoucher(kind){
   const name=document.getElementById(`vch-${kind}-name`).value.trim();
   const amount=Number(document.getElementById(`vch-${kind}-amount`).value||0);
-  const custLines=kind==='receipt'?_vchReceiptCustomers.filter(c=>Number(c.amount)>0):[];
+  const typeVal=document.getElementById(`vch-${kind}-type`).value||'أخرى';
+  const isSettle=kind==='receipt'&&typeVal==='تسوية قبض';
+  const custLines=(kind==='receipt'&&!isSettle)?_vchReceiptCustomers.filter(c=>Number(c.amount)>0):[];
   if(!name&&!custLines.length){pgConfirm(kind==='receipt'?'من فضلك أدخل اسم المستلم منه أو اختر عميلاً من القائمة':'من فضلك أدخل اسم المصروف له',()=>{},'حسناً');return;}
   const custTotal=Math.round(custLines.reduce((s,c)=>s+Number(c.amount||0),0)*100)/100;
   const total=Math.round((amount+custTotal)*100)/100;
@@ -6470,19 +6623,20 @@ function saveVoucher(kind){
     saveSInvoices(sInv);
     extraNotes=custLines.map(c=>c.name+': '+fmt(c.amount)).join(' — ');
   }
+  if(isSettle&&_vchSettleKey)settleOtherDebitOrPartner(_vchSettleKey,total,date,seq);
   const notesVal=document.getElementById(`vch-${kind}-notes`).value.trim();
   const v={id:(kind==='receipt'?'rcpt_':'pmt_')+Date.now(),seq,name:displayName,amount:total,
-    type:document.getElementById(`vch-${kind}-type`).value||'أخرى',
+    type:typeVal,
     date,
-    desc:document.getElementById(`vch-${kind}-desc`).value.trim()||(custLines.length?'تحصيل مديونية عملاء':''),
+    desc:document.getElementById(`vch-${kind}-desc`).value.trim()||(custLines.length?'تحصيل مديونية عملاء':(isSettle?'تسوية فرق تحصيل':'')),
     notes:[notesVal,extraNotes].filter(Boolean).join(' — ')};
   if(custLines.length){v.lines=custLines.map(c=>({customerName:c.name,amount:Number(c.amount)}));v.status='pending';}
   if(kind==='receipt'){const l=loadTreasuryReceipts();l.push(v);saveTreasuryReceipts(l);}
   else{const l=loadTreasuryPayments();l.push(v);saveTreasuryPayments(l);}
   pushBizJournal(displayName,total,kind==='receipt'?'in':'out',(kind==='receipt'?'إذن قبض #':'إذن صرف #')+v.seq,kind==='receipt'?'var(--green)':'var(--red)',v.date);
-  if(kind==='receipt')_vchReceiptCustomers=[];
+  if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   closeVoucherForm(kind);
-  if(kind==='receipt'){renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));refreshBizDashboard();}
+  if(kind==='receipt'){renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));refreshBizDashboard();renderAccountsDetail();}
   else renderPaymentTab(document.getElementById('biz-liquidity-tab-content'));
 }
 function viewVoucher(kind,id){
@@ -7062,6 +7216,11 @@ function buildEntityLedger(type,name){
   const rows=[];
   const opening=Number(openings[name]||0);
   if(opening){rows.push({date:'—',invNo:'رصيد افتتاحي',debit:opening>0?opening:0,credit:opening<0?-opening:0,_sd:'0000-00-00'});}
+  if(type==='customer'){
+    (loadCustomerOpeningPayments()[name]||[]).forEach(p=>{
+      rows.push({date:p.date||'',invNo:'رصيد افتتاحي'+(p.voucherSeq?' — تحصيل #'+p.voucherSeq:' — تحصيل'),debit:0,credit:Number(p.amount)||0,_sd:p.date||''});
+    });
+  }
   invoices.filter(i=>(i[nameField]||'—')===name).forEach(inv=>{
     const label=inv.invNo?('#'+inv.invNo):('فاتورة #'+inv.seq);
     rows.push({date:inv.date||'',invNo:label,debit:inv.total,credit:0,_sd:inv.date||''});
@@ -7109,7 +7268,7 @@ function entityDetailHtml(type,name){
       const remain=Math.max(Number(inv.total)-paidSoFar,0);
       return `<div class="biz-po-row" onclick="${viewInvFn}('${inv.id}')">
       <div class="biz-po-row-top"><b>${inv.invNo?'#'+esc(inv.invNo):'فاتورة'}</b><span>${inv.date||''}</span></div>
-      <div class="biz-po-row-bottom"><span>إجمالي: ${fmt(inv.total)}${paidSoFar>0?' · محصّل: '+fmt(paidSoFar):''}</span><b style="color:${remain>0.001?'var(--red)':'var(--green)'};">متبقي ${fmt(remain)}</b></div>
+      <div class="biz-po-row-bottom"><span style="color:#aab8cb;">إجمالي: ${fmt(inv.total)}${paidSoFar>0?' · محصّل: '+fmt(paidSoFar):''}</span><b style="color:${remain>0.001?'var(--red)':'var(--green)'};">متبقي ${fmt(remain)}</b></div>
     </div>`;}),
     ...returns.map(r=>`<div class="biz-po-row" onclick="${viewRetFn}('${r.id}')">
       <div class="biz-po-row-top"><b>مرتجع #${r.refNo}</b><span>${r.date||''}</span></div>
@@ -7264,6 +7423,16 @@ function loadSReturns(){return JSON.parse(_getItem('fm_biz_sales_returns')||'[]'
 function saveSReturns(l){_setItem('fm_biz_sales_returns',JSON.stringify(l));}
 function loadCustomerOpenings(){return JSON.parse(_getItem('fm_customer_openings')||'{}');}
 function saveCustomerOpenings(o){_setItem('fm_customer_openings',JSON.stringify(o));}
+/* ── تحصيل من رصيد افتتاحي (مديونية عميل من غير فواتير): بنسجل كل دفعة عليه لوحدها
+   بدل ما نلمس رقم الرصيد الافتتاحي نفسه (عشان يفضل ثابت كأول سطر فى كشف الحساب) ── */
+function loadCustomerOpeningPayments(){return JSON.parse(_getItem('fm_customer_opening_payments')||'{}');}
+function saveCustomerOpeningPayments(o){_setItem('fm_customer_opening_payments',JSON.stringify(o));}
+function customerOpeningRemaining(name){
+  const op=Number(loadCustomerOpenings()[name]||0);
+  if(op<=0)return op;
+  const paid=(loadCustomerOpeningPayments()[name]||[]).reduce((s,p)=>s+Number(p.amount||0),0);
+  return Math.max(op-paid,0);
+}
 function loadCustomerDueDates(){return JSON.parse(_getItem('fm_customer_duedates')||'{}');}
 function saveCustomerDueDates(o){_setItem('fm_customer_duedates',JSON.stringify(o));}
 function loadCustomerCreditLimits(){return JSON.parse(_getItem('fm_customer_creditlimits')||'{}');}
@@ -7485,7 +7654,7 @@ function saveInvoiceS(){
   const creditLimit=Number(loadCustomerCreditLimits()[customerName]||0);
   if(creditLimit>0&&remaining>0){
     const cu=buildEntityMap('customer').find(c=>c.name===customerName);
-    const opening=Number(loadCustomerOpenings()[customerName]||0);
+    const opening=customerOpeningRemaining(customerName);
     const currentBalance=cu?Math.max(cu.total-cu.paid-cu.returned+opening,0):Math.max(opening,0);
     const projectedBalance=currentBalance+remaining;
     if(projectedBalance>creditLimit){
@@ -7592,6 +7761,16 @@ function customerDueList(){
     if(!map[k])map[k]={name:k,dueTotal:0,items:[]};
     items.forEach(it=>{map[k].dueTotal+=it.amount;map[k].items.push(it);});
   });
+  /* رصيد افتتاحي مستحق (لعميل ممكن ميكونش ليه أي فواتير أصلاً) */
+  Object.keys(loadCustomerOpenings()).forEach(name=>{
+    const remain=customerOpeningRemaining(name);
+    if(remain<=0)return;
+    const custDue=dueDates[name];
+    if(!(custDue&&custDue<=today))return;
+    if(!map[name])map[name]={name,dueTotal:0,items:[]};
+    map[name].dueTotal+=remain;
+    map[name].items.push({invId:'opening',no:null,amount:remain,dueDate:custDue,invLabel:'رصيد افتتاحي',custName:name});
+  });
   const out=Object.values(map).filter(c=>c.dueTotal>0);
   out.forEach(c=>c.items.sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||'')));
   out.sort((a,b)=>b.dueTotal-a.dueTotal);
@@ -7614,6 +7793,8 @@ function customerOpenItems(name){
       items.push({invId:inv.id,no:null,amount:remaining,dueDate:dueDates[name]||'',invLabel});
     }
   });
+  const openRemain=customerOpeningRemaining(name);
+  if(openRemain>0)items.push({invId:'opening',no:null,amount:openRemain,dueDate:'',invLabel:'رصيد افتتاحي',custName:name});
   items.sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
   return items;
 }
@@ -7656,6 +7837,17 @@ function applyPaymentToSInvoice(inv,amountAvailable,date,voucherSeq){
 function distributeCustomerPayment(sInv,customerName,amount,date,voucherSeq){
   let left=Number(amount)||0;
   if(left<=0.001)return 0;
+  const opRemain=customerOpeningRemaining(customerName);
+  if(opRemain>0.001){
+    const apply=Math.min(left,opRemain);
+    if(apply>0.001){
+      const payments=loadCustomerOpeningPayments();
+      if(!payments[customerName])payments[customerName]=[];
+      payments[customerName].push({amount:apply,date,voucherSeq});
+      saveCustomerOpeningPayments(payments);
+      left-=apply;
+    }
+  }
   const invs=sInv.filter(inv=>(inv.customerName||'—')===customerName&&Math.max(Number(inv.total)-Number(inv.paid||0),0)>0.001)
     .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   for(const inv of invs){
@@ -7770,8 +7962,16 @@ function updCollectTotal(){
 }
 /* ── يطبّق المبلغ اللى المستخدم كتبه على بند بعينه (فاتورة أو قسط) بدل التوزيع التلقائي ── */
 function applyManualPaymentToItem(sInv,it,amt,date,voucherSeq){
+  if(amt<=0.001)return;
+  if(it.invId==='opening'){
+    const payments=loadCustomerOpeningPayments();
+    if(!payments[it.custName])payments[it.custName]=[];
+    payments[it.custName].push({amount:amt,date,voucherSeq});
+    saveCustomerOpeningPayments(payments);
+    return;
+  }
   const inv=sInv.find(x=>x.id===it.invId);
-  if(!inv||amt<=0.001)return;
+  if(!inv)return;
   if(it.no!=null&&inv.installments){
     const inst=inv.installments.find(x=>x.no===it.no);
     if(inst&&!inst.paid){
@@ -8301,7 +8501,7 @@ function openCustomerPayFromReport(encName){
   document.getElementById('collect-modal').classList.add('show');
 }
 function customerCardHtml(cu,clsStore,openings,dueDates,creditLimits){
-  const opening=Number((openings&&openings[cu.name])||0);
+  const opening=customerOpeningRemaining(cu.name);
   const balance=Math.max(cu.total-cu.paid-cu.returned+opening,0);
   const cls=((clsStore&&clsStore.customer)||[]).find(c=>c.members.includes(cu.name));
   const dueDate=(dueDates&&dueDates[cu.name])||'';
@@ -8550,7 +8750,7 @@ function switchInvTab(tab){
 /* ── تبويب الأصناف: قسم ← مجموعة ← صنف ── */
 function renderInvItemsTab(c){
   const sections=loadInvSections().filter(s=>s.whId===invCurrentWh);
-  const directItems=loadInvItems().filter(i=>i.whId===invCurrentWh&&!i.grpId);
+  const directItems=loadInvItems().filter(i=>i.whId===invCurrentWh&&!i.grpId&&!i.secId);
   c.innerHTML=`
     <div style="display:flex;flex-direction:column;gap:8px;">
       <div style="display:flex;gap:8px;">
@@ -8571,8 +8771,9 @@ function renderInvItemsTab(c){
 }
 function sectionBlockHtml(sec){
   const groups=loadInvGroups().filter(g=>g.secId===sec.id);
-  const secItems=loadInvItems().filter(i=>groups.some(g=>g.id===i.grpId));
-  const qty=secItems.reduce((s,i)=>s+Number(i.qty||0),0);
+  const secDirectItems=loadInvItems().filter(i=>i.secId===sec.id&&!i.grpId);
+  const secGroupItems=loadInvItems().filter(i=>groups.some(g=>g.id===i.grpId));
+  const qty=secDirectItems.reduce((s,i)=>s+Number(i.qty||0),0)+secGroupItems.reduce((s,i)=>s+Number(i.qty||0),0);
   const collapsed=_invCollapsedSec.has(sec.id);
   return`<div class="inv-sec-block">
     <div class="inv-sec-hdr" onclick="toggleInvSec('${sec.id}')">
@@ -8583,8 +8784,16 @@ function sectionBlockHtml(sec){
       </span>
     </div>
     ${collapsed?'':`<div class="inv-sec-body">
-      <div class="inv-addlink" onclick="event.stopPropagation();openAddGroupForm('${sec.id}')">+ إضافة مجموعة</div>
-      ${groups.length?groups.map(groupBlockHtml).join(''):'<div class="biz-po-empty" style="padding:8px;">لا توجد مجموعات بهذا القسم</div>'}
+      <div style="display:flex;gap:8px;">
+        <div class="inv-addlink" style="flex:1;" onclick="event.stopPropagation();openAddItemForm(null,'${sec.id}')">+ إضافة صنف مباشر</div>
+        <div class="inv-addlink" style="flex:1;" onclick="event.stopPropagation();openAddGroupForm('${sec.id}')">+ إضافة مجموعة</div>
+      </div>
+      ${secDirectItems.length?`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
+        ${secDirectItems.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
+          <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
+        </div>`).join('')}
+      </div>`:''}
+      ${groups.length?groups.map(groupBlockHtml).join(''):(secDirectItems.length?'':'<div class="biz-po-empty" style="padding:8px;">لا توجد مجموعات بهذا القسم</div>')}
     </div>`}
   </div>`;
 }
@@ -8637,7 +8846,7 @@ function deleteSection(id){
   const groups=loadInvGroups().filter(g=>g.secId===id).map(g=>g.id);
   saveInvSections(loadInvSections().filter(s=>s.id!==id));
   saveInvGroups(loadInvGroups().filter(g=>g.secId!==id));
-  saveInvItems(loadInvItems().filter(i=>!groups.includes(i.grpId)));
+  saveInvItems(loadInvItems().filter(i=>!groups.includes(i.grpId)&&i.secId!==id));
   refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
 }
 function openAddGroupForm(secId){
@@ -8667,11 +8876,12 @@ function deleteGroup(id){
   saveInvItems(loadInvItems().filter(i=>i.grpId!==id));
   refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
 }
-function openAddItemForm(grpId){
+function openAddItemForm(grpId,secId){
   const barcodeOn=getSettings().addonBarcode;
+  const title=grpId?'صنف جديد':(secId?'صنف جديد (مباشر بالقسم)':'صنف جديد (مباشر بالمخزن)');
   document.getElementById('item-form-slot').innerHTML=`
     <div class="biz-po-form">
-      <div class="biz-po-form-title">${grpId?'صنف جديد':'صنف جديد (مباشر بالمخزن)'}</div>
+      <div class="biz-po-form-title">${title}</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="itm-name" placeholder="اسم الصنف"></div>
       <div class="biz-po-frow2">
         <input class="biz-po-inp" id="itm-qty" type="number" placeholder="الكمية" value="1">
@@ -8679,17 +8889,17 @@ function openAddItemForm(grpId){
       </div>
       ${barcodeOn?'<div class="biz-po-frow"><input class="biz-po-inp" id="itm-barcode" placeholder="الباركود"></div>':''}
       <div class="biz-po-btns">
-        <button class="biz-po-btn save" onclick="saveInvItem(${grpId?`'${grpId}'`:'null'})">حفظ</button>
+        <button class="biz-po-btn save" onclick="saveInvItem(${grpId?`'${grpId}'`:'null'},${secId?`'${secId}'`:'null'})">حفظ</button>
         <button class="biz-po-btn cancel" onclick="closeItemFormSlot()">إلغاء</button>
       </div>
     </div>`;
 }
-function saveInvItem(grpId){
+function saveInvItem(grpId,secId){
   const name=document.getElementById('itm-name').value.trim();
   if(!name){pgConfirm('أدخل اسم الصنف',()=>{},'حسناً');return;}
   const grp=grpId?loadInvGroups().find(g=>g.id===grpId):null;
   const list=loadInvItems();
-  list.push({id:'itm_'+Date.now(),grpId:grpId||null,secId:grp?grp.secId:null,whId:invCurrentWh,name,
+  list.push({id:'itm_'+Date.now(),grpId:grpId||null,secId:grp?grp.secId:(secId||null),whId:invCurrentWh,name,
     qty:Number(document.getElementById('itm-qty').value||0),
     cost:Number(document.getElementById('itm-cost').value||0),
     barcode:document.getElementById('itm-barcode')?document.getElementById('itm-barcode').value.trim():''});
@@ -9005,12 +9215,14 @@ function loadSettingsPage(){
     if(document.getElementById('s-addon-installments'))document.getElementById('s-addon-installments').checked=!!s.addonInstallments;
     if(document.getElementById('s-addon-partners'))document.getElementById('s-addon-partners').checked=!!s.addonPartners;
     if(document.getElementById('s-addon-barcode'))document.getElementById('s-addon-barcode').checked=!!s.addonBarcode;
+    if(document.getElementById('s-addon-employees'))document.getElementById('s-addon-employees').checked=!!s.addonEmployees;
     const pg=document.getElementById('set-partners-group');
     if(pg)pg.style.display=s.addonPartners?'block':'none';
     if(s.addonPartners)renderPartnersList();
     renderClsTags('customer','tags-cls-customer');
     renderClsTags('supplier','tags-cls-supplier');
     renderAccountsDetail();
+    renderWhUnits();
     return;
   }
   if(document.getElementById('s-notif-commit'))document.getElementById('s-notif-commit').checked=!!s.notifCommit;
@@ -9131,6 +9343,111 @@ function addCat(sk,inputId,cid){
 function removeCat(sk,idx,cid){
   const s=getSettings();if(!s[sk])return;s[sk].splice(idx,1);saveAllSettings(s);renderTags(sk,cid);
   if(sk==='creditorCats'||sk==='debtorCats'){renderDebtCats();renderDebt();}
+}
+
+/* ══════════════════════════════════════════════
+   Warehouse Units (وحدات المخزن)
+   - مصفوفة 5 عناصر من الأكبر (index 0) للأصغر (index 4)
+   - العنصر 0 و 4 إجباريين، 1-3 اختياريين
+   - كل عنصر: {name, factor} حيث factor = كم وحدة من العنصر التالي تساوي وحدة واحدة من العنصر الحالي
+   ══════════════════════════════════════════════ */
+const WH_UNITS_KEY='whUnits';
+const WH_UNITS_MAX=5;
+function getWhUnits(){
+  const s=getSettings();
+  const arr=s[WH_UNITS_KEY];
+  if(!Array.isArray(arr)||arr.length!==WH_UNITS_MAX){
+    const def=Array.from({length:WH_UNITS_MAX},(_,i)=>({name:'',factor:1}));
+    return def;
+  }
+  return arr;
+}
+function setWhUnits(arr){
+  const s=getSettings();
+  s[WH_UNITS_KEY]=arr;
+  saveAllSettings(s);
+}
+function renderWhUnits(){
+  const root=document.getElementById('wh-units-list');
+  if(!root)return;
+  const units=getWhUnits();
+  const hints=[
+    'الوحدة الأكبر (إجبارية) — مثلاً: بالطة، طن، شحنة',
+    'متوسط (اختياري) — مثلاً: كرتونة، صندوق',
+    'متوسط (اختياري) — مثلاً: متر، لفة',
+    'متوسط (اختياري) — مثلاً: سنتيمتر، علبة',
+    'الوحدة الأصغر (إجبارية) — مثلاً: قطعة، متر مربع'
+  ];
+  const levelNames=['الأكبر','وسط ١','وسط ٢','وسط ٣','الأصغر'];
+  const placeholders=['مثل: بالطة','مثل: كرتونة','مثل: متر','مثل: سنتيمتر','مثل: قطعة'];
+  root.innerHTML=units.map((u,i)=>{
+    const isMandatory=(i===0||i===WH_UNITS_MAX-1);
+    const isLast=(i===WH_UNITS_MAX-1);
+    const factorDisabled=isLast?'disabled':'';
+    const eqLabel=isLast?'× ١':`× ${u.factor||1}`;
+    return`
+    <div class="wh-unit-row ${isMandatory?'mandatory':'optional'}" data-idx="${i}">
+      <div class="wh-unit-lvl">${i+1}</div>
+      <input class="wh-unit-name" type="text" data-field="name" data-idx="${i}"
+             value="${esc(u.name||'')}" placeholder="${placeholders[i]}" maxlength="24">
+      <span class="wh-unit-eq">=</span>
+      <input class="wh-unit-factor" type="number" data-field="factor" data-idx="${i}"
+             value="${Number(u.factor)||1}" min="0.0001" step="any" ${factorDisabled}>
+      <span class="wh-unit-tag">${levelNames[i]}</span>
+      ${!isLast&&!isMandatory?`<button class="wh-unit-del" onclick="clearWhUnitRow(${i})" title="إفراغ">×</button>`:''}
+    </div>
+    <div class="wh-unit-hint"><span class="ic">${i+1}</span> ${hints[i]}${!isLast?` — المعامل يعني: 1 ${u.name||'وحدة '+levelNames[i]} = ${Number(u.factor)||1} ${units[i+1].name||'وحدة '+(levelNames[i+1]||'التالية')}`:''}</div>
+    `;
+  }).join('');
+}
+function clearWhUnitRow(i){
+  const units=getWhUnits();
+  units[i]={name:'',factor:1};
+  setWhUnits(units);
+  renderWhUnits();
+}
+function addWhUnitRow(){
+  /* عدد الصفوف ثابت = 5 (الأكبر + 3 وسطى + الأصغر) */
+  const cur=getWhUnits().filter(u=>u.name&&u.name.trim()).length;
+  if(cur>=WH_UNITS_MAX){alert(`الحد الأقصى ${WH_UNITS_MAX} مستويات (الأكبر + 3 وسطى + الأصغر)`);return;}
+  alert('كل المستويات الـ 5 ظاهرة بالفعل — اترك المستوى اللي مش محتاجه فارغًا');
+}
+function saveWhUnits(){
+  const rows=document.querySelectorAll('#wh-units-list .wh-unit-row');
+  const units=Array.from({length:WH_UNITS_MAX},(_,i)=>({name:'',factor:1}));
+  let err=null;
+  rows.forEach(row=>{
+    const i=Number(row.dataset.idx);
+    const nameEl=row.querySelector('[data-field="name"]');
+    const facEl=row.querySelector('[data-field="factor"]');
+    const name=(nameEl?.value||'').trim();
+    const factor=Number(facEl?.value)||1;
+    if((i===0||i===WH_UNITS_MAX-1)&&!name){
+      err=`الوحدة ${i===0?'الأكبر':'الأصغر'} (المستوى ${i+1}) إجبارية`;
+    }
+    units[i]={name,factor};
+  });
+  if(err){alert('⚠️ '+err);return;}
+  setWhUnits(units);
+  renderWhUnits();
+  alert('✅ تم حفظ وحدات المخزن');
+}
+function getUnitChain(){
+  /* ترجع الوحدات النشطة بالترتيب الأكبر→الأصغر (تتخلّص من الفاضية في النص) */
+  return getWhUnits().filter(u=>u.name&&u.name.trim());
+}
+function convertUnits(value,fromIdx,toIdx,units){
+  /* value: كمية بالوحدة fromIdx، تُحوَّل للوحدة toIdx
+     units: المصفوفة الكاملة
+     فهرس أصغر = أصغر وحدة، فهرس أكبر = أكبر وحدة */
+  units=units||getWhUnits();
+  if(fromIdx===toIdx)return value;
+  const step=fromIdx<toIdx?1:-1;
+  let v=value;
+  for(let i=fromIdx;i!==toIdx;i+=step){
+    v=v*(units[i].factor||1);
+  }
+  return v;
 }
 function setTheme(t){
   saveSetting('theme',t);
