@@ -615,6 +615,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 /* ── لوحة معلومات النشاط التجاري ── */
 .biz-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%;box-sizing:border-box;cursor:pointer;transition:transform .12s;}
 .biz-card:active{transform:scale(.97);}
+@keyframes liqPendingGlow{0%,100%{box-shadow:0 0 0 0 rgba(224,176,48,.55);border-color:rgba(224,176,48,.9);}50%{box-shadow:0 0 0 7px rgba(224,176,48,0);border-color:rgba(224,176,48,.35);}}
+.liq-pending-blink{animation:liqPendingGlow 1.4s ease-in-out infinite;}
+@keyframes liqBadgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+.liq-pending-badge{position:absolute;top:-6px;left:-6px;background:var(--yellow);color:#1a1a1a;font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg,#111);animation:liqBadgePulse 1.4s ease-in-out infinite;}
 .biz-card-hdr{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
 .biz-ico{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
 .biz-lbl{font-size:12px;color:var(--muted);}
@@ -1783,7 +1787,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       </div>
 
       <!-- السيولة النقدية -->
-      <div class="biz-card" style="border-color:rgba(224,176,48,.3);border-radius:14px;padding:7px;gap:4px;" data-biz-key="liquidity" onclick="openBizDetail('liquidity')">
+      <div class="biz-card" id="ws-liq-card" style="border-color:rgba(224,176,48,.3);border-radius:14px;padding:7px;gap:4px;" data-biz-key="liquidity" onclick="openBizDetail('liquidity')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('liquidity')">⤢</span>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="width:20px;height:20px;border-radius:6px;background:rgba(224,176,48,.16);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">💼</span>
@@ -4656,12 +4660,8 @@ function saveDebtTransaction(){
     arr[debtHistIdx].transactions[txnIdx].mirrored=true;
     saveData(debtKey(),arr);
   }
-  // إضافة مدين → مصروف تلقائيًا (★ mirrored:true يمنع تكرار نفس الحركة فى صفحة السجل)
-  if(debtMode==='debtor'&&dir==='against'){
-    addAutoExpenseFromDebtAdd(debtorName,amount,pay,txnDate);
-    arr[debtHistIdx].transactions[txnIdx].mirrored=true;
-    saveData(debtKey(),arr);
-  }
+  // إضافة مدين (دفع سلفة لشخص) — بتتسجل فى جدول الديون بس، من غير ترحيل لجدول المصروفات
+  // (كانت قديمًا بترحّل تلقائيًا كمصروف بردو، وده كان بيسبب احتساب المبلغ مرتين فى إجمالي النفقات)
   // دائن + إضافة قرض جديد (against) + ترحيل للدخل → يضاف تلقائيًا في جدول الدخل كبند مستقل
   if(debtMode==='creditor'&&dir==='against'&&linkToIncome){
     addIncomeFromDebtLoan(debtHistIdx,txnIdx);
@@ -4681,11 +4681,7 @@ function addAutoIncomeFromDebtPayment(debtorName,amount,pay,date){
   inc.push({name:debtorName,amount,pay,date,fromDebt:true,_seq:nextSeq()});
   saveData('income',inc);renderIncome();
 }
-function addAutoExpenseFromDebtAdd(debtorName,amount,pay,date){
-  const exp=loadData('expense');
-  exp.push({name:debtorName,amount,pay,date,fromDebt:true,_seq:nextSeq()});
-  saveData('expense',exp);renderExpense();
-}
+// ملحوظة: دفع سلفة لشخص (مدين + against) بقى بيتسجل فى جدول الديون بس (بدون ترحيل مصروف تلقائي) — شوف saveDebtTransaction.
 // ★ تحميل بيانات معاملة دين موجودة فى النموذج للتعديل (بدل الحذف والإضافة من جديد)
 function editDebtTransaction(di,ti){
   const arr=loadData(debtKey());
@@ -5656,6 +5652,7 @@ function refreshBizDashboard(){
   setTxt('ws-liq-total',fmt(treasuryVal+bankVal));
   setTxt('ws-liq-treasury',fmt(treasuryVal));
   setTxt('ws-liq-bank',fmt(bankVal));
+  updateLiqPendingBlink();
   const coa=loadCoaAccounts();
   const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
   const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_funds','assets_other_debit']);
@@ -6311,9 +6308,30 @@ function saveBankOpeningVal(){
 /* ── الأذون المعلقة: إذن قبض (تحصيل مديونية العملاء) أو إذن صرف (دفع فواتير شراء) لسه محتاجين تأكيد المبلغ ── */
 function pendingReceipts(){return loadTreasuryReceipts().filter(v=>v.status==='pending');}
 function pendingPayments(){return loadTreasuryPayments().filter(v=>v.status==='pending');}
+/* وميض بطاقة السيولة النقدية + شارة العدد لما يكون فيه أذون معلقة محتاجة تأكيد */
+function updateLiqPendingBlink(){
+  const card=document.getElementById('ws-liq-card');
+  if(!card)return;
+  const count=pendingReceipts().length+pendingPayments().length;
+  let badge=document.getElementById('ws-liq-pending-badge');
+  if(count>0){
+    card.classList.add('liq-pending-blink');
+    if(!badge){
+      badge=document.createElement('span');
+      badge.id='ws-liq-pending-badge';
+      badge.className='liq-pending-badge';
+      card.appendChild(badge);
+    }
+    badge.textContent=count>99?'99+':String(count);
+  }else{
+    card.classList.remove('liq-pending-blink');
+    if(badge)badge.remove();
+  }
+}
 function renderPendingVouchers(){
   const wrap=document.getElementById('liq-pending-wrap');
   if(!wrap)return;
+  updateLiqPendingBlink();
   const list=[...pendingReceipts().map(v=>({v,kind:'receipt'})),...pendingPayments().map(v=>({v,kind:'payment'}))];
   if(!list.length){wrap.innerHTML='';return;}
   wrap.innerHTML=`
@@ -9713,6 +9731,26 @@ function seedDemo(){
     });
     if(changed)saveData('debt_debtor',arr);
   }catch(e){console.warn('migrateExcessToRealDebt failed',e);}
+})();
+/* ── إلغاء ترحيل "دفع سلفة لشخص" (مدين + against) من جدول المصروفات ──
+   قديمًا كانت بتتسجل مرتين: مرة فى جدول الديون ومرة كمصروف تلقائي (fromDebt)، وده كان يسبب
+   احتساب المبلغ مرتين فى إجمالي النفقات، وبيخفيها من سجل المعاملات لما يتفلتر بـ"ديون".
+   دلوقتي بتتسجل فى جدول الديون فقط، فبنشيل نسخة المصروفات المكررة القديمة وبنشيل علامة
+   mirrored عن معاملات الديون دى عشان تظهر فى السجل تحت فلتر "ديون" بدل "مصروفات". */
+(function migrateRemoveAdvanceExpenseDuplicates(){
+  try{
+    const exp=loadData('expense');
+    const cleanExp=exp.filter(e=>!e.fromDebt);
+    if(cleanExp.length!==exp.length)saveData('expense',cleanExp);
+    const debtors=loadData('debt_debtor');
+    let changed=false;
+    debtors.forEach(r=>{
+      (r.transactions||[]).forEach(t=>{
+        if(t.dir==='against'&&t.mirrored){delete t.mirrored;changed=true;}
+      });
+    });
+    if(changed)saveData('debt_debtor',debtors);
+  }catch(e){console.warn('migrateRemoveAdvanceExpenseDuplicates failed',e);}
 })();
 // seedDemo(); // معطل — للتطوير فقط
 renderDebtCats();
