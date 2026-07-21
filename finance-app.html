@@ -758,6 +758,28 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .add-workspace-popover.show{opacity:1;visibility:visible;transform:translateY(0);}
 .add-ws-opt{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer;border-radius:7px;}
 .add-ws-opt:hover{background:rgba(255,255,255,.07);}
+/* ══ مجلدات الملاحظات ══ */
+.note-folder-card{width:calc(50% - 4px);background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.note-folder-card .nf-ico{font-size:19px;flex-shrink:0;}
+.note-folder-card .nf-info{flex:1;min-width:0;}
+.note-folder-card .nf-name{font-size:12.5px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.note-folder-card .nf-count{font-size:10.5px;color:var(--muted);margin-top:1px;}
+.note-folder-breadcrumb{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:8px;}
+.note-folder-breadcrumb .nfb-back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--txt);cursor:pointer;}
+.note-folder-breadcrumb .nfb-del{font-size:15px;color:var(--muted);cursor:pointer;}
+/* ══ شريط أدوات كتابة الملاحظة (إضافة / قائمة / تنسيق) ══ */
+.note-toolbar{display:flex;justify-content:space-around;align-items:center;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 4px;}
+.note-tb-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--txt);font-family:inherit;cursor:pointer;flex:1;padding:2px 0;}
+.note-tb-ico{width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .15s,border-color .15s;}
+.note-tb-btn.active .note-tb-ico{background:var(--yellow);color:#1a1a1a;border-color:var(--yellow);}
+.note-tb-lbl{font-size:9.5px;font-weight:700;color:var(--muted);}
+.note-toolbar-floating{position:fixed;left:12px;right:12px;z-index:275;box-shadow:0 -6px 22px rgba(0,0,0,.65);}
+.note-fmt-popover{position:fixed;z-index:600;background:#0a0d12;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.8);padding:6px;min-width:175px;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .15s,transform .15s,visibility .15s;}
+.note-fmt-popover.show{opacity:1;visibility:visible;transform:translateY(0);}
+.note-fmt-opt{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer;border-radius:7px;}
+.note-fmt-opt:hover{background:rgba(255,255,255,.07);}
+.note-fmt-opt .nf-chk{color:var(--yellow);font-weight:800;visibility:hidden;}
+.note-fmt-opt.active .nf-chk{visibility:visible;}
 /* نافذة اسم النشاط */
 .ws-name-modal{position:fixed;inset:0;z-index:700;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
 .ws-name-modal.show{opacity:1;visibility:visible;pointer-events:auto;}
@@ -1314,6 +1336,19 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
       <textarea id="note-items" rows="5" placeholder="بند فى كل سطر" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--txt);font-size:13px;resize:vertical;font-family:inherit;"></textarea>
     </div>
     <div class="slide-form-row">
+      <div class="note-toolbar">
+        <button type="button" class="note-tb-btn" onclick="noteTbAddLine()">
+          <span class="note-tb-ico">➕</span><span class="note-tb-lbl">إضافة</span>
+        </button>
+        <button type="button" class="note-tb-btn" onclick="noteTbAddChecklist()">
+          <span class="note-tb-ico">✅</span><span class="note-tb-lbl">قائمة</span>
+        </button>
+        <button type="button" class="note-tb-btn" id="note-tb-fmt-btn" onclick="toggleNoteFmtPopover(event)">
+          <span class="note-tb-ico">🔤</span><span class="note-tb-lbl">التنسيق</span>
+        </button>
+      </div>
+    </div>
+    <div class="slide-form-row">
       <input type="date" id="note-date">
     </div>
     <div style="padding:0 0 4px;">
@@ -1678,7 +1713,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div style="position:relative;display:flex;align-items:center;justify-content:flex-end;padding:8px 12px 4px;">
       <span style="position:absolute;left:0;right:0;text-align:center;font-size:17px;font-weight:800;color:var(--txt);pointer-events:none;">📝 ملاحظات</span>
       <div class="ftable-hdr-btns" style="position:relative;">
-        <button class="btn-ft btn-ft-add" onclick="openNotesForm()" title="إضافة ملاحظة جديدة">+</button>
+        <button class="btn-ft btn-ft-add" id="notes-add-btn" onclick="toggleNotesAddPopover(event)" title="إضافة">+</button>
         <button class="btn-ft" onclick="clearCompletedNotes()" title="حذف المكتملة">🗑</button>
       </div>
     </div>
@@ -2039,6 +2074,32 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
   <div class="add-ws-opt" onclick="startAddWorkspace('service')">🔧 خدمي</div>
 </div>
 
+<!-- منسدلة اختيار مجلد/ملف عند إضافة ملاحظة -->
+<div class="add-workspace-popover" id="notes-add-popover">
+  <div class="add-ws-opt" onclick="startAddNoteFolder()">📁 مجلد جديد</div>
+  <div class="add-ws-opt" onclick="startAddNoteFile()">📄 ملف جديد</div>
+</div>
+
+<!-- نافذة اسم مجلد الملاحظات -->
+<div class="ws-name-modal" id="note-folder-modal">
+  <div class="ws-name-box">
+    <div class="ws-name-title">📁 اسم المجلد</div>
+    <input class="ws-name-inp" id="note-folder-inp" placeholder="مثال: فواتير يناير" onkeydown="if(event.key==='Enter')saveNewNoteFolder()">
+    <div class="ws-name-btns">
+      <button class="ws-name-cancel" onclick="closeNoteFolderModal()">إلغاء</button>
+      <button class="ws-name-save" onclick="saveNewNoteFolder()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- منسدلة تنسيق نص الملاحظة -->
+<div class="note-fmt-popover" id="note-fmt-popover">
+  <div class="note-fmt-opt" onclick="noteFmtFont(-1)"><span>🔡 تصغير الخط</span></div>
+  <div class="note-fmt-opt" onclick="noteFmtFont(1)"><span>🔠 تكبير الخط</span></div>
+  <div class="note-fmt-opt" id="note-fmt-bold-opt" onclick="noteFmtToggle('bold')"><span><b>B</b> عريض</span><span class="nf-chk">✓</span></div>
+  <div class="note-fmt-opt" id="note-fmt-italic-opt" onclick="noteFmtToggle('italic')"><span><i>I</i> مائل</span><span class="nf-chk">✓</span></div>
+</div>
+
 <!-- قائمة اختيار عند الضغط المطوّل على نشاط -->
 <div class="ws-ctx-overlay" id="ws-ctx-overlay" onclick="closeWsContextMenu()"></div>
 <div class="ws-ctx-menu" id="ws-ctx-menu">
@@ -2130,7 +2191,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 // ══════════════════════════════════════════════
 const KEYS={income:'fm_income',expense:'fm_expense',commit:'fm_commit',
   debt_creditor:'fm_debt_creditor',debt_debtor:'fm_debt_debtor',
-  debt_cats:'fm_debt_cats',settings:'fm_settings',notes:'fm_notes'};
+  debt_cats:'fm_debt_cats',settings:'fm_settings',notes:'fm_notes',note_folders:'fm_note_folders'};
 let _memStore={};
 let _storageAvailable=true;
 try{
@@ -4488,6 +4549,16 @@ document.addEventListener('click', e=>{
   if(e.target.closest('#cat-popover')) return;
   if(e.target.closest('.cat-cell-trigger')) return; // toggling handled in trigger
   closeCatPopover();
+});
+document.addEventListener('click', e=>{
+  const addPop=document.getElementById('notes-add-popover');
+  if(addPop&&addPop.classList.contains('show')&&!e.target.closest('#notes-add-popover')&&!e.target.closest('#notes-add-btn')){
+    addPop.classList.remove('show');
+  }
+  const fmtPop=document.getElementById('note-fmt-popover');
+  if(fmtPop&&fmtPop.classList.contains('show')&&!e.target.closest('#note-fmt-popover')&&!e.target.closest('#note-tb-fmt-btn')){
+    fmtPop.classList.remove('show');
+  }
 });
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape') closeCatPopover();
@@ -9104,6 +9175,7 @@ renderWsBar();
    كل ملاحظة = عنوان + قائمة بنود تحته (زى تطبيقات الملاحظات)
    ══════════════════════════════════════════════ */
 let currentNotesType='all';
+let currentNotesFolder=null; // null = جذر التصنيف الحالي؛ غير كده = داخل مجلد بعينه (الفلترة على مستوى تصنيف واحد فقط)
 let _noteEditIdx=null;
 function noteTypeIcon(t){return t==='payment'?'💳':t==='reminder'?'⏰':t==='purchases'?'🛒':'✅';}
 function itemsTotal(items){return(items||[]).reduce((s,it)=>s+Number(it.amount||0),0);}
@@ -9116,16 +9188,58 @@ function setNotesType(btn,type){
   document.querySelectorAll('#pg-notes .ptab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   currentNotesType=type;
+  currentNotesFolder=null; // تغيير التصنيف يرجّعنا لجذر الملاحظات، المجلدات مربوطة بتصنيف واحد بس
   renderNotes();
+}
+/* ══ مجلدات الملاحظات: تنظيم إضافي جوه كل تصنيف (مهام/مدفوعات/تذكيرات/مشتريات) ══ */
+function loadNoteFolders(){return loadData('note_folders');}
+function saveNoteFolders(v){saveData('note_folders',v);}
+function noteStyleCss(style,baseSize,baseWeight){
+  style=style||{};
+  const delta=style.size==='large'?2:style.size==='small'?-2:0;
+  const weight=style.bold?'800':(baseWeight||'700');
+  const fstyle=style.italic?'italic':'normal';
+  return `font-size:${baseSize+delta}px;font-weight:${weight};font-style:${fstyle};`;
 }
 function renderNotes(){
   const all=loadData('notes');
-  const rows=currentNotesType==='all'?all:all.filter(r=>r.type===currentNotesType);
   const cont=document.getElementById('tbody-notes');
   if(!cont)return;
   cont.innerHTML='';
+  const inFolderMode=currentNotesType!=='all';
+  const folders=inFolderMode?loadNoteFolders().filter(f=>f.type===currentNotesType):[];
+  const openFolder=currentNotesFolder?folders.find(f=>f.id===currentNotesFolder):null;
+  if(currentNotesFolder&&!openFolder)currentNotesFolder=null; // المجلد اتحذف من مكان تاني — نرجع للجذر
+  let rows;
+  if(!inFolderMode){
+    rows=all;
+  }else if(openFolder){
+    rows=all.filter(r=>r.type===currentNotesType&&r.folderId===openFolder.id);
+    const bc=document.createElement('div');
+    bc.className='note-folder-breadcrumb';
+    bc.innerHTML=`<span class="nfb-back" onclick="backToNotesRoot()">→ <span>📁 ${escapeHtml(openFolder.name)}</span></span><span class="nfb-del" onclick="deleteNoteFolder('${openFolder.id}')" title="حذف المجلد">🗑</span>`;
+    cont.appendChild(bc);
+  }else{
+    rows=all.filter(r=>r.type===currentNotesType&&!r.folderId);
+    if(folders.length){
+      const grid=document.createElement('div');
+      grid.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;';
+      folders.forEach(f=>{
+        const cnt=all.filter(r=>r.type===f.type&&r.folderId===f.id).length;
+        const fc=document.createElement('div');
+        fc.className='note-folder-card';
+        fc.onclick=()=>openNoteFolder(f.id);
+        fc.innerHTML=`<span class="nf-ico">📁</span><div class="nf-info"><div class="nf-name">${escapeHtml(f.name)}</div><div class="nf-count">${cnt} ملف</div></div>`;
+        grid.appendChild(fc);
+      });
+      cont.appendChild(grid);
+    }
+  }
   if(!rows.length){
-    cont.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:24px 0;">لا توجد ملاحظات</div>';
+    const empty=document.createElement('div');
+    empty.style.cssText='text-align:center;color:var(--muted);font-size:12px;padding:24px 0;';
+    empty.textContent=inFolderMode&&openFolder?'المجلد فاضي':'لا توجد ملاحظات';
+    cont.appendChild(empty);
   }
   rows.forEach(r=>{
     const idx=all.indexOf(r);
@@ -9133,15 +9247,17 @@ function renderNotes(){
     const card=document.createElement('div');
     card.dataset.idx=idx;
     card.style.cssText='background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;';
+    const titleCss=noteStyleCss(r.style,14,'800');
+    const itemCss=noteStyleCss(r.style,12,'400');
     const itemsHtml=(r.items||[]).map((it,ii)=>`<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">
         <input type="checkbox" ${it.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleNoteItemDone(${idx},${ii})" style="width:14px;height:14px;accent-color:var(--green);flex-shrink:0;">
-        <span style="flex:1;font-size:12px;${it.done?'color:var(--muted);':'color:var(--txt);'}">${escapeHtml(it.text||'')}</span>
+        <span style="flex:1;${itemCss}${it.done?'color:var(--muted);':'color:var(--txt);'}">${escapeHtml(it.text||'')}</span>
         ${it.amount?`<span style="font-size:11px;font-weight:700;color:var(--yellow);flex-shrink:0;">${fmt(it.amount)}</span>`:''}
       </div>`).join('');
     const total=itemsTotal(r.items);
     const totalLine=(r.type==='purchases'||r.type==='payment')&&total>0?`<div style="margin-top:4px;text-align:left;font-size:11px;font-weight:800;color:var(--yellow);">الإجمالي: ${fmt(total)}</div>`:'';
     card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;">
-        <span style="font-size:14px;font-weight:800;${complete?'color:var(--muted);':'color:var(--txt);'}">${noteTypeIcon(r.type)} ${escapeHtml(r.title||'')}</span>
+        <span style="${titleCss}${complete?'color:var(--muted);':'color:var(--txt);'}">${noteTypeIcon(r.type)} ${escapeHtml(r.title||'')}</span>
         <span style="font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0;">${fmtDate(r.date)}</span>
       </div>
       <div>${itemsHtml}</div>
@@ -9155,6 +9271,147 @@ function renderNotes(){
   const tEl=document.getElementById('notes-total-sum');if(tEl)tEl.textContent=fmt(totalSum);
   const cEl=document.getElementById('notes-completed-count');if(cEl)cEl.textContent=completed;
   const pEl=document.getElementById('notes-pending-count');if(pEl)pEl.textContent=pending;
+}
+function openNoteFolder(id){currentNotesFolder=id;renderNotes();}
+function backToNotesRoot(){currentNotesFolder=null;renderNotes();}
+function deleteNoteFolder(id){
+  pgConfirm('حذف المجلد؟ الملفات اللى جواه هترجع بره المجلد ومش هتتحذف.',()=>{
+    saveNoteFolders(loadNoteFolders().filter(f=>f.id!==id));
+    const notes=loadData('notes');
+    notes.forEach(n=>{if(n.folderId===id)delete n.folderId;});
+    saveData('notes',notes);
+    if(currentNotesFolder===id)currentNotesFolder=null;
+    renderNotes();
+  },'حذف');
+}
+/* ══ منسدلة الإضافة (+): مجلد جديد / ملف جديد ══ */
+function toggleNotesAddPopover(e){
+  e.stopPropagation();
+  const pop=document.getElementById('notes-add-popover');
+  const btn=document.getElementById('notes-add-btn');
+  const r=btn.getBoundingClientRect();
+  pop.style.top=(r.bottom+4)+'px';
+  pop.style.right=(window.innerWidth-r.right)+'px';
+  // إنشاء مجلد ملوش معنى لو مفتوحين على تبويب "الكل" (المجلدات مربوطة بتصنيف واحد بعينه)
+  const folderOpt=pop.querySelector('.add-ws-opt:first-child');
+  if(folderOpt)folderOpt.style.display=currentNotesType==='all'?'none':'flex';
+  pop.classList.toggle('show');
+}
+function closeNotesAddPopover(){document.getElementById('notes-add-popover').classList.remove('show');}
+function startAddNoteFolder(){
+  closeNotesAddPopover();
+  document.getElementById('note-folder-inp').value='';
+  document.getElementById('note-folder-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('note-folder-inp').focus(),200);
+}
+function closeNoteFolderModal(){document.getElementById('note-folder-modal').classList.remove('show');}
+function saveNewNoteFolder(){
+  const name=document.getElementById('note-folder-inp').value.trim();
+  if(!name)return;
+  const folders=loadNoteFolders();
+  folders.push({id:'nf'+nextSeq(),type:currentNotesType,name,_seq:nextSeq()});
+  saveNoteFolders(folders);
+  closeNoteFolderModal();
+  renderNotes();
+}
+function startAddNoteFile(){
+  closeNotesAddPopover();
+  openNotesForm();
+}
+/* ══ شريط أدوات كتابة الملاحظة: إضافة سطر / بند قائمة / تنسيق ══ */
+function noteTbAddLine(){
+  const ta=document.getElementById('note-items');
+  if(!ta)return;
+  const pos=ta.selectionStart||ta.value.length;
+  const before=ta.value.slice(0,pos),after=ta.value.slice(pos);
+  const insert=(before&&!before.endsWith('\n')?'\n':'');
+  ta.value=before+insert+after;
+  const newPos=(before+insert).length;
+  ta.focus();
+  ta.setSelectionRange(newPos,newPos);
+}
+function noteTbAddChecklist(){
+  const ta=document.getElementById('note-items');
+  if(!ta)return;
+  const pos=ta.selectionStart||ta.value.length;
+  const before=ta.value.slice(0,pos),after=ta.value.slice(pos);
+  const insert=(before&&!before.endsWith('\n')?'\n':'')+'☑ ';
+  ta.value=before+insert+after;
+  const newPos=(before+insert).length;
+  ta.focus();
+  ta.setSelectionRange(newPos,newPos);
+}
+let _noteStyleDraft={size:'normal',bold:false,italic:false};
+/* شريط الأدوات بيطفو فوق الكيبورد مباشرة أثناء الكتابة (زي تطبيقات الملاحظات) بدل ما يختفي وراه.
+   بنستخدم VisualViewport لمعرفة ارتفاع الكيبورد الفعلي، وبننقل الشريط لـ body مؤقتًا وقت الطفو
+   عشان position:fixed يتحسب من الشاشة كلها مش من داخل نافذة الفورم (اللي بتستخدم transform). */
+let _noteToolbarAnchor=null;
+function setupNoteKeyboardAware(){
+  if(!window.visualViewport)return;
+  const vv=window.visualViewport;
+  const toolbar=document.querySelector('.note-toolbar');
+  const titleInp=document.getElementById('note-title');
+  const itemsTa=document.getElementById('note-items');
+  if(!toolbar||!titleInp||!itemsTa)return;
+  if(!_noteToolbarAnchor){
+    _noteToolbarAnchor=document.createComment('note-toolbar-anchor');
+    toolbar.parentNode.insertBefore(_noteToolbarAnchor,toolbar);
+  }
+  const reposition=()=>{
+    const formShown=document.getElementById('form-note-slide').classList.contains('show');
+    const kbHeight=formShown?Math.max(0,window.innerHeight-vv.height-vv.offsetTop):0;
+    if(formShown&&kbHeight>60){
+      if(!toolbar.classList.contains('note-toolbar-floating')){
+        document.body.appendChild(toolbar);
+        toolbar.classList.add('note-toolbar-floating');
+      }
+      toolbar.style.bottom=kbHeight+'px';
+    }else if(toolbar.classList.contains('note-toolbar-floating')){
+      toolbar.classList.remove('note-toolbar-floating');
+      toolbar.style.bottom='';
+      _noteToolbarAnchor.parentNode.insertBefore(toolbar,_noteToolbarAnchor.nextSibling);
+    }
+  };
+  vv.addEventListener('resize',reposition);
+  vv.addEventListener('scroll',reposition);
+  [titleInp,itemsTa].forEach(el=>{
+    el.addEventListener('focus',()=>setTimeout(reposition,300));
+    el.addEventListener('blur',()=>setTimeout(reposition,300));
+  });
+}
+function toggleNoteFmtPopover(e){
+  e.stopPropagation();
+  const pop=document.getElementById('note-fmt-popover');
+  const btn=document.getElementById('note-tb-fmt-btn');
+  const r=btn.getBoundingClientRect();
+  pop.style.bottom=(window.innerHeight-r.top+6)+'px';
+  pop.style.right=(window.innerWidth-r.right)+'px';
+  document.getElementById('note-fmt-bold-opt').classList.toggle('active',!!_noteStyleDraft.bold);
+  document.getElementById('note-fmt-italic-opt').classList.toggle('active',!!_noteStyleDraft.italic);
+  pop.classList.toggle('show');
+}
+function closeNoteFmtPopover(){document.getElementById('note-fmt-popover').classList.remove('show');}
+function noteFmtFont(dir){
+  const order=['small','normal','large'];
+  let i=order.indexOf(_noteStyleDraft.size||'normal');
+  i=Math.max(0,Math.min(order.length-1,i+dir));
+  _noteStyleDraft.size=order[i];
+  applyNoteFormPreview();
+}
+function noteFmtToggle(prop){
+  _noteStyleDraft[prop]=!_noteStyleDraft[prop];
+  document.getElementById('note-fmt-bold-opt').classList.toggle('active',!!_noteStyleDraft.bold);
+  document.getElementById('note-fmt-italic-opt').classList.toggle('active',!!_noteStyleDraft.italic);
+  applyNoteFormPreview();
+}
+function applyNoteFormPreview(){
+  const title=document.getElementById('note-title');
+  const items=document.getElementById('note-items');
+  const delta=_noteStyleDraft.size==='large'?2:_noteStyleDraft.size==='small'?-2:0;
+  const weight=_noteStyleDraft.bold?'800':'400';
+  const fstyle=_noteStyleDraft.italic?'italic':'normal';
+  if(title){title.style.fontSize=(15+delta)+'px';title.style.fontWeight=weight;title.style.fontStyle=fstyle;}
+  if(items){items.style.fontSize=(13+delta)+'px';items.style.fontWeight=weight;items.style.fontStyle=fstyle;}
 }
 function toggleNoteItemDone(noteIdx,itemIdx){
   const arr=loadData('notes');
@@ -9199,15 +9456,26 @@ function openNotesForm(idx){
   const arr=loadData('notes');
   const r=_noteEditIdx!==null?arr[_noteEditIdx]:null;
   document.getElementById('note-form-title').textContent=r?'✏️ تعديل ملاحظة':'📝 ملاحظة جديدة';
-  const type=r?r.type:'task';
+  const type=r?r.type:(currentNotesType!=='all'?currentNotesType:'task');
   document.getElementById('note-type').value=type;
   document.getElementById('note-title').value=r?(r.title||''):'';
   document.getElementById('note-items').value=r?itemsToRaw(r.items,type):'';
   document.getElementById('note-date').value=r?(r.date||todayStr()):todayStr();
   updateNoteItemsHint();
+  // ملاحظة جديدة جوه مجلد مفتوح تتربط بيه تلقائيًا؛ ملاحظة قيد التعديل بتحافظ على مجلدها الحالي
+  _noteFormFolderId=r?(r.folderId||null):(currentNotesFolder||null);
+  _noteStyleDraft=r&&r.style?{...r.style}:{size:'normal',bold:false,italic:false};
+  document.getElementById('note-title').style.fontSize='';
+  document.getElementById('note-title').style.fontWeight='';
+  document.getElementById('note-title').style.fontStyle='';
+  document.getElementById('note-items').style.fontSize='';
+  document.getElementById('note-items').style.fontWeight='';
+  document.getElementById('note-items').style.fontStyle='';
+  applyNoteFormPreview();
   document.getElementById('form-note-slide').classList.add('show');
   setTimeout(()=>document.getElementById('note-title').focus(),350);
 }
+let _noteFormFolderId=null;
 function saveNote(){
   const type=document.getElementById('note-type').value;
   const title=document.getElementById('note-title').value.trim();
@@ -9216,13 +9484,20 @@ function saveNote(){
   if(!title)return;
   const items=parseNoteItems(rawItems,type);
   const arr=loadData('notes');
+  const style={..._noteStyleDraft};
   if(_noteEditIdx!==null&&arr[_noteEditIdx]){
     // نحافظ على حالة "تم" للبنود المطابقة نصيًا مع النسخة القديمة
     const oldItems=arr[_noteEditIdx].items||[];
     items.forEach(it=>{const old=oldItems.find(o=>o.text===it.text);if(old)it.done=old.done;});
-    arr[_noteEditIdx]={...arr[_noteEditIdx],type,title,items,date};
+    let folderId=arr[_noteEditIdx].folderId;
+    // لو اتغيّر التصنيف عن نوع المجلد الأصلي، الملف يطلع بره المجلد بدل ما يختفي
+    if(folderId){
+      const f=loadNoteFolders().find(x=>x.id===folderId);
+      if(!f||f.type!==type)folderId=undefined;
+    }
+    arr[_noteEditIdx]={...arr[_noteEditIdx],type,title,items,date,folderId,style};
   } else {
-    arr.push({type,title,items,date,_seq:nextSeq()});
+    arr.push({type,title,items,date,folderId:_noteFormFolderId||undefined,style,_seq:nextSeq()});
   }
   saveData('notes',arr);
   closeSlideForm();
@@ -9872,6 +10147,7 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   });
 }
+setupNoteKeyboardAware();
 </script>
 </body>
 </html>
