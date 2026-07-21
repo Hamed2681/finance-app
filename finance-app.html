@@ -619,6 +619,11 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .liq-pending-blink{animation:liqPendingGlow 1.4s ease-in-out infinite;}
 @keyframes liqBadgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
 .liq-pending-badge{position:absolute;top:-6px;left:-6px;background:var(--yellow);color:#1a1a1a;font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg,#111);animation:liqBadgePulse 1.4s ease-in-out infinite;}
+.liq-pend-btn{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 6px;display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10.5px;font-weight:700;color:var(--txt);font-family:inherit;cursor:pointer;transition:border-color .2s;}
+.liq-pend-btn:active{transform:scale(.97);}
+.liq-pend-count{display:none;background:var(--yellow);color:#1a1a1a;font-size:9.5px;font-weight:800;min-width:15px;height:15px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0;}
+.liq-pend-btn.liq-pend-blink{animation:liqPendingGlow 1.4s ease-in-out infinite;}
+.liq-pend-btn.liq-pend-blink .liq-pend-count{animation:liqBadgePulse 1.4s ease-in-out infinite;}
 .biz-card-hdr{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
 .biz-ico{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
 .biz-lbl{font-size:12px;color:var(--muted);}
@@ -1803,6 +1808,16 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
             <span class="biz-lbl">🏦 البنك</span>
             <span style="font-size:10.5px;font-weight:800;color:var(--yellow);" id="ws-liq-bank">0</span>
           </div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="liq-pend-btn" id="ws-liq-pend-payment" onclick="event.stopPropagation();openLiqPendingKind('payment');">
+            <span>🔻 معلق صرف</span>
+            <span class="liq-pend-count" id="ws-liq-pend-payment-count" style="display:none;">0</span>
+          </button>
+          <button type="button" class="liq-pend-btn" id="ws-liq-pend-receipt" onclick="event.stopPropagation();openLiqPendingKind('receipt');">
+            <span>🔺 معلق قبض</span>
+            <span class="liq-pend-count" id="ws-liq-pend-receipt-count" style="display:none;">0</span>
+          </button>
         </div>
         <div class="biz-card-ftr">
           <span class="biz-card-title" style="color:var(--yellow);">السيولة النقدية</span>
@@ -5600,6 +5615,7 @@ function openBizDetail(key){
 function closeBizDetail(){
   document.getElementById('pg-biz-detail').style.display='none';
   document.getElementById('pg-workspace').style.display='flex';
+  liqPendingFilter=null;
   refreshBizDashboard();
 }
 /* ── تحديث أرقام كروت لوحة النشاط التجاري (مشتريات/مبيعات/حسابات) من واقع البيانات ── */
@@ -6312,7 +6328,9 @@ function pendingPayments(){return loadTreasuryPayments().filter(v=>v.status==='p
 function updateLiqPendingBlink(){
   const card=document.getElementById('ws-liq-card');
   if(!card)return;
-  const count=pendingReceipts().length+pendingPayments().length;
+  const rCount=pendingReceipts().length;
+  const pCount=pendingPayments().length;
+  const count=rCount+pCount;
   let badge=document.getElementById('ws-liq-pending-badge');
   if(count>0){
     card.classList.add('liq-pending-blink');
@@ -6327,15 +6345,52 @@ function updateLiqPendingBlink(){
     card.classList.remove('liq-pending-blink');
     if(badge)badge.remove();
   }
+  updateLiqPendBtn('payment',pCount);
+  updateLiqPendBtn('receipt',rCount);
+}
+/* تحديث زر «معلق صرف» أو «معلق قبض» على حدة: وميض + شارة عدد لما يكون فيه أذون معلقة من هذا النوع */
+function updateLiqPendBtn(kind,count){
+  const btn=document.getElementById('ws-liq-pend-'+kind);
+  if(!btn)return;
+  const cnt=document.getElementById('ws-liq-pend-'+kind+'-count');
+  if(count>0){
+    btn.classList.add('liq-pend-blink');
+    if(cnt){cnt.style.display='flex';cnt.textContent=count>99?'99+':String(count);}
+  }else{
+    btn.classList.remove('liq-pend-blink');
+    if(cnt){cnt.style.display='none';}
+  }
+}
+/* فتح تفاصيل السيولة مباشرة مع فلترة الأذون المعلقة على نوع واحد (صرف/قبض) */
+let liqPendingFilter=null;
+function openLiqPendingKind(kind){
+  liqPendingFilter=kind;
+  openBizDetail('liquidity');
+  setTimeout(()=>{
+    const el=document.getElementById('liq-pending-wrap');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  },60);
 }
 function renderPendingVouchers(){
   const wrap=document.getElementById('liq-pending-wrap');
   if(!wrap)return;
   updateLiqPendingBlink();
-  const list=[...pendingReceipts().map(v=>({v,kind:'receipt'})),...pendingPayments().map(v=>({v,kind:'payment'}))];
-  if(!list.length){wrap.innerHTML='';return;}
+  let list=[...pendingReceipts().map(v=>({v,kind:'receipt'})),...pendingPayments().map(v=>({v,kind:'payment'}))];
+  if(!list.length){wrap.innerHTML='';liqPendingFilter=null;return;}
+  if(liqPendingFilter)list=list.filter(x=>x.kind===liqPendingFilter);
+  if(!list.length){
+    wrap.innerHTML=`<div class="biz-po-form-title" style="color:var(--yellow);padding:0;display:flex;justify-content:space-between;align-items:center;">
+      <span>⏳ لا توجد أذون معلقة ${liqPendingFilter==='payment'?'صرف':'قبض'} حالياً</span>
+      <span style="color:var(--blue);font-size:11px;cursor:pointer;" onclick="liqPendingFilter=null;renderPendingVouchers();">عرض الكل</span>
+    </div>`;
+    return;
+  }
+  const filterLbl=liqPendingFilter?`<span style="color:var(--blue);font-size:11px;cursor:pointer;" onclick="liqPendingFilter=null;renderPendingVouchers();">عرض الكل</span>`:'';
   wrap.innerHTML=`
-    <div class="biz-po-form-title" style="color:var(--yellow);padding:0;">⏳ أذون معلقة تحتاج تأكيد (${list.length})</div>
+    <div class="biz-po-form-title" style="color:var(--yellow);padding:0;display:flex;justify-content:space-between;align-items:center;">
+      <span>⏳ أذون معلقة${liqPendingFilter?' '+(liqPendingFilter==='payment'?'صرف':'قبض'):''} تحتاج تأكيد (${list.length})</span>
+      ${filterLbl}
+    </div>
     <div class="biz-po-list">${list.map(({v,kind})=>`
       <div class="biz-po-row">
         <div class="biz-po-row-top"><b>${esc(v.name)}</b><span>#${v.seq} · ${kind==='receipt'?'قبض':'صرف'}</span></div>
