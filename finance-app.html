@@ -626,16 +626,23 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .liq-pend-btn.liq-pend-blink .liq-pend-count{animation:liqBadgePulse 1.4s ease-in-out infinite;}
 .biz-card-hdr{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
 .biz-ico{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
-.biz-lbl{font-size:12px;color:var(--muted);}
-.biz-val{font-size:17px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.biz-sub{font-size:11px;color:var(--muted);}
+.biz-lbl{font-size:13.5px;color:var(--muted);}
+.biz-val{font-size:19px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.biz-sub{font-size:12.5px;color:var(--muted);}
 .biz-bar{height:4px;background:var(--card2);border-radius:3px;overflow:hidden;}
 .biz-bar>div{height:100%;border-radius:3px;}
-.biz-split-lbls{display:flex;justify-content:space-between;gap:4px;text-align:center;font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:3px;}
+.biz-split-lbls{display:flex;justify-content:space-between;gap:4px;text-align:center;font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:3px;}
 .biz-split-lbls>div{display:flex;flex-direction:column;gap:0;flex:1;min-width:0;}
-.biz-split-lbls b{font-size:13px;font-weight:800;}
-.biz-split-lbls small{font-size:10px;}
+.biz-split-lbls b{font-size:15px;font-weight:800;}
+.biz-split-lbls small{font-size:11px;}
 .biz-split-bar{display:flex;height:4px;border-radius:3px;overflow:hidden;}
+.biz-split-lbls.expand-only{display:none;}
+.biz-expand-overlay .biz-split-lbls.expand-only{display:flex;}
+.biz-ring-badge{position:relative;width:34px;height:34px;flex-shrink:0;}
+.biz-ring-badge svg{width:100%;height:100%;display:block;}
+.biz-ring-badge .biz-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--txt);}
+.biz-expand-overlay .biz-ring-badge{width:52px;height:52px;}
+.biz-expand-overlay .biz-ring-badge .biz-ring-val{font-size:12px;}
 .biz-card-ftr{display:flex;align-items:center;justify-content:center;gap:6px;margin:auto -7px -7px -7px;background:var(--card2);border-top:1px solid var(--border);border-radius:0 0 11px 11px;padding:4px 8px;}
 .biz-expand-overlay .biz-card-ftr{margin:auto -16px -16px -16px;padding:8px 16px;border-radius:0 0 16px 16px;}
 .biz-card-title{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:center;}
@@ -658,29 +665,34 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-expand-overlay .biz-ico{width:34px;height:34px;font-size:19px;}
 /* ── كارت السيولة: صف الإجمالي + صندوقي الخزينة/البنك (كلاسات بدل الأنماط المضمّنة عشان تتكبّر صح جوه المودل الموسّع) ── */
 .liq-total-row{display:flex;align-items:center;gap:6px;}
-.liq-total-ico{width:20px;height:20px;border-radius:6px;background:rgba(224,176,48,.16);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
-.liq-total-val{font-size:14px;font-weight:800;color:var(--txt);}
+.liq-total-ico{width:20px;height:20px;border-radius:6px;background:rgba(62,207,106,.16);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.liq-total-val{font-size:16px;font-weight:800;color:var(--green);}
 .liq-quick-row{display:flex;gap:6px;}
 /* صف الخزينة / صف البنك: صف كامل (full width) فيه العنوان + الافتتاحي + الرصيد، كلهم inline */
-.liq-quick-col{display:flex;flex-direction:row;gap:6px;}
+.liq-quick-col{display:none;flex-direction:row;gap:6px;}
+.biz-expand-overlay .liq-quick-col{display:flex;}
 .liq-quick-line-row{flex:1;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:5px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;min-width:0;}
 .liq-quick-line-row:active{background:var(--card);}
-.liq-quick-line-row>.biz-lbl{white-space:nowrap;font-size:10.5px;font-weight:700;}
+.liq-quick-line-row>.biz-lbl{white-space:nowrap;font-size:11.5px;font-weight:700;}
 .liq-quick-line-row>.liq-quick-val{margin-inline-start:0;}
-.liq-quick-val{font-size:13px;font-weight:800;color:var(--yellow);white-space:nowrap;}
+.liq-quick-val{font-size:14px;font-weight:800;color:var(--green);white-space:nowrap;}
+.liq-quick-val small{font-size:9px;font-weight:700;color:var(--muted);margin-inline-end:3px;}
+.liq-quick-val.expand-only{display:none;}
+.biz-expand-overlay .liq-quick-val.expand-only{display:inline;}
 /* الرصيد الافتتاحي يظهر في نفس صف قسم الخزينة/البنك */
-.liq-quick-open{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;color:var(--muted);font-weight:700;white-space:nowrap;flex-shrink:0;padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.04);}
+.liq-quick-open{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);font-weight:700;white-space:nowrap;flex-shrink:0;padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.04);}
 .liq-quick-open-lbl{font-size:9px;opacity:.85;}
-.liq-quick-open b{color:var(--txt);font-weight:800;font-size:10.5px;}
+.liq-quick-open b{color:var(--txt);font-weight:800;font-size:11.5px;}
 .liq-quick-open-edit{font-size:8.5px;opacity:.7;}
 .biz-expand-overlay .liq-total-ico{width:32px;height:32px;font-size:16px;border-radius:9px;}
-.biz-expand-overlay .liq-total-val{font-size:22px;}
+.biz-expand-overlay .liq-total-val{font-size:26px;}
 .biz-expand-overlay .liq-quick-line-row{padding:10px 14px;gap:10px;}
-.biz-expand-overlay .liq-quick-line-row>.biz-lbl{font-size:14px;}
-.biz-expand-overlay .liq-quick-val{font-size:17px;}
-.biz-expand-overlay .liq-quick-open{font-size:11.5px;padding:3px 8px;}
-.biz-expand-overlay .liq-quick-open-lbl{font-size:10.5px;}
-.biz-expand-overlay .liq-quick-open b{font-size:13px;}
+.biz-expand-overlay .liq-quick-line-row>.biz-lbl{font-size:16px;}
+.biz-expand-overlay .liq-quick-val{font-size:20px;}
+.biz-expand-overlay .liq-quick-val small{font-size:11px;}
+.biz-expand-overlay .liq-quick-open{font-size:13px;padding:3px 8px;}
+.biz-expand-overlay .liq-quick-open-lbl{font-size:12px;}
+.biz-expand-overlay .liq-quick-open b{font-size:15px;}
 .biz-expand-overlay .liq-quick-open-edit{font-size:10px;}
 .biz-expand-overlay .liq-pend-btn{padding:9px 8px;border-radius:11px;}
 .biz-expand-overlay .liq-pend-btn span:first-child{font-size:12.5px;}
@@ -737,6 +749,19 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .wh-row-btn{border:none;border-radius:7px;padding:5px 9px;font-family:'Cairo',sans-serif;font-size:10.5px;font-weight:700;cursor:pointer;background:var(--card2);color:var(--blue);flex-shrink:0;}
 .wh-row-btn.edit{color:var(--yellow);}
 .wh-row-btn.del{color:var(--red);}
+.inv-view-toggle{display:flex;align-items:center;justify-content:flex-end;gap:5px;}
+.inv-view-btn{border:none;border-radius:7px;padding:5px 10px;font-family:'Cairo',sans-serif;font-size:10.5px;font-weight:700;cursor:pointer;background:var(--card2);color:var(--muted);}
+.inv-view-btn.active{background:var(--blue);color:#fff;}
+.inv-add-fab{border:none;border-radius:7px;padding:5px 12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;background:var(--green);color:#08221a;}
+.inv-add-fab.small{padding:3px 10px;font-size:12px;}
+.inv-items-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.inv-item-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 4px;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;}
+.inv-item-card-ic{font-size:15px;}
+.inv-item-card-name{font-size:9.5px;font-weight:700;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.inv-item-card-meta{display:flex;flex-direction:column;gap:1px;font-size:8.5px;color:var(--muted);}
+.inv-item-card-meta b{color:#2dd4a7;font-size:9.5px;}
+.wh-inline-view{margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);}
+.inv-item-card.has-qty{background:#3a4048;border-color:#4a5260;}
 /* ── تصميم فاتورة المشتريات الجديد (أحمر) ── */
 .pinv-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
 .pinv-hdr{background:#8c2e26;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;flex-shrink:0;}
@@ -1816,20 +1841,23 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div class="biz-card" style="border:none;background:var(--bg);" data-biz-key="purchases" onclick="openBizDetail('purchases')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           <div class="biz-card-hdr">
-            <span class="biz-ico" style="background:rgba(77,168,240,.16);">🛒</span>
+            <span class="biz-ico" style="background:rgba(192,57,43,.16);">🛒</span>
+            <span class="biz-ring-badge"><svg id="ws-pur-ring" viewBox="0 0 78 78"></svg><span class="biz-ring-val" id="ws-pur-ring-val">0%</span></span>
           </div>
-          <div class="biz-lbl">إجمالي المشتريات</div>
-          <div class="biz-val" id="ws-pur-total">0</div>
+          <div class="biz-lbl" style="text-align:center;">المشتريات</div>
+          <div class="biz-val" id="ws-pur-total" style="text-align:center;">0</div>
 
-          <div class="biz-sub">من رأس المال <b style="color:var(--blue);">0%</b></div>
-          <div class="biz-bar"><div id="ws-pur-bar" style="width:0%;background:var(--blue);"></div></div>
-          <div class="biz-split-lbls">
-            <div><span>مدفوع</span><b id="ws-pur-paid" style="color:var(--green);">0</b><small id="ws-pur-paid-pct">0%</small></div>
-            <div><span>متبقي</span><b id="ws-pur-rem" style="color:var(--red);">0</b><small id="ws-pur-rem-pct">0%</small></div>
-          </div>
+          <div class="biz-sub">من رأس المال <b style="color:var(--red);">0%</b></div>
+          <div class="biz-bar"><div id="ws-pur-bar" style="width:0%;background:var(--red);"></div></div>
+          <div class="biz-lbl" style="text-align:center;">موردين</div>
+          <div class="biz-val" id="ws-pur-suppliers-rem" style="text-align:center;color:var(--red);">0</div>
           <div class="biz-split-bar"><div id="ws-pur-paidbar" style="width:0%;background:var(--green);"></div><div id="ws-pur-rembar" style="width:0%;background:var(--red);"></div></div>
+          <div class="biz-split-lbls expand-only">
+            <div><span>مدفوع</span><b style="color:var(--green);" id="ws-pur-paid">0</b></div>
+            <div><span>متبقي</span><b style="color:var(--red);" id="ws-pur-rem">0</b></div>
+          </div>
           <div class="biz-card-ftr">
-            <span class="biz-card-title" style="color:var(--blue);">المشتريات/الموردين</span>
+            <span class="biz-card-title" style="color:var(--red);">المشتريات/الموردين</span>
           </div>
         </div>
 
@@ -1840,14 +1868,14 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">🎓</span>
           </div>
           <div class="biz-lbl">قيمة المخزون</div>
-          <div style="position:relative;width:58px;height:58px;margin:1px 0;">
-            <svg id="ws-inv-ring" viewBox="0 0 78 78" style="width:58px;height:58px;"></svg>
+          <div style="position:relative;width:100px;height:100px;margin:1px 0;">
+            <svg id="ws-inv-ring" viewBox="0 0 78 78" style="width:100px;height:100px;"></svg>
             <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-              <span style="font-size:13px;font-weight:800;color:var(--txt);" id="ws-inv-val">0</span>
+              <span style="font-size:19px;font-weight:800;color:var(--txt);" id="ws-inv-val">0</span>
             </div>
           </div>
           <div class="biz-sub">من إجمالي الأصول <b style="color:var(--blue);" id="ws-inv-pct">0%</b></div>
-          <div class="biz-split-lbls" style="width:100%;margin-top:4px;">
+          <div class="biz-split-lbls expand-only" style="width:100%;margin-top:4px;">
             <div><span style="font-size:7.5px;white-space:nowrap;">عدد الأصناف</span><b style="color:var(--txt);" id="ws-inv-count">0</b></div>
             <div><span style="font-size:7.5px;white-space:nowrap;">أصناف منخفضة</span><b style="color:var(--yellow);" id="ws-inv-low">0</b></div>
           </div>
@@ -1861,16 +1889,19 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">👥</span>
+            <span class="biz-ring-badge"><svg id="ws-sale-ring" viewBox="0 0 78 78"></svg><span class="biz-ring-val" id="ws-sale-ring-val">0%</span></span>
           </div>
-          <div class="biz-lbl">إجمالي المبيعات</div>
-          <div class="biz-val" id="ws-sale-total">0</div>
+          <div class="biz-lbl" style="text-align:center;">المبيعات</div>
+          <div class="biz-val" id="ws-sale-total" style="text-align:center;">0</div>
           <div class="biz-sub">من رأس المال <b style="color:var(--blue);">0%</b></div>
           <div class="biz-bar"><div id="ws-sale-bar" style="width:0%;background:var(--blue);"></div></div>
-          <div class="biz-split-lbls">
-            <div><span>محصل</span><b id="ws-sale-collected" style="color:var(--green);">0</b><small id="ws-sale-collected-pct">0%</small></div>
-            <div><span>متبقي</span><b id="ws-sale-rem" style="color:var(--red);">0</b><small id="ws-sale-rem-pct">0%</small></div>
-          </div>
+          <div class="biz-lbl" style="text-align:center;">عملاء</div>
+          <div class="biz-val" id="ws-sale-customers-rem" style="text-align:center;color:var(--blue);">0</div>
           <div class="biz-split-bar"><div id="ws-sale-collectedbar" style="width:0%;background:var(--blue);"></div><div id="ws-sale-rembar" style="width:0%;background:var(--red);"></div></div>
+          <div class="biz-split-lbls expand-only">
+            <div><span>محصل</span><b style="color:var(--blue);" id="ws-sale-collected">0</b></div>
+            <div><span>متبقي</span><b style="color:var(--red);" id="ws-sale-rem">0</b></div>
+          </div>
           <div class="biz-card-ftr">
             <span class="biz-card-title" style="color:var(--blue);">المبيعات/العملاء</span>
           </div>
@@ -1888,11 +1919,11 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div class="liq-quick-col">
           <div class="liq-quick-line-row" onclick="event.stopPropagation();openTreasuryOpeningForm();" title="تعديل الرصيد الافتتاحي للخزينة">
             <span class="biz-lbl">💵 الخزنة</span>
-            <span class="liq-quick-open"><b id="ws-liq-treasury-open">0</b></span>
+            <span class="liq-quick-val expand-only"><b id="ws-liq-treasury">0</b></span>
           </div>
           <div class="liq-quick-line-row" onclick="event.stopPropagation();openBankOpeningForm();" title="تعديل الرصيد الافتتاحي للبنك">
             <span class="biz-lbl">🏦 بنوك</span>
-            <span class="liq-quick-open"><b id="ws-liq-bank-open">0</b></span>
+            <span class="liq-quick-val expand-only"><b id="ws-liq-bank">0</b></span>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
@@ -1906,7 +1937,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           </button>
         </div>
         <div class="biz-card-ftr">
-          <span class="biz-card-title" style="color:var(--yellow);">السيولة النقدية</span>
+          <span class="biz-card-title" style="color:var(--green);">السيولة النقدية</span>
         </div>
       </div>
 
@@ -1917,11 +1948,11 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <div class="biz-card-hdr">
             <span class="biz-ico" style="width:16px;height:16px;font-size:9px;background:rgba(224,138,62,.16);">🧾</span>
           </div>
-          <div class="biz-lbl" style="font-size:10px;line-height:1.2;">إجمالي المصروفات</div>
-          <div class="biz-val" style="font-size:13px;line-height:1.1;">0</div>
-          <div class="biz-sub" style="font-size:9.5px;line-height:1.2;">من رأس المال <b style="color:#e08a3e;">0%</b></div>
-          <div class="biz-bar" style="height:3px;"><div style="width:0%;background:#e08a3e;"></div></div>
-          <div class="biz-split-lbls" style="font-size:9px;">
+          <div class="biz-lbl" style="font-size:14px;line-height:1.2;text-align:center;font-weight:700;">مصروفات</div>
+          <div class="biz-val" style="font-size:15px;line-height:1.1;text-align:center;color:#e08a3e;">0</div>
+          <div class="biz-sub" style="font-size:11px;line-height:1.2;margin-top:26px;">من رأس المال <b style="color:#e08a3e;">0%</b></div>
+          <div class="biz-bar" style="height:3px;margin-top:4px;"><div style="width:0%;background:#e08a3e;"></div></div>
+          <div class="biz-split-lbls expand-only" style="font-size:10.5px;">
             <div><span>مصروفات تشغيلية</span><b style="color:var(--txt);">0</b><small>0%</small></div>
             <div><span>مصروفات إدارية</span><b style="color:var(--txt);">0</b><small>0%</small></div>
           </div>
@@ -1934,14 +1965,14 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <div class="biz-card-hdr">
             <span class="biz-ico" style="width:16px;height:16px;font-size:9px;background:rgba(77,168,240,.16);">📋</span>
           </div>
-          <div class="biz-lbl" style="font-size:10px;line-height:1.2;">إجمالي الأصول</div>
-          <div class="biz-val" id="ws-acc-assets" style="font-size:12px;line-height:1.1;">0</div>
-          <div class="biz-lbl" style="font-size:10px;line-height:1.2;">إجمالي الخصوم</div>
-          <div class="biz-val" id="ws-acc-liab" style="font-size:12px;line-height:1.1;">0</div>
-          <div class="biz-lbl" style="font-size:10px;line-height:1.2;">إجمالي حقوق الملكية</div>
-          <div class="biz-val" id="ws-acc-equity" style="font-size:12px;line-height:1.1;">0</div>
+          <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">إجمالي الأصول</div>
+          <div class="biz-val" id="ws-acc-assets" style="font-size:14px;line-height:1.1;">0</div>
+          <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">إجمالي الخصوم</div>
+          <div class="biz-val" id="ws-acc-liab" style="font-size:14px;line-height:1.1;">0</div>
+          <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">إجمالي حقوق الملكية</div>
+          <div class="biz-val" id="ws-acc-equity" style="font-size:14px;line-height:1.1;">0</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div><div class="biz-lbl" style="font-size:10px;line-height:1.2;">التوازن</div><div id="ws-acc-balance" style="font-size:10px;font-weight:800;color:var(--green);line-height:1.2;">متوازن ✅</div></div>
+            <div><div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">التوازن</div><div id="ws-acc-balance" style="font-size:11.5px;font-weight:800;color:var(--green);line-height:1.2;">متوازن ✅</div></div>
             <span style="font-size:13px;">⚖️</span>
           </div>
           <div class="biz-card-ftr" style="padding:3px 8px;">
@@ -2254,7 +2285,7 @@ try{
 // ══════════════════════════════════════════════
 const BIZ_SCOPED_KEYS=new Set(['fm_bank_opening','fm_biz_journal','fm_biz_purchase_invoices','fm_biz_purchase_returns',
   'fm_biz_sales_invoices','fm_biz_sales_returns','fm_classifications','fm_coa_accounts',
-  'fm_customer_creditlimits','fm_customer_duedates','fm_customer_openings','fm_inv_damaged','fm_inv_groups','fm_inv_items',
+  'fm_customer_creditlimits','fm_customer_duedates','fm_customer_openings','fm_inv_damaged','fm_inv_folders','fm_inv_groups','fm_inv_items',
   'fm_inv_returns','fm_inv_sections','fm_inv_warehouses','fm_liq_transfers','fm_manual_customers','fm_manual_suppliers',
   'fm_partner_current_adj','fm_partners','fm_pinv_no_seq','fm_return_ref_seq','fm_return_ref_seq_sales','fm_seq',
   'fm_sinv_no_seq','fm_supplier_duedates','fm_supplier_openings','fm_treasury_opening',
@@ -5741,13 +5772,16 @@ function refreshBizDashboard(){
   const pReturned=pRet.reduce((s,r)=>s+Number(r.returnValue||0),0);
   const pRemaining=Math.max(pTotal-pPaid-pReturned,0);
   setTxt('ws-pur-total',fmt(pTotal));
-  setTxt('ws-pur-paid',fmt(pPaid));
+  setTxt('ws-pur-suppliers-rem',fmt(pRemaining));
   setTxt('ws-pur-rem',fmt(pRemaining));
   const pPaidPct=pTotal>0?Math.round(pPaid/pTotal*100):0;
   const pRemPct=pTotal>0?100-pPaidPct:0;
   setTxt('ws-pur-paid-pct',pPaidPct+'%');
   setTxt('ws-pur-rem-pct',pRemPct+'%');
+  setTxt('ws-pur-paid',fmt(pPaid));
   setW('ws-pur-paidbar',pPaidPct);setW('ws-pur-rembar',pRemPct);setW('ws-pur-bar',pTotal>0?100:0);
+  drawSegmentedRing('ws-pur-ring',pPaidPct,'var(--green)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36});
+  setTxt('ws-pur-ring-val',pPaidPct+'%');
 
   /* المبيعات/العملاء */
   const sInv=loadSInvoices(),sRet=loadSReturns();
@@ -5760,13 +5794,16 @@ function refreshBizDashboard(){
     return s+Math.max(cu.total-cu.paid-cu.returned+opening,0);
   },0);
   setTxt('ws-sale-total',fmt(sTotal));
-  setTxt('ws-sale-collected',fmt(sCollected));
+  setTxt('ws-sale-customers-rem',fmt(sRemaining));
   setTxt('ws-sale-rem',fmt(sRemaining));
   const sColPct=sTotal>0?Math.round(sCollected/sTotal*100):0;
   const sRemPct=sTotal>0?100-sColPct:0;
   setTxt('ws-sale-collected-pct',sColPct+'%');
   setTxt('ws-sale-rem-pct',sRemPct+'%');
+  setTxt('ws-sale-collected',fmt(sCollected));
   setW('ws-sale-collectedbar',sColPct);setW('ws-sale-rembar',sRemPct);setW('ws-sale-bar',sTotal>0?100:0);
+  drawSegmentedRing('ws-sale-ring',sColPct,'var(--blue)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36});
+  setTxt('ws-sale-ring-val',sColPct+'%');
 
   /* حسابات: أصول = مديونية العملاء + المخزون + الخزينة + حسابات أصول يدوية
              خصوم = مديونية الموردين + حسابات خصوم/حقوق ملكية يدوية */
@@ -7206,7 +7243,7 @@ function postPurchaseToInventory(inv){
       existing.qty=newQty;
       posted.push({itemId:existing.id,qty});
     } else {
-      const newItem={id:'itm_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),grpId:null,secId:null,whId:inv.whId,name:it.name,qty,cost:price,fromPurchase:true};
+      const newItem={id:'itm_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),folderId:null,whId:inv.whId,name:it.name,qty,cost:price,fromPurchase:true};
       items.push(newItem);
       posted.push({itemId:newItem.id,qty});
     }
@@ -8821,6 +8858,24 @@ function loadInvSections(){return JSON.parse(_getItem('fm_inv_sections')||'[]');
 function saveInvSections(l){_setItem('fm_inv_sections',JSON.stringify(l));}
 function loadInvGroups(){return JSON.parse(_getItem('fm_inv_groups')||'[]');}
 function saveInvGroups(l){_setItem('fm_inv_groups',JSON.stringify(l));}
+function loadInvFolders(){return JSON.parse(_getItem('fm_inv_folders')||'[]');}
+function saveInvFolders(l){_setItem('fm_inv_folders',JSON.stringify(l));}
+function migrateInvFolders(){
+  if(_getItem('fm_inv_folders')!==null)return;
+  const sections=loadInvSections(),groups=loadInvGroups();
+  const folders=[];
+  sections.forEach(s=>folders.push({id:'fld_'+s.id,whId:s.whId,parentId:null,name:s.name}));
+  groups.forEach(g=>folders.push({id:'fld_'+g.id,whId:g.whId,parentId:'fld_'+g.secId,name:g.name}));
+  const items=loadInvItems();
+  items.forEach(it=>{
+    if(it.grpId)it.folderId='fld_'+it.grpId;
+    else if(it.secId)it.folderId='fld_'+it.secId;
+    else if(!('folderId' in it))it.folderId=null;
+    delete it.grpId;delete it.secId;
+  });
+  saveInvItems(items);
+  saveInvFolders(folders);
+}
 function loadInvItems(){return JSON.parse(_getItem('fm_inv_items')||'[]');}
 function saveInvItems(l){_setItem('fm_inv_items',JSON.stringify(l));}
 function loadInvReturns(){return JSON.parse(_getItem('fm_inv_returns')||'[]');}
@@ -8829,7 +8884,9 @@ function loadInvDamaged(){return JSON.parse(_getItem('fm_inv_damaged')||'[]');}
 function saveInvDamaged(l){_setItem('fm_inv_damaged',JSON.stringify(l));}
 
 let invCurrentWh=null,invTab='items';
-let _invCollapsedSec=new Set(),_invCollapsedGrp=new Set();
+let _invCollapsedFld=new Set();
+let invAddTarget=null,invAddMode=null;
+let _whExpandedView=new Set();
 
 function renderInventoryDetail(){
   const body=document.getElementById('biz-detail-body');
@@ -8913,16 +8970,35 @@ function renderWarehouseList(root){
     <div class="biz-po-list">${whs.length?whs.map(warehouseCardHtml).join(''):'<div class="biz-po-empty">لا توجد مخازن مسجلة بعد<br>أضف أول مخزن للبدء</div>'}</div>`;
 }
 function warehouseCardHtml(w){
+  const expanded=_whExpandedView.has(w.id);
   return`<div class="biz-po-row wh-row">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
       <b onclick="openWarehouse('${w.id}')" style="cursor:pointer;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📦 ${esc(w.name)}</b>
       <div style="display:flex;gap:5px;flex-shrink:0;">
-        <button type="button" class="wh-row-btn" onclick="event.stopPropagation();openWarehouse('${w.id}')">عرض</button>
+        <button type="button" class="wh-row-btn" onclick="event.stopPropagation();toggleWhInlineView('${w.id}')">${expanded?'طي':'عرض'}</button>
         <button type="button" class="wh-row-btn edit" onclick="event.stopPropagation();openEditWarehouseForm('${w.id}')">تعديل</button>
         <button type="button" class="wh-row-btn del" onclick="event.stopPropagation();pgConfirm('هل تريد حذف مخزن «${esc(w.name)}» وكل بياناته؟',()=>deleteWarehouse('${w.id}'))">حذف</button>
       </div>
     </div>
+    ${expanded?`<div class="wh-inline-view">${invFlatItemsPreviewHtml(w.id)}</div>`:''}
   </div>`;
+}
+function toggleWhInlineView(id){
+  if(_whExpandedView.has(id))_whExpandedView.delete(id);
+  else _whExpandedView.add(id);
+  renderInvRoot();
+}
+function invFlatItemsPreviewHtml(whId){
+  const items=loadInvItems().filter(i=>i.whId===whId);
+  if(!items.length)return'<div class="biz-po-empty" style="padding:8px;">لا توجد أصناف بعد</div>';
+  return`<div class="inv-items-grid">${items.map(it=>{
+    const hasQty=Number(it.qty||0)>0;
+    return`<div class="inv-item-card${hasQty?' has-qty':''}" onclick="event.stopPropagation();openWarehouse('${whId}')">
+      <div class="inv-item-card-ic">${itemIcon(it.name)}</div>
+      <div class="inv-item-card-name">${esc(it.name)}</div>
+      <div class="inv-item-card-meta"><span>${it.qty} قطعة</span><b>${fmt(it.cost)}</b></div>
+    </div>`;
+  }).join('')}</div>`;
 }
 let whEditId=null;
 function openAddWarehouseForm(){
@@ -8974,6 +9050,7 @@ function deleteWarehouse(id){
   saveInvWarehouses(loadInvWarehouses().filter(w=>w.id!==id));
   saveInvSections(loadInvSections().filter(s=>s.whId!==id));
   saveInvGroups(loadInvGroups().filter(g=>g.whId!==id));
+  saveInvFolders(loadInvFolders().filter(f=>f.whId!==id));
   saveInvItems(loadInvItems().filter(i=>i.whId!==id));
   saveInvReturns(loadInvReturns().filter(r=>r.whId!==id));
   saveInvDamaged(loadInvDamaged().filter(d=>d.whId!==id));
@@ -9060,140 +9137,104 @@ function switchInvTab(tab){
 }
 
 /* ── تبويب الأصناف: قسم ← مجموعة ← صنف ── */
+let invItemsView='rows';
+function setInvItemsView(mode){invItemsView=mode;renderInvItemsTab(document.getElementById('inv-tab-content'));}
+function itemsListHtml(items){
+  if(!items.length)return'';
+  if(invItemsView==='grid'){
+    return`<div class="inv-items-grid">${items.map(it=>`<div class="inv-item-card" onclick="editInvItem('${it.id}')">
+      <div class="inv-item-card-ic">${itemIcon(it.name)}</div>
+      <div class="inv-item-card-name">${esc(it.name)}</div>
+      <div class="inv-item-card-meta"><span>${it.qty} قطعة</span><b>${fmt(it.cost)}</b></div>
+    </div>`).join('')}</div>`;
+  }
+  return`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
+    ${items.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
+      <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
+    </div>`).join('')}
+  </div>`;
+}
 function renderInvItemsTab(c){
-  const sections=loadInvSections().filter(s=>s.whId===invCurrentWh);
-  const directItems=loadInvItems().filter(i=>i.whId===invCurrentWh&&!i.grpId&&!i.secId);
+  migrateInvFolders();
+  const rootFolders=loadInvFolders().filter(f=>f.whId===invCurrentWh&&!f.parentId);
+  const directItems=loadInvItems().filter(i=>i.whId===invCurrentWh&&!i.folderId);
   c.innerHTML=`
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="display:flex;gap:8px;">
-        <button class="biz-po-addbtn" style="flex:1;" onclick="openAddItemForm(null)">+ إضافة صنف</button>
-        <button class="biz-po-addbtn" style="flex:1;background:rgba(77,168,240,.12);color:var(--blue);border-color:rgba(77,168,240,.3);" onclick="openAddSectionForm()">+ تقسيم (قسم/مجموعة) اختياري</button>
+      <div class="inv-view-toggle">
+        <button class="inv-view-btn ${invItemsView==='rows'?'active':''}" onclick="setInvItemsView('rows')">☰ صفوف</button>
+        <button class="inv-view-btn ${invItemsView==='grid'?'active':''}" onclick="setInvItemsView('grid')">▦ شبكة</button>
+        <button class="inv-add-fab" onclick="toggleInvAddMenu(null)">+</button>
       </div>
-      <div id="sec-form-slot"></div>
+      <div id="inv-add-slot"></div>
       <div id="item-form-slot"></div>
-      ${directItems.length?`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
-        ${directItems.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
-          <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
-        </div>`).join('')}
-      </div>`:''}
+      ${itemsListHtml(directItems)}
       <div style="display:flex;flex-direction:column;gap:6px;">
-        ${sections.length?sections.map(sectionBlockHtml).join(''):(directItems.length?'':'<div class="biz-po-empty">لا توجد أصناف بعد<br>أضف صنف مباشرة، أو استخدم تقسيم قسم/مجموعة لو محتاج تنظيم أكتر</div>')}
+        ${rootFolders.length?rootFolders.map(folderBlockHtml).join(''):(directItems.length?'':'<div class="biz-po-empty">لا توجد أصناف بعد<br>دوس + لإضافة صنف أو مجلد</div>')}
       </div>
     </div>`;
+  renderInvAddSlot();
 }
-function sectionBlockHtml(sec){
-  const groups=loadInvGroups().filter(g=>g.secId===sec.id);
-  const secDirectItems=loadInvItems().filter(i=>i.secId===sec.id&&!i.grpId);
-  const secGroupItems=loadInvItems().filter(i=>groups.some(g=>g.id===i.grpId));
-  const qty=secDirectItems.reduce((s,i)=>s+Number(i.qty||0),0)+secGroupItems.reduce((s,i)=>s+Number(i.qty||0),0);
-  const collapsed=_invCollapsedSec.has(sec.id);
+function folderQty(id){
+  const own=loadInvItems().filter(i=>i.folderId===id).reduce((s,i)=>s+Number(i.qty||0),0);
+  const children=loadInvFolders().filter(f=>f.parentId===id);
+  return children.reduce((s,f)=>s+folderQty(f.id),own);
+}
+function folderBlockHtml(folder){
+  const childFolders=loadInvFolders().filter(f=>f.parentId===folder.id);
+  const directItems=loadInvItems().filter(i=>i.folderId===folder.id);
+  const qty=folderQty(folder.id);
+  const collapsed=_invCollapsedFld.has(folder.id);
   return`<div class="inv-sec-block">
-    <div class="inv-sec-hdr" onclick="toggleInvSec('${sec.id}')">
-      <span>${collapsed?'›':'⌄'} 🗂️ ${esc(sec.name)}</span>
+    <div class="inv-sec-hdr" onclick="toggleInvFld('${folder.id}')">
+      <span>${collapsed?'›':'⌄'} 📁 ${esc(folder.name)}</span>
       <span style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:10px;color:var(--muted);font-weight:600;">${qty} قطعة</span>
-        <span class="inv-del" onclick="event.stopPropagation();pgConfirm('حذف القسم «${esc(sec.name)}» وكل مجموعاته وأصنافه؟',()=>deleteSection('${sec.id}'))">✕</span>
+        <span class="inv-del" onclick="event.stopPropagation();pgConfirm('حذف مجلد «${esc(folder.name)}» وكل محتوياته؟',()=>deleteInvFolder('${folder.id}'))">✕</span>
       </span>
     </div>
     ${collapsed?'':`<div class="inv-sec-body">
-      <div style="display:flex;gap:8px;">
-        <div class="inv-addlink" style="flex:1;" onclick="event.stopPropagation();openAddItemForm(null,'${sec.id}')">+ إضافة صنف مباشر</div>
-        <div class="inv-addlink" style="flex:1;" onclick="event.stopPropagation();openAddGroupForm('${sec.id}')">+ إضافة مجموعة</div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="inv-add-fab small" onclick="event.stopPropagation();toggleInvAddMenu('${folder.id}')">+</button>
       </div>
-      ${secDirectItems.length?`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
-        ${secDirectItems.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
-          <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
-        </div>`).join('')}
-      </div>`:''}
-      ${groups.length?groups.map(groupBlockHtml).join(''):(secDirectItems.length?'':'<div class="biz-po-empty" style="padding:8px;">لا توجد مجموعات بهذا القسم</div>')}
+      ${invAddTarget===folder.id?'<div id="inv-add-slot-inline"></div>':''}
+      ${itemsListHtml(directItems)}
+      ${childFolders.length?childFolders.map(folderBlockHtml).join(''):(directItems.length?'':'<div class="biz-po-empty" style="padding:8px;">لا يوجد محتوى بهذا المجلد بعد</div>')}
     </div>`}
   </div>`;
 }
-function groupBlockHtml(grp){
-  const items=loadInvItems().filter(i=>i.grpId===grp.id);
-  const qty=items.reduce((s,i)=>s+Number(i.qty||0),0);
-  const collapsed=_invCollapsedGrp.has(grp.id);
-  return`<div class="inv-grp-block">
-    <div class="inv-grp-hdr" onclick="toggleInvGrp('${grp.id}')">
-      <span>${collapsed?'›':'⌄'} 📁 ${esc(grp.name)}</span>
-      <span style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:9.5px;color:var(--muted);font-weight:600;">${qty} قطعة</span>
-        <span class="inv-del" onclick="event.stopPropagation();pgConfirm('حذف مجموعة «${esc(grp.name)}» وكل أصنافها؟',()=>deleteGroup('${grp.id}'))">✕</span>
-      </span>
-    </div>
-    ${collapsed?'':`<div class="inv-grp-body">
-      <div class="inv-addlink" onclick="event.stopPropagation();openAddItemForm('${grp.id}')">+ إضافة صنف</div>
-      ${items.length?`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
-        ${items.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
-          <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
-        </div>`).join('')}
-      </div>`:'<div class="biz-po-empty" style="padding:8px;">لا توجد أصناف بهذه المجموعة</div>'}
-    </div>`}
-  </div>`;
+function toggleInvFld(id){if(_invCollapsedFld.has(id))_invCollapsedFld.delete(id);else _invCollapsedFld.add(id);renderInvItemsTab(document.getElementById('inv-tab-content'));}
+function toggleInvAddMenu(folderId){
+  if(invAddMode&&invAddTarget===folderId){invAddMode=null;invAddTarget=null;}
+  else{invAddTarget=folderId;invAddMode='choice';}
+  renderInvItemsTab(document.getElementById('inv-tab-content'));
 }
-function toggleInvSec(id){if(_invCollapsedSec.has(id))_invCollapsedSec.delete(id);else _invCollapsedSec.add(id);renderInvItemsTab(document.getElementById('inv-tab-content'));}
-function toggleInvGrp(id){if(_invCollapsedGrp.has(id))_invCollapsedGrp.delete(id);else _invCollapsedGrp.add(id);renderInvItemsTab(document.getElementById('inv-tab-content'));}
-function openAddSectionForm(){
-  document.getElementById('sec-form-slot').innerHTML=`
-    <div class="biz-po-form">
-      <div class="biz-po-form-title">قسم جديد</div>
-      <div class="biz-po-frow"><input class="biz-po-inp" id="sec-name" placeholder="اسم القسم"></div>
+function closeInvAddMenu(){invAddMode=null;invAddTarget=null;renderInvItemsTab(document.getElementById('inv-tab-content'));}
+function renderInvAddSlot(){
+  const slot=invAddTarget?document.getElementById('inv-add-slot-inline'):document.getElementById('inv-add-slot');
+  if(!slot)return;
+  if(invAddMode==='choice'){
+    slot.innerHTML=`<div class="biz-po-form">
       <div class="biz-po-btns">
-        <button class="biz-po-btn save" onclick="saveSection()">حفظ</button>
-        <button class="biz-po-btn cancel" onclick="closeSecForm()">إلغاء</button>
+        <button class="biz-po-btn save" style="background:rgba(77,168,240,.15);color:var(--blue);" onclick="invAddMode='new-folder';renderInvAddSlot();">📁 مجلد</button>
+        <button class="biz-po-btn save" onclick="invAddMode='new-item';renderInvAddSlot();">🏷️ صنف</button>
+      </div>
+      <button class="biz-po-btn cancel" style="width:100%;" onclick="closeInvAddMenu()">إلغاء</button>
+    </div>`;
+  }else if(invAddMode==='new-folder'){
+    slot.innerHTML=`<div class="biz-po-form">
+      <div class="biz-po-form-title">مجلد جديد</div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="fld-name" value="مجلد"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveInvFolder()">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="closeInvAddMenu()">إلغاء</button>
       </div>
     </div>`;
-}
-function closeSecForm(){const s=document.getElementById('sec-form-slot');if(s)s.innerHTML='';}
-function saveSection(){
-  const name=document.getElementById('sec-name').value.trim();
-  if(!name){pgConfirm('أدخل اسم القسم',()=>{},'حسناً');return;}
-  const list=loadInvSections();
-  list.push({id:'sec_'+Date.now(),whId:invCurrentWh,name});
-  saveInvSections(list);
-  closeSecForm();
-  refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
-}
-function deleteSection(id){
-  const groups=loadInvGroups().filter(g=>g.secId===id).map(g=>g.id);
-  saveInvSections(loadInvSections().filter(s=>s.id!==id));
-  saveInvGroups(loadInvGroups().filter(g=>g.secId!==id));
-  saveInvItems(loadInvItems().filter(i=>!groups.includes(i.grpId)&&i.secId!==id));
-  refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
-}
-function openAddGroupForm(secId){
-  document.getElementById('item-form-slot').innerHTML=`
-    <div class="biz-po-form">
-      <div class="biz-po-form-title">مجموعة جديدة</div>
-      <div class="biz-po-frow"><input class="biz-po-inp" id="grp-name" placeholder="اسم المجموعة"></div>
-      <div class="biz-po-btns">
-        <button class="biz-po-btn save" onclick="saveGroup('${secId}')">حفظ</button>
-        <button class="biz-po-btn cancel" onclick="closeItemFormSlot()">إلغاء</button>
-      </div>
-    </div>`;
-}
-function closeItemFormSlot(){const s=document.getElementById('item-form-slot');if(s)s.innerHTML='';}
-function saveGroup(secId){
-  const name=document.getElementById('grp-name').value.trim();
-  if(!name){pgConfirm('أدخل اسم المجموعة',()=>{},'حسناً');return;}
-  const list=loadInvGroups();
-  list.push({id:'grp_'+Date.now(),secId,whId:invCurrentWh,name});
-  saveInvGroups(list);
-  _invCollapsedSec.delete(secId);
-  closeItemFormSlot();
-  refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
-}
-function deleteGroup(id){
-  saveInvGroups(loadInvGroups().filter(g=>g.id!==id));
-  saveInvItems(loadInvItems().filter(i=>i.grpId!==id));
-  refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
-}
-function openAddItemForm(grpId,secId){
-  const barcodeOn=getSettings().addonBarcode;
-  const title=grpId?'صنف جديد':(secId?'صنف جديد (مباشر بالقسم)':'صنف جديد (مباشر بالمخزن)');
-  document.getElementById('item-form-slot').innerHTML=`
-    <div class="biz-po-form">
-      <div class="biz-po-form-title">${title}</div>
+    const inp=document.getElementById('fld-name');
+    if(inp){inp.focus();inp.select();}
+  }else if(invAddMode==='new-item'){
+    const barcodeOn=getSettings().addonBarcode;
+    slot.innerHTML=`<div class="biz-po-form">
+      <div class="biz-po-form-title">صنف جديد</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="itm-name" placeholder="اسم الصنف"></div>
       <div class="biz-po-frow2">
         <input class="biz-po-inp" id="itm-qty" type="number" placeholder="الكمية" value="1">
@@ -9201,22 +9242,43 @@ function openAddItemForm(grpId,secId){
       </div>
       ${barcodeOn?'<div class="biz-po-frow"><input class="biz-po-inp" id="itm-barcode" placeholder="الباركود"></div>':''}
       <div class="biz-po-btns">
-        <button class="biz-po-btn save" onclick="saveInvItem(${grpId?`'${grpId}'`:'null'},${secId?`'${secId}'`:'null'})">حفظ</button>
-        <button class="biz-po-btn cancel" onclick="closeItemFormSlot()">إلغاء</button>
+        <button class="biz-po-btn save" onclick="saveInvItem()">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="closeInvAddMenu()">إلغاء</button>
       </div>
     </div>`;
+  }else{
+    slot.innerHTML='';
+  }
 }
-function saveInvItem(grpId,secId){
+function saveInvFolder(){
+  const name=(document.getElementById('fld-name').value||'').trim()||'مجلد';
+  const list=loadInvFolders();
+  list.push({id:'fld_'+Date.now(),whId:invCurrentWh,parentId:invAddTarget,name});
+  saveInvFolders(list);
+  if(invAddTarget)_invCollapsedFld.delete(invAddTarget);
+  invAddMode=null;invAddTarget=null;
+  refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
+}
+function deleteInvFolder(id){
+  const all=loadInvFolders();
+  const toDelete=new Set([id]);
+  let changed=true;
+  while(changed){changed=false;all.forEach(f=>{if(f.parentId&&toDelete.has(f.parentId)&&!toDelete.has(f.id)){toDelete.add(f.id);changed=true;}});}
+  saveInvFolders(all.filter(f=>!toDelete.has(f.id)));
+  saveInvItems(loadInvItems().filter(i=>!toDelete.has(i.folderId)));
+  refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
+}
+function closeItemFormSlot(){const s=document.getElementById('item-form-slot');if(s)s.innerHTML='';}
+function saveInvItem(){
   const name=document.getElementById('itm-name').value.trim();
   if(!name){pgConfirm('أدخل اسم الصنف',()=>{},'حسناً');return;}
-  const grp=grpId?loadInvGroups().find(g=>g.id===grpId):null;
   const list=loadInvItems();
-  list.push({id:'itm_'+Date.now(),grpId:grpId||null,secId:grp?grp.secId:(secId||null),whId:invCurrentWh,name,
+  list.push({id:'itm_'+Date.now(),folderId:invAddTarget||null,whId:invCurrentWh,name,
     qty:Number(document.getElementById('itm-qty').value||0),
     cost:Number(document.getElementById('itm-cost').value||0),
     barcode:document.getElementById('itm-barcode')?document.getElementById('itm-barcode').value.trim():''});
   saveInvItems(list);
-  closeItemFormSlot();
+  invAddMode=null;invAddTarget=null;
   refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
 }
 function editInvItem(id){
