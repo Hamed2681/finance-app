@@ -661,12 +661,27 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .liq-total-ico{width:20px;height:20px;border-radius:6px;background:rgba(224,176,48,.16);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
 .liq-total-val{font-size:14px;font-weight:800;color:var(--txt);}
 .liq-quick-row{display:flex;gap:6px;}
-.liq-quick-box{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 6px;display:flex;align-items:center;justify-content:space-between;min-width:0;}
-.liq-quick-val{font-size:10.5px;font-weight:800;color:var(--yellow);white-space:nowrap;}
+/* صف الخزينة / صف البنك: صف كامل (full width) فيه العنوان + الافتتاحي + الرصيد، كلهم inline */
+.liq-quick-col{display:flex;flex-direction:row;gap:6px;}
+.liq-quick-line-row{flex:1;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:5px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;min-width:0;}
+.liq-quick-line-row:active{background:var(--card);}
+.liq-quick-line-row>.biz-lbl{white-space:nowrap;font-size:10.5px;font-weight:700;}
+.liq-quick-line-row>.liq-quick-val{margin-inline-start:0;}
+.liq-quick-val{font-size:13px;font-weight:800;color:var(--yellow);white-space:nowrap;}
+/* الرصيد الافتتاحي يظهر في نفس صف قسم الخزينة/البنك */
+.liq-quick-open{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;color:var(--muted);font-weight:700;white-space:nowrap;flex-shrink:0;padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.04);}
+.liq-quick-open-lbl{font-size:9px;opacity:.85;}
+.liq-quick-open b{color:var(--txt);font-weight:800;font-size:10.5px;}
+.liq-quick-open-edit{font-size:8.5px;opacity:.7;}
 .biz-expand-overlay .liq-total-ico{width:32px;height:32px;font-size:16px;border-radius:9px;}
 .biz-expand-overlay .liq-total-val{font-size:22px;}
-.biz-expand-overlay .liq-quick-box{padding:9px 10px;border-radius:11px;}
-.biz-expand-overlay .liq-quick-val{font-size:15px;}
+.biz-expand-overlay .liq-quick-line-row{padding:10px 14px;gap:10px;}
+.biz-expand-overlay .liq-quick-line-row>.biz-lbl{font-size:14px;}
+.biz-expand-overlay .liq-quick-val{font-size:17px;}
+.biz-expand-overlay .liq-quick-open{font-size:11.5px;padding:3px 8px;}
+.biz-expand-overlay .liq-quick-open-lbl{font-size:10.5px;}
+.biz-expand-overlay .liq-quick-open b{font-size:13px;}
+.biz-expand-overlay .liq-quick-open-edit{font-size:10px;}
 .biz-expand-overlay .liq-pend-btn{padding:9px 8px;border-radius:11px;}
 .biz-expand-overlay .liq-pend-btn span:first-child{font-size:12.5px;}
 .biz-expand-overlay .liq-pend-count{font-size:12px;min-width:19px;height:19px;}
@@ -718,6 +733,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-po-btn.save{background:var(--green);color:#08221a;}
 .biz-po-btn.print{background:var(--blue);color:#fff;}
 .biz-po-btn.cancel{background:var(--card2);color:var(--muted);}
+.wh-row{cursor:default;}
+.wh-row-btn{border:none;border-radius:7px;padding:5px 9px;font-family:'Cairo',sans-serif;font-size:10.5px;font-weight:700;cursor:pointer;background:var(--card2);color:var(--blue);flex-shrink:0;}
+.wh-row-btn.edit{color:var(--yellow);}
+.wh-row-btn.del{color:var(--red);}
 /* ── تصميم فاتورة المشتريات الجديد (أحمر) ── */
 .pinv-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
 .pinv-hdr{background:#8c2e26;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;flex-shrink:0;}
@@ -1866,14 +1885,14 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <div class="biz-lbl" style="flex:1;">إجمالي السيولة</div>
           <div class="liq-total-val" id="ws-liq-total">0</div>
         </div>
-        <div class="liq-quick-row">
-          <div class="liq-quick-box">
-            <span class="biz-lbl">💵 الخزينة</span>
-            <span class="liq-quick-val" id="ws-liq-treasury">0</span>
+        <div class="liq-quick-col">
+          <div class="liq-quick-line-row" onclick="event.stopPropagation();openTreasuryOpeningForm();" title="تعديل الرصيد الافتتاحي للخزينة">
+            <span class="biz-lbl">💵 الخزنة</span>
+            <span class="liq-quick-open"><b id="ws-liq-treasury-open">0</b></span>
           </div>
-          <div class="liq-quick-box">
-            <span class="biz-lbl">🏦 البنك</span>
-            <span class="liq-quick-val" id="ws-liq-bank">0</span>
+          <div class="liq-quick-line-row" onclick="event.stopPropagation();openBankOpeningForm();" title="تعديل الرصيد الافتتاحي للبنك">
+            <span class="biz-lbl">🏦 بنوك</span>
+            <span class="liq-quick-open"><b id="ws-liq-bank-open">0</b></span>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
@@ -1996,6 +2015,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
   <div class="collect-box">
     <div class="ws-name-title" style="text-align:center;">💸 سداد مديونية الموردين</div>
     <input class="ws-name-inp" id="pay-payer-name" placeholder="اسم الصارف">
+    <input class="ws-name-inp" id="pay-recipient" placeholder="اسم المستلم (اختياري — اتركه فارغاً ليطابق اسم الصارف)">
     <input class="ws-name-inp" id="pay-date" type="date">
     <div class="collect-list" id="pay-list"></div>
     <div class="collect-total-bar"><span>الإجمالي المسدد</span><b id="pay-total-val" style="color:var(--red);">0.00</b></div>
@@ -5759,6 +5779,8 @@ function refreshBizDashboard(){
   setTxt('ws-liq-total',fmt(treasuryVal+bankVal));
   setTxt('ws-liq-treasury',fmt(treasuryVal));
   setTxt('ws-liq-bank',fmt(bankVal));
+  setTxt('ws-liq-treasury-open',fmt(loadTreasuryOpening()));
+  setTxt('ws-liq-bank-open',fmt(loadBankOpening()));
   updateLiqPendingBlink();
   const coa=loadCoaAccounts();
   const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
@@ -6275,22 +6297,20 @@ function renderLiquidityDetail(){
   const wrap=document.createElement('div');
   wrap.style.cssText='display:flex;flex-direction:column;gap:10px;';
   wrap.innerHTML=`
-    <div class="biz-po-form-title" style="text-align:right;padding:0;">💵 قسم الخزينة</div>
     <div class="biz-po-total-row" onclick="openTreasuryOpeningForm()" style="cursor:pointer;">
-      <span>رصيد افتتاحي<span style="color:var(--muted);font-size:9.5px;"> ✏️</span></span>
-      <b id="liq-opening-val" style="color:var(--yellow);">${fmt(loadTreasuryOpening())}</b>
+      <span>💵 قسم الخزينة</span>
+      <span style="display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px;">رصيد افتتاحي<span style="font-size:9.5px;"> ✏️</span> <b id="liq-opening-val" style="color:var(--yellow);font-size:13.5px;">${fmt(loadTreasuryOpening())}</b></span>
     </div>
     <div id="liq-opening-form-slot"></div>
 
-    <div class="biz-po-form-title" style="text-align:right;padding:0;">🏦 قسم البنك</div>
     <div class="biz-po-total-row" onclick="openBankOpeningForm()" style="cursor:pointer;">
-      <span>رصيد افتتاحي<span style="color:var(--muted);font-size:9.5px;"> ✏️</span></span>
-      <b id="liq-bank-opening-val" style="color:var(--yellow);">${fmt(loadBankOpening())}</b>
+      <span>🏦 قسم البنك</span>
+      <span style="display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px;">رصيد افتتاحي<span style="font-size:9.5px;"> ✏️</span> <b id="liq-bank-opening-val" style="color:var(--yellow);font-size:13.5px;">${fmt(loadBankOpening())}</b></span>
     </div>
     <div id="liq-bank-opening-form-slot"></div>
 
-    <div class="biz-po-form-title" style="text-align:right;padding:0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleSettingsSection('liq-transfer-body',this)">🔁 تحويل بين الخزينة والبنك<span class="s-collapse-arrow open">›</span></div>
-    <div id="liq-transfer-body" class="s-collapse-body" style="display:block;">
+    <div class="biz-po-form-title" style="text-align:right;padding:0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleSettingsSection('liq-transfer-body',this)">🔁 تحويل بين الخزينة والبنك<span class="s-collapse-arrow">›</span></div>
+    <div id="liq-transfer-body" class="s-collapse-body" style="display:none;">
     <div style="display:flex;align-items:center;gap:6px;">
       <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center;">
         <div style="font-size:9.5px;color:var(--muted);">💵 رصيد الخزينة</div>
@@ -6388,8 +6408,12 @@ function deleteLiqTransfer(id){
   });
 }
 function openBankOpeningForm(){
+  // لو ضغط من كارت السيولة الرئيسي قبل فتح شاشة التفاصيل، نفتحها أوتوماتيكياً
+  ensureLiquidityDetailOpen();
   const slot=document.getElementById('liq-bank-opening-form-slot');
   if(!slot)return;
+  // لو في form مفتوح قبل كده للخزينة، نقفله عشان ما يبقاش فيه اتنين مفتوحين
+  closeTreasuryOpeningForm();
   slot.innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">رصيد افتتاحي — البنك</div>
@@ -6522,14 +6546,19 @@ function saveConfirmVoucher(kind,id){
   v.confirmedDate=todayStr();
   if(kind==='receipt')saveTreasuryReceipts(list);else saveTreasuryPayments(list);
   let wentToPartner=false;
-  if(diff>0.001)wentToPartner=addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
+  if(diff>0.001){
+    // في إذن الصرف: الفرق يسجَّل كدين على المستلم (الشخص اللي استلم المبلغ فعلاً) وليس المصروف له
+    const diffPerson=(kind==='payment'&&v.recipient)?v.recipient:v.name;
+    wentToPartner=addVoucherDiffDebt(diffPerson,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
+  }
   const slot=document.getElementById('confirm-voucher-slot');
   if(slot)slot.innerHTML='';
   renderPendingVouchers();
   switchLiquidityTab(liquidityTab);
   refreshLiqTransferBalances();
   refreshBizDashboard();
-  const diffMsg=wentToPartner?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} بالخصم من حسابه الجارى`:`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`;
+  const diffPerson=(kind==='payment'&&v.recipient)?v.recipient:v.name;
+  const diffMsg=wentToPartner?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(diffPerson)} بالخصم من حسابه الجارى`:`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(diffPerson)} فى حساب "أخرى مدينة"`;
   pgConfirm(diff>0.001?diffMsg:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
 }
 /* تسجيل الفرق بين المسجَّل والمؤكَّد (تحصيل ناقص أو صرف أقل من المتوقع):
@@ -6555,8 +6584,12 @@ function addVoucherDiffDebt(personName,amount,voucherSeq,label){
   return false;
 }
 function openTreasuryOpeningForm(){
+  // لو ضغط من كارت السيولة الرئيسي قبل فتح شاشة التفاصيل، نفتحها أوتوماتيكياً
+  ensureLiquidityDetailOpen();
   const slot=document.getElementById('liq-opening-form-slot');
   if(!slot)return;
+  // لو في form مفتوح قبل كده للبنك، نقفله عشان ما يبقاش فيه اتنين مفتوحين
+  closeBankOpeningForm();
   slot.innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">رصيد افتتاحي — الخزينة</div>
@@ -6568,6 +6601,15 @@ function openTreasuryOpeningForm(){
     </div>`;
 }
 function closeTreasuryOpeningForm(){const s=document.getElementById('liq-opening-form-slot');if(s)s.innerHTML='';}
+/* لو الـ user ضغط على «افتتاحي» من كارت السيولة الرئيسي قبل ما يكون فتح شاشة التفاصيل،
+   نفتحها له أوتوماتيكياً بحيث يلاقي فورم التعديل على طول */
+function ensureLiquidityDetailOpen(){
+  let slot=document.getElementById('liq-opening-form-slot');
+  if(!slot){
+    // شاشة التفاصيل لسه ما اتفتحتش — نفتحها
+    if(typeof openBizDetail==='function')openBizDetail('liquidity');
+  }
+}
 function saveTreasuryOpeningVal(){
   const val=Number(document.getElementById('liq-opening-inp').value||0);
   const old=loadTreasuryOpening();
@@ -6626,8 +6668,10 @@ function voucherRowHtml(v,kind){
   const color=kind==='receipt'?'var(--green)':'var(--red)';
   const pendingBadge=v.status==='pending'?' <span style="font-size:9px;color:var(--yellow);">⏳ معلق</span>':'';
   const typeBadge=v.type?` <span style="font-size:9px;color:var(--blue);background:rgba(77,168,240,.15);border-radius:5px;padding:1px 6px;">${esc(v.type)}</span>`:'';
+  // للمستلم في الإذن الصرف (يظهر بادچ صغير بجانب الاسم)
+  const recipientBadge=(kind==='payment'&&v.recipient)?` <span style="font-size:9px;color:var(--yellow);background:rgba(224,176,48,.14);border-radius:5px;padding:1px 6px;" title="المستلم">👤 ${esc(v.recipient)}</span>`:'';
   return `<div class="biz-po-row" onclick="viewVoucher('${kind}','${v.id}')">
-    <div class="biz-po-row-top"><b>${esc(v.name)||'—'}${pendingBadge}</b><span>#${v.seq}</span></div>
+    <div class="biz-po-row-top"><b>${esc(v.name)||'—'}${pendingBadge}${recipientBadge}</b><span>#${v.seq}</span></div>
     <div class="biz-po-row-bottom"><span>${v.date||''}${typeBadge}</span><b style="color:${color};">${fmt(v.amount)}</b></div>
   </div>`;
 }
@@ -6640,6 +6684,8 @@ function openVoucherForm(kind){
   let types=(VOUCHER_TYPES[kind]||[]).slice();
   if(kind==='receipt'&&getSettings().addonEmployees)types.splice(types.indexOf('تسوية قبض')+1,0,'تسوية عهدة');
   const suggestNames=kind==='receipt'?getAllCustomerNames():getAllSupplierNames();
+  // المستلم في إذن الصرف: اقتراحات من الموردين + الموظفين + أسماء مستلمي أذون سابقة
+  const recipientDatalist=kind==='payment'?buildRecipientDatalist():'';
   if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
@@ -6648,6 +6694,11 @@ function openVoucherForm(kind){
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl} — اكتب أول حروف للاقتراح" autocomplete="off">
         <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
       </div>
+      ${kind==='payment'?`
+      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-payment-recipient" list="vch-payment-recipient-list" placeholder="اسم المستلم — الشخص اللي استلم المبلغ فعلاً" autocomplete="off">
+        <datalist id="vch-payment-recipient-list">${recipientDatalist}</datalist>
+        <button type="button" class="biz-po-btn save" style="flex:0 0 auto;padding:7px 10px;font-size:12px;" onclick="copyNameToRecipient('payment')" title="نسخ اسم المصروف له">↓</button>
+      </div>`:''}
       <div class="biz-po-frow2">
         <input class="biz-po-inp" id="vch-${kind}-amount" type="number" placeholder="المبلغ">
         <input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}">
@@ -6664,6 +6715,27 @@ function openVoucherForm(kind){
       </div>
     </div>`;
   if(kind==='receipt')renderVchCustRows();
+}
+/* ── بناء قائمة اقتراحات لحقل المستلم (إذن صرف): الموردين + الموظفين + أسماء مستلمين سابقين ── */
+function buildRecipientDatalist(){
+  const set=new Set();
+  // أسماء الموردين (المستفيد المحتمل من الصرف)
+  getAllSupplierNames().forEach(n=>n&&set.add(n));
+  // الموظفين (إذا كان الإضافة مفعلة)
+  try{
+    const emp=JSON.parse(_getItem('fm_employees')||'[]');
+    emp.forEach(e=>{if(e&&e.name)set.add(e.name);});
+  }catch(_){}
+  // أسماء المستلمين من أذون صرف سابقة
+  loadTreasuryPayments().forEach(v=>{if(v.recipient)set.add(v.recipient);});
+  return Array.from(set).map(n=>`<option value="${esc(n)}">`).join('');
+}
+/* نسخ اسم المصروف له إلى حقل المستلم (اختصار شائع) */
+function copyNameToRecipient(kind){
+  if(kind!=='payment')return;
+  const nameEl=document.getElementById('vch-payment-name');
+  const recEl=document.getElementById('vch-payment-recipient');
+  if(nameEl&&recEl&&nameEl.value.trim()&&!recEl.value.trim())recEl.value=nameEl.value.trim();
 }
 /* ── لما نوع الإذن يتغير لـ"تسوية قبض": نظهر قائمة منسدلة بكل فروق التحصيل المسجلة
    (سواء على شركاء أو على "أخرى مدينة")، ونخفي قائمة تحصيل العملاء لأنها مالهاش علاقة ── */
@@ -6774,6 +6846,8 @@ function saveVoucher(kind){
   const isSettle=kind==='receipt'&&typeVal==='تسوية قبض';
   const custLines=(kind==='receipt'&&!isSettle)?_vchReceiptCustomers.filter(c=>Number(c.amount)>0):[];
   if(!name&&!custLines.length){pgConfirm(kind==='receipt'?'من فضلك أدخل اسم المستلم منه أو اختر عميلاً من القائمة':'من فضلك أدخل اسم المصروف له',()=>{},'حسناً');return;}
+  // حقل المستلم (إذن صرف فقط) — اختياري، يستخدم لتسجيل فرق التأكيد كدين على المستلم
+  const recipient=(kind==='payment')?(document.getElementById('vch-payment-recipient')?.value.trim()||''):'';
   const custTotal=Math.round(custLines.reduce((s,c)=>s+Number(c.amount||0),0)*100)/100;
   const total=Math.round((amount+custTotal)*100)/100;
   if(!total){pgConfirm('من فضلك أدخل المبلغ',()=>{},'حسناً');return;}
@@ -6795,6 +6869,8 @@ function saveVoucher(kind){
     desc:document.getElementById(`vch-${kind}-desc`).value.trim()||(custLines.length?'تحصيل مديونية عملاء':(isSettle?'تسوية فرق تحصيل':'')),
     notes:[notesVal,extraNotes].filter(Boolean).join(' — ')};
   if(custLines.length){v.lines=custLines.map(c=>({customerName:c.name,amount:Number(c.amount)}));v.status='pending';}
+  // خزّن اسم المستلم في الإذن الصرف
+  if(kind==='payment'&&recipient)v.recipient=recipient;
   if(kind==='receipt'){const l=loadTreasuryReceipts();l.push(v);saveTreasuryReceipts(l);}
   else{const l=loadTreasuryPayments();l.push(v);saveTreasuryPayments(l);}
   pushBizJournal(displayName,total,kind==='receipt'?'in':'out',(kind==='receipt'?'إذن قبض #':'إذن صرف #')+v.seq,kind==='receipt'?'var(--green)':'var(--red)',v.date);
@@ -6811,11 +6887,14 @@ function viewVoucher(kind,id){
   const nameLbl=kind==='receipt'?'المستلم منه':'المصروف له';
   const pendingNote=v.status==='pending'?`<div class="biz-po-detail-line"><span>الحالة</span><b style="color:var(--yellow);">⏳ معلق — فى انتظار تأكيد المبلغ</b></div>`:'';
   const confirmedNote=(v.status==='confirmed'&&v.confirmedAmount!=null)?`<div class="biz-po-detail-line"><span>المبلغ المؤكَّد فعلياً</span><b style="color:var(--green);">${fmt(v.confirmedAmount)}</b></div>`:'';
+  // صف المستلم يظهر فقط في إذن الصرف عند تسجيل اسم مستلم
+  const recipientRow=(kind==='payment'&&v.recipient)?`<div class="biz-po-detail-line"><span>المستلم</span><b style="color:var(--yellow);">👤 ${esc(v.recipient)}</b></div>`:'';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">${title} #${v.seq}</div>
       ${v.type?`<div class="biz-po-detail-line"><span>النوع</span><b style="color:var(--blue);">${esc(v.type)}</b></div>`:''}
       <div class="biz-po-detail-line"><span>${nameLbl}</span><b>${esc(v.name)}</b></div>
+      ${recipientRow}
       <div class="biz-po-detail-line"><span>التاريخ</span><b>${v.date}</b></div>
       <div class="biz-po-detail-line"><span>${v.status==='pending'?'المبلغ المسجل':'المبلغ'}</span><b style="color:${kind==='receipt'?'var(--green)':'var(--red)'};">${fmt(v.amount)}</b></div>
       ${pendingNote}${confirmedNote}
@@ -6854,11 +6933,16 @@ function saveConfirmFromVoucherView(kind,id){
   v.status='confirmed';v.confirmedAmount=confirmedAmount;v.confirmedDate=todayStr();
   if(kind==='receipt')saveTreasuryReceipts(list);else saveTreasuryPayments(list);
   let wentToPartner2=false;
-  if(diff>0.001)wentToPartner2=addVoucherDiffDebt(v.name,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
+  if(diff>0.001){
+    // في إذن الصرف: الفرق يسجَّل كدين على المستلم (الشخص اللي استلم المبلغ فعلاً) وليس المصروف له
+    const diffPerson=(kind==='payment'&&v.recipient)?v.recipient:v.name;
+    wentToPartner2=addVoucherDiffDebt(diffPerson,diff,v.seq,kind==='receipt'?'تحصيل':'شراء');
+  }
   if(document.getElementById('liq-pending-wrap'))renderPendingVouchers();
   refreshBizDashboard();
   viewVoucher(kind,id);
-  const diffMsg2=wentToPartner2?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} بالخصم من حسابه الجارى`:`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(v.name)} فى حساب "أخرى مدينة"`;
+  const diffPerson=(kind==='payment'&&v.recipient)?v.recipient:v.name;
+  const diffMsg2=wentToPartner2?`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(diffPerson)} بالخصم من حسابه الجارى`:`تم التأكيد، وسُجّل فرق ${fmt(diff)} على ${esc(diffPerson)} فى حساب "أخرى مدينة"`;
   pgConfirm(diff>0.001?diffMsg2:'تم تأكيد المبلغ بنجاح',()=>{},'تمام');
 }
 /* ── التراجع الكامل عن أثر إذن (قبض أو صرف) قبل حذفه:
@@ -7179,7 +7263,7 @@ function saveInvoice(print){
     const payments=loadTreasuryPayments();
     payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:supplierName,amount:paid,type:'شراء',
       date:inv.date,desc:'دفعة فاتورة مشتريات '+(inv.invNo?'#'+inv.invNo:'#'+inv.seq),notes:'',
-      status:'pending',sourceInvId:inv.id});
+      status:'pending',sourceInvId:inv.id,recipient:supplierName});
     saveTreasuryPayments(payments);
   }
   closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
@@ -8286,6 +8370,7 @@ let _payDue=[];
 function openPayModal(){
   _payDue=supplierDueList();
   const nameEl=document.getElementById('pay-payer-name');if(nameEl)nameEl.value='';
+  const recEl=document.getElementById('pay-recipient');if(recEl)recEl.value='';
   const dateEl=document.getElementById('pay-date');if(dateEl)dateEl.value=todayStr();
   renderPayList();
   document.getElementById('pay-modal').classList.add('show');
@@ -8309,6 +8394,9 @@ function updPayTotal(){
 function savePayment(){
   const payer=(document.getElementById('pay-payer-name').value||'').trim();
   if(!payer){pgConfirm('من فضلك أدخل اسم الصارف',()=>{},'حسناً');return;}
+  // المستلم اختياري: لو فاضي، نعتبره نفس الصارف
+  const recipientRaw=(document.getElementById('pay-recipient')?.value||'').trim();
+  const recipient=recipientRaw||payer;
   const date=document.getElementById('pay-date').value||todayStr();
   const lines=[];
   _payDue.forEach((s,i)=>{
@@ -8330,7 +8418,7 @@ function savePayment(){
     desc:'سداد مديونية موردين ('+lines.length+' مورد)',
     notes:lines.map(l=>l.supplierName+': '+fmt(l.amount)).join(' — '),
     lines:lines.map(l=>({supplierName:l.supplierName,amount:l.amount})),
-    status:'pending',payer};
+    status:'pending',payer,recipient};
   const payments=loadTreasuryPayments();payments.push(v);saveTreasuryPayments(payments);
   pushBizJournal(payer,total,'out','سداد موردين #'+seq,'var(--red)',date);
   closePayModal();
@@ -8471,7 +8559,7 @@ function saveReturnS(print){
   if(r.settleMethod==='استرداد نقدي'&&r.returnValue>0){
     const payments=loadTreasuryPayments();
     payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:customerName,amount:r.returnValue,type:'مردود مبيعات',
-      date:r.date,desc:'استرداد نقدى — مردود مبيعات مرجع #'+refNo,notes:'',sourceRetId:r.id});
+      date:r.date,desc:'استرداد نقدى — مردود مبيعات مرجع #'+refNo,notes:'',sourceRetId:r.id,recipient:customerName});
     saveTreasuryPayments(payments);
   }
   closeReturnFormS();
@@ -8825,13 +8913,20 @@ function renderWarehouseList(root){
     <div class="biz-po-list">${whs.length?whs.map(warehouseCardHtml).join(''):'<div class="biz-po-empty">لا توجد مخازن مسجلة بعد<br>أضف أول مخزن للبدء</div>'}</div>`;
 }
 function warehouseCardHtml(w){
-  const{qty,val}=warehouseTotals(w.id);
-  return`<div class="biz-po-row" onclick="openWarehouse('${w.id}')">
-    <div class="biz-po-row-top"><b>📦 ${esc(w.name)}</b><span>${qty} قطعة</span></div>
-    <div class="biz-po-row-bottom"><span>قيمة المخزون</span><b>${fmt(val)}</b></div>
+  return`<div class="biz-po-row wh-row">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+      <b onclick="openWarehouse('${w.id}')" style="cursor:pointer;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📦 ${esc(w.name)}</b>
+      <div style="display:flex;gap:5px;flex-shrink:0;">
+        <button type="button" class="wh-row-btn" onclick="event.stopPropagation();openWarehouse('${w.id}')">عرض</button>
+        <button type="button" class="wh-row-btn edit" onclick="event.stopPropagation();openEditWarehouseForm('${w.id}')">تعديل</button>
+        <button type="button" class="wh-row-btn del" onclick="event.stopPropagation();pgConfirm('هل تريد حذف مخزن «${esc(w.name)}» وكل بياناته؟',()=>deleteWarehouse('${w.id}'))">حذف</button>
+      </div>
+    </div>
   </div>`;
 }
+let whEditId=null;
 function openAddWarehouseForm(){
+  whEditId=null;
   document.getElementById('wh-form-slot').innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">مخزن جديد</div>
@@ -8842,12 +8937,32 @@ function openAddWarehouseForm(){
       </div>
     </div>`;
 }
-function closeWhForm(){const s=document.getElementById('wh-form-slot');if(s)s.innerHTML='';}
+function openEditWarehouseForm(id){
+  const w=loadInvWarehouses().find(x=>x.id===id);
+  if(!w)return;
+  whEditId=id;
+  document.getElementById('wh-form-slot').innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">تعديل اسم المخزن</div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="wh-name" placeholder="اسم المخزن" value="${esc(w.name)}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="saveWarehouse()">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="closeWhForm()">إلغاء</button>
+      </div>
+    </div>`;
+}
+function closeWhForm(){whEditId=null;const s=document.getElementById('wh-form-slot');if(s)s.innerHTML='';}
 function saveWarehouse(){
   const name=document.getElementById('wh-name').value.trim();
   if(!name){pgConfirm('من فضلك أدخل اسم المخزن',()=>{},'حسناً');return;}
   const list=loadInvWarehouses();
-  list.push({id:'wh_'+Date.now(),name});
+  if(whEditId){
+    const w=list.find(x=>x.id===whEditId);
+    if(w)w.name=name;
+  }else{
+    list.push({id:'wh_'+Date.now(),name});
+  }
+  whEditId=null;
   saveInvWarehouses(list);
   closeWhForm();
   renderInvRoot();
