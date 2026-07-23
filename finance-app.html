@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>المدير المالي</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg:#0f1318;--card:#181e26;--card2:#1e2530;
@@ -625,7 +627,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .liq-pend-btn.liq-pend-blink{animation:liqPendingGlow 1.4s ease-in-out infinite;}
 .liq-pend-btn.liq-pend-blink .liq-pend-count{animation:liqBadgePulse 1.4s ease-in-out infinite;}
 .biz-card-hdr{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
-.biz-ico{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.biz-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .biz-lbl{font-size:13.5px;color:var(--muted);}
 .biz-val{font-size:19px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .biz-sub{font-size:12.5px;color:var(--muted);}
@@ -640,23 +642,25 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-expand-overlay .biz-split-lbls.expand-only{display:flex;}
 .biz-ring-badge{position:relative;width:34px;height:34px;flex-shrink:0;}
 .biz-ring-badge svg{width:100%;height:100%;display:block;}
-.biz-ring-badge .biz-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--txt);}
+.biz-ring-badge .biz-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:var(--txt);}
 .biz-expand-overlay .biz-ring-badge{width:52px;height:52px;}
-.biz-expand-overlay .biz-ring-badge .biz-ring-val{font-size:12px;}
+.biz-expand-overlay .biz-ring-badge .biz-ring-val{font-size:10px;}
 .biz-ring-center{display:flex;justify-content:center;align-items:center;margin:2px 0;}
 #pg-workspace .biz-card[data-biz-key="purchases"] .biz-ring-center .biz-ring-badge,#pg-workspace .biz-card[data-biz-key="sales"] .biz-ring-center .biz-ring-badge{width:60px;height:60px;}
-#pg-workspace .biz-card[data-biz-key="purchases"] .biz-ring-center .biz-ring-val,#pg-workspace .biz-card[data-biz-key="sales"] .biz-ring-center .biz-ring-val{font-size:13px;}
+#pg-workspace .biz-card[data-biz-key="purchases"] .biz-ring-center .biz-ring-val,#pg-workspace .biz-card[data-biz-key="sales"] .biz-ring-center .biz-ring-val{font-size:11px;}
 .biz-card-ftr{display:flex;align-items:center;justify-content:center;gap:6px;margin:auto -7px -7px -7px;background:var(--card2);border-top:1px solid var(--border);border-radius:0 0 11px 11px;padding:4px 8px;}
 .biz-expand-overlay .biz-card-ftr{margin:auto -16px -16px -16px;padding:8px 16px;border-radius:0 0 16px 16px;}
 .biz-card-title{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:center;}
 .biz-expand-btn{position:absolute;bottom:6px;left:6px;width:18px;height:18px;border-radius:5px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;cursor:pointer;color:var(--muted);z-index:2;}
 .biz-expand-btn:active{background:var(--border);}
-.biz-expand-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+.biz-expand-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease;overflow-y:auto;}
 .biz-expand-overlay.show{opacity:1;pointer-events:auto;}
-.biz-expand-overlay .biz-card{width:min(78vw,360px)!important;border-radius:16px!important;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:16px!important;padding-top:34px!important;gap:10px!important;cursor:default;transform:scale(.85);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.3),opacity .18s ease;}
+.biz-expand-overlay .biz-card{width:min(78vw,360px)!important;height:auto;border-radius:16px!important;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:16px!important;padding-top:34px!important;gap:10px!important;cursor:default;transform:scale(.85);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.3),opacity .18s ease;overflow-y:visible;}
 .biz-expand-overlay .biz-card-hdr{justify-content:flex-start!important;}
 #pg-workspace .biz-card[data-biz-key="purchases"]>.biz-bar,#pg-workspace .biz-card[data-biz-key="sales"]>.biz-bar,#pg-workspace .biz-card[data-biz-key="expenses"]>.biz-bar{display:none!important;}
 #pg-workspace .biz-card[data-biz-key="purchases"]>.biz-sub,#pg-workspace .biz-card[data-biz-key="sales"]>.biz-sub,#pg-workspace .biz-card[data-biz-key="expenses"]>.biz-sub,#pg-workspace .biz-card[data-biz-key="inventory"]>.biz-sub{display:none!important;}
+#pg-workspace .biz-card[data-biz-key="accounts"] .acc-expand-only{display:none!important;}
+.biz-expand-overlay .biz-card[data-biz-key="accounts"] .acc-mini-only{display:none!important;}
 .biz-expand-overlay.show .biz-card{transform:scale(1);opacity:1;}
 .biz-expand-overlay .biz-card:active{transform:none;}
 .biz-expand-overlay .biz-card-title{font-size:14px;}
@@ -667,10 +671,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-expand-overlay .biz-split-lbls{font-size:14px;}
 .biz-expand-overlay .biz-split-lbls b{font-size:17px;}
 .biz-expand-overlay .biz-split-lbls span{font-size:11px!important;white-space:nowrap;}
-.biz-expand-overlay .biz-ico{width:34px;height:34px;font-size:19px;}
+.biz-expand-overlay .biz-ico{width:44px;height:44px;font-size:24px;}
 /* ── كارت السيولة: صف الإجمالي + صندوقي الخزينة/البنك (كلاسات بدل الأنماط المضمّنة عشان تتكبّر صح جوه المودل الموسّع) ── */
 .liq-total-row{display:flex;align-items:center;gap:6px;}
-.liq-total-ico{width:20px;height:20px;border-radius:6px;background:rgba(62,207,106,.16);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.liq-total-ico{width:28px;height:28px;border-radius:7px;background:rgba(62,207,106,.16);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .liq-total-val{font-size:16px;font-weight:800;color:var(--green);}
 .liq-quick-row{display:flex;gap:6px;}
 /* صف الخزينة / صف البنك: صف كامل (full width) فيه العنوان + الافتتاحي + الرصيد، كلهم inline */
@@ -689,12 +693,12 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .liq-quick-open-lbl{font-size:9px;opacity:.85;}
 .liq-quick-open b{color:var(--txt);font-weight:800;font-size:11.5px;}
 .liq-quick-open-edit{font-size:8.5px;opacity:.7;}
-.biz-expand-overlay .liq-total-ico{width:32px;height:32px;font-size:16px;border-radius:9px;}
+.biz-expand-overlay .liq-total-ico{width:42px;height:42px;font-size:22px;border-radius:11px;}
 .biz-expand-overlay .liq-total-val{font-size:26px;}
 .biz-expand-overlay .liq-quick-line-row{padding:10px 14px;gap:10px;}
 .biz-expand-overlay .liq-quick-line-row>.biz-lbl{font-size:16px;}
-.biz-expand-overlay .liq-quick-val{font-size:20px;}
-.biz-expand-overlay .liq-quick-val small{font-size:11px;}
+.biz-expand-overlay .liq-quick-val{font-size:15px;}
+.biz-expand-overlay .liq-quick-val small{font-size:9px;}
 .biz-expand-overlay .liq-quick-open{font-size:13px;padding:3px 8px;}
 .biz-expand-overlay .liq-quick-open-lbl{font-size:12px;}
 .biz-expand-overlay .liq-quick-open b{font-size:15px;}
@@ -810,6 +814,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .pinv-btn.print{background:var(--green);color:#08221a;}
 .pinv-btn.save{background:var(--blue);color:#fff;}
 .coa-tree{display:flex;flex-direction:column;gap:6px;}
+.coa-balance-cols{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:start;}
+.coa-balance-col{min-width:0;display:flex;flex-direction:column;gap:6px;}
+.coa-balance-col .coa-node-hdr .coa-name{font-size:11.5px;}
+.coa-balance-col .coa-name{white-space:normal;}
 .coa-root{font-size:13px;font-weight:800;color:var(--txt);text-align:center;padding:8px;background:var(--card2);border-radius:9px;border:1px solid var(--border);}
 .coa-node{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
 .coa-node-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;cursor:pointer;}
@@ -1516,8 +1524,12 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div style="font-size:15px;font-weight:800;color:#fff;" id="dhm-name"></div>
         <div style="font-size:9px;color:rgba(255,255,255,.5);" id="dhm-cat-label"></div>
       </div>
-      <button onclick="closeDebtHistory()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:7px;color:#fff;font-size:18px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+      <div style="display:flex;gap:6px;">
+        <button id="dhm-lock-btn" onclick="handleLockBtnClick()" title="قفل الحساب وأرشفته" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:7px;color:#fff;font-size:14px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🔒</button>
+        <button onclick="closeDebtHistory()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:7px;color:#fff;font-size:18px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+      </div>
     </div>
+    <div id="dhm-locked-banner" style="display:none;margin-top:8px;background:rgba(224,176,48,.14);border:1px solid rgba(224,176,48,.35);border-radius:8px;padding:7px 9px;font-size:10.5px;color:#e0b030;line-height:1.6;"></div>
     <div style="display:flex;gap:6px;margin-top:8px;">
       <div style="flex:1;background:rgba(0,0,0,.25);border-radius:8px;padding:5px 6px;text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,.5);">الإجمالي</div><div style="font-size:13px;font-weight:800;color:var(--red);" id="dhm-req"></div></div>
       <div style="flex:1;background:rgba(0,0,0,.25);border-radius:8px;padding:5px 6px;text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,.5);">المدفوع</div><div style="font-size:13px;font-weight:800;color:var(--green);" id="dhm-paid"></div></div>
@@ -1532,7 +1544,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div></div>
   </div>
   <div style="flex:1;overflow-y:auto;min-height:0;background:var(--bg);" id="dhm-list"></div>
-  <div style="flex-shrink:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;">
+  <div id="dhm-footer" style="flex-shrink:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;">
     <div style="display:flex;gap:5px;">
       <input type="number" id="dhm-amount" placeholder="المبلغ" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;padding:6px 8px;min-width:0;">
       <input type="text" id="dhm-details" placeholder="التفاصيل" style="flex:1.4;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11px;padding:6px 7px;min-width:0;">
@@ -1563,6 +1575,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div class="s-sec"><div class="s-sec-title">📅 الأسبوع</div><div class="s-row"><span class="s-lbl">يبدأ الأسبوع من</span><select class="s-sel" id="s-week-start" onchange="saveSetting('weekStartDay',Number(this.value))"><option value="6">السبت</option><option value="0">الأحد</option><option value="1">الاثنين</option><option value="5">الجمعة</option></select></div></div>
     <div class="s-sec"><div class="s-sec-title">💰 العملة</div><div class="s-row"><span class="s-lbl">العملة</span><select class="s-sel" id="s-currency" onchange="saveSetting('currency',this.value)"><option value="EGP">جنيه مصري</option><option value="SAR">ريال سعودي</option><option value="AED">درهم</option><option value="USD">دولار</option><option value="EUR">يورو</option></select></div><div class="s-row"><span class="s-lbl">رمز العملة</span><input class="s-inp" id="s-currency-sym" placeholder="ج.م" onchange="saveSetting('currencySym',this.value)" style="max-width:80px;"></div></div>
     <div class="s-sec"><div class="s-sec-title">🎨 السمة</div><div class="s-row"><span class="s-lbl">وضع العرض</span><div class="s-tgl-g"><button class="s-tgl active" id="theme-dark" onclick="setTheme('dark')">🌙 داكن</button><button class="s-tgl" id="theme-light" onclick="setTheme('light')">☀️ فاتح</button></div></div></div>
+    <div class="s-sec"><div class="s-sec-title">🗄️ أرشيف الديون</div><div class="s-row"><span class="s-lbl">الحسابات المقفلة والمؤرشفة</span><button class="s-btn-add" onclick="openDebtArchivePage()" style="width:auto;padding:6px 14px;font-size:11px;font-family:'Cairo',sans-serif;">عرض الأرشيف</button></div></div>
     <div id="set-biz-group" style="display:none;">
       <div class="s-sec">
         <div class="s-sec-title">🌳 شجرة الحسابات</div>
@@ -1666,6 +1679,15 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div id="set-personal-group-2" class="s-sec"><div class="s-sec-title">🔔 التنبيهات</div><div class="s-row"><span class="s-lbl">تنبيهات الالتزامات</span><label class="sw"><input type="checkbox" id="s-notif-commit" onchange="saveSetting('notifCommit',this.checked)"><span class="sw-sl"></span></label></div><div class="s-row"><span class="s-lbl">تنبيهات الديون</span><label class="sw"><input type="checkbox" id="s-notif-debt" onchange="saveSetting('notifDebt',this.checked)"><span class="sw-sl"></span></label></div><div class="s-row"><span class="s-lbl">تذكير يومي</span><label class="sw"><input type="checkbox" id="s-notif-daily" onchange="saveSetting('notifDaily',this.checked)"><span class="sw-sl"></span></label></div></div>
     <div style="height:20px;"></div>
   </div>
+</div>
+
+<!-- ════ DEBT ARCHIVE PAGE ════ -->
+<div id="pg-debt-archive" class="page" style="display:none;flex-direction:column;">
+  <div style="flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:10px;">
+    <button onclick="closeDebtArchivePage()" style="background:var(--card2);border:1px solid var(--border);border-radius:7px;color:var(--txt);font-size:16px;width:30px;height:30px;cursor:pointer;">→</button>
+    <div style="font-size:15px;font-weight:800;color:var(--txt);">🗄️ أرشيف الديون</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:12px;" id="debt-archive-list"></div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -1872,13 +1894,12 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <div class="biz-card-hdr" style="width:100%;">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">🎓</span>
           </div>
-          <div class="biz-lbl">قيمة المخزون</div>
+          <div class="biz-lbl" style="width:100%;">قيمة المخزون</div>
           <div style="position:relative;width:100px;height:100px;margin:1px 0;">
             <svg id="ws-inv-ring" viewBox="0 0 78 78" style="width:100px;height:100px;"></svg>
-            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-              <span style="font-size:19px;font-weight:800;color:var(--txt);" id="ws-inv-val">0</span>
-            </div>
+            <span id="ws-inv-ring-pct" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--txt);">0%</span>
           </div>
+          <div style="font-size:19px;font-weight:800;color:var(--txt);" id="ws-inv-val">0</div>
           <div class="biz-sub">من إجمالي الأصول <b style="color:var(--blue);" id="ws-inv-pct">0%</b></div>
           <div class="biz-split-lbls expand-only" style="width:100%;margin-top:4px;">
             <div><span style="font-size:7.5px;white-space:nowrap;">عدد الأصناف</span><b style="color:var(--txt);" id="ws-inv-count">0</b></div>
@@ -1951,7 +1972,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div class="biz-card" style="background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(120,140,170,.18);border-radius:14px;padding:6px;gap:2px;" data-biz-key="expenses" onclick="openBizDetail('expenses')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('expenses')">⤢</span>
           <div class="biz-card-hdr">
-            <span class="biz-ico" style="width:16px;height:16px;font-size:9px;background:rgba(224,138,62,.16);">🧾</span>
+            <span class="biz-ico" style="background:rgba(224,138,62,.16);">🧾</span>
           </div>
           <div class="biz-lbl" style="font-size:14px;line-height:1.2;text-align:center;font-weight:700;">مصروفات</div>
           <div class="biz-val" style="font-size:15px;line-height:1.1;text-align:center;color:#e08a3e;">0</div>
@@ -1968,17 +1989,26 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
         <div class="biz-card" style="background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(120,140,170,.18);border-radius:14px;padding:6px;gap:2px;" data-biz-key="accounts" onclick="openBizDetail('accounts')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('accounts')">⤢</span>
           <div class="biz-card-hdr">
-            <span class="biz-ico" style="width:16px;height:16px;font-size:9px;background:rgba(77,168,240,.16);">📋</span>
+            <span class="biz-ico" style="background:rgba(77,168,240,.16);">📋</span>
           </div>
-          <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">إجمالي الأصول</div>
-          <div class="biz-val" id="ws-acc-assets" style="font-size:14px;line-height:1.1;">0</div>
-          <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">إجمالي الخصوم</div>
-          <div class="biz-val" id="ws-acc-liab" style="font-size:14px;line-height:1.1;">0</div>
-          <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">إجمالي حقوق الملكية</div>
-          <div class="biz-val" id="ws-acc-equity" style="font-size:14px;line-height:1.1;">0</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div><div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">التوازن</div><div id="ws-acc-balance" style="font-size:11.5px;font-weight:800;color:var(--green);line-height:1.2;">متوازن ✅</div></div>
-            <span style="font-size:13px;">⚖️</span>
+          <div class="acc-mini-only" style="display:flex;gap:6px;">
+            <div style="flex:1;text-align:center;">
+              <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">الأصول</div>
+              <div class="biz-val" id="ws-acc-assets-mini" style="font-size:14px;line-height:1.1;">0</div>
+            </div>
+            <div style="flex:1;text-align:center;">
+              <div class="biz-lbl" style="font-size:11.5px;line-height:1.2;">الخصوم</div>
+              <div class="biz-val" id="ws-acc-liab-mini" style="font-size:14px;line-height:1.1;">0</div>
+            </div>
+          </div>
+          <div class="biz-lbl acc-expand-only" style="font-size:11.5px;line-height:1.2;">إجمالي الأصول</div>
+          <div class="biz-val acc-expand-only" id="ws-acc-assets" style="font-size:14px;line-height:1.1;">0</div>
+          <div class="biz-lbl acc-expand-only" style="font-size:11.5px;line-height:1.2;">إجمالي الخصوم</div>
+          <div class="biz-val acc-expand-only" id="ws-acc-liab" style="font-size:14px;line-height:1.1;">0</div>
+          <div class="biz-lbl acc-expand-only" style="font-size:11.5px;line-height:1.2;">إجمالي حقوق الملكية</div>
+          <div class="biz-val acc-expand-only" id="ws-acc-equity" style="font-size:14px;line-height:1.1;">0</div>
+          <div class="acc-expand-only" style="text-align:center;">
+            <div id="ws-acc-balance" style="font-size:11.5px;font-weight:800;color:var(--green);line-height:1.2;">متوازن ✅</div>
           </div>
           <div class="biz-card-ftr" style="padding:3px 8px;">
             <span class="biz-card-title" style="color:var(--blue);">حسابات</span>
@@ -2271,7 +2301,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 // ══════════════════════════════════════════════
 const KEYS={income:'fm_income',expense:'fm_expense',commit:'fm_commit',
   debt_creditor:'fm_debt_creditor',debt_debtor:'fm_debt_debtor',
-  debt_cats:'fm_debt_cats',settings:'fm_settings',notes:'fm_notes',note_folders:'fm_note_folders'};
+  debt_cats:'fm_debt_cats',settings:'fm_settings',notes:'fm_notes',note_folders:'fm_note_folders',
+  debt_archive:'fm_debt_archive'};
 let _memStore={};
 let _storageAvailable=true;
 try{
@@ -2839,6 +2870,7 @@ function initCommitSwipe(){
 }
 
 function renderDebt(){
+  purgeExpiredLockedDebts();
   // ★ عمود "مدفوع" فى وضع مدين يوريك "سداد" (المبلغ المُحصَّل من المدين)، وفى دائن يفضل "مدفوع" (اللي دفعته له)
   const paidColLbl=debtMode==='debtor'?'سداد':'مدفوع';
   const ftTh=document.getElementById('ft-debt-paid-th');if(ftTh)ftTh.textContent=paidColLbl;
@@ -2881,6 +2913,7 @@ function renderDebt(){
     const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date&&x.req===r.req);
     const tr=document.createElement('tr');tr.dataset.idx=ri;
     const excessBadge=hasExcess?` <span style="font-size:9px;background:rgba(77,168,240,.15);color:var(--blue);border-radius:4px;padding:1px 5px;font-weight:700;" title="زيادة سداد من دائن: ${fmt(excessTotal)}">+ زيادة ${fmt(excessTotal)}</span>`:'';
+    const lockBadge=r.locked?` <span style="font-size:9px;background:rgba(224,176,48,.15);color:var(--yellow);border-radius:4px;padding:1px 5px;font-weight:700;" title="مقفل — هيختفي بتاريخ ${fmtFullDate(r.lockHideFrom)}">🔒</span>`:'';
     // شريط التقدم — كل الشريط ممتد 100% مقسم بالألوان
     const paidPct=req>0?Math.min(100,Math.round((net/req)*100)):0;
     if(net<=0){tr.classList.add('bar-none');}
@@ -2890,7 +2923,7 @@ function renderDebt(){
     const paidColor=debtMode==='creditor'?'td-b':'td-rn';
     const displayNet=debtMode==='creditor'?Math.max(0,net):net;
     tr.innerHTML=`<td class="td-name${nameCellMeta(r).cls}">
-      <span style="overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center;gap:4px;flex:1;">${nameCellMeta(r).prefix}${r.name}${excessBadge}</span>
+      <span style="overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center;gap:4px;flex:1;">${nameCellMeta(r).prefix}${r.name}${excessBadge}${lockBadge}</span>
       <button class="dhb" onclick="openDebtHistory(${ri})">🔻</button>
       </td>
       <td class="${reqColor}">${fmt(req)}</td>
@@ -3508,7 +3541,7 @@ function drawSegmentedRing(id,pct,color,opts){
   } else if(opts.showText!==false){
     const txt=document.createElementNS(NS,'text');
     txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
-    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',Math.max(10,Math.round(W*0.2)));
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',Math.max(8,Math.round(W*0.15)));
     txt.setAttribute('font-family','Cairo,sans-serif');txt.setAttribute('font-weight','800');
     txt.setAttribute('fill','#dde4ef');
     txt.textContent=Math.round(pct)+'%';
@@ -4688,6 +4721,7 @@ function openDebtHistory(ri){
   document.getElementById('dhm-name').textContent=r.name;
   document.getElementById('dhm-cat-label').textContent=r.cat||'';
   updateHistHeader(r);renderStatementList(r);
+  applyDhmLockUI(r);
   document.getElementById('dhm-save-btn').style.background=debtMode==='creditor'?'var(--yellow)':'var(--green)';
   document.getElementById('dhm-save-btn').textContent='+ تسجيل';
   const _dhPayMethods=getSettings().payMethods||['كاش','تحويل بنكي','بطاقة','instapay'];
@@ -4900,6 +4934,245 @@ function closeDebtHistory(){
   debtHistIdx=null;
   _dhmEditTxnIdx=null;
   if(!currentFT&&!currentEM)document.getElementById('overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  🔒 قفل حساب دائن/مدين وأرشفته كملف PDF
+//  • القفل بيستخدم فترة العرض النشطة وقتها (يوم/أسبوع/شهر/سنة) عشان يحدد
+//    آخر يوم يفضل فيه الحساب ظاهر — وبيختفي تلقائيًا مع بداية الفترة اللي بعدها.
+//  • بمجرد القفل: يتولّد PDF لكشف حساب كامل ويتحفظ فى أرشيف داخل التطبيق،
+//    والحساب يبقى للقراءة فقط (من غير تسجيل معاملات جديدة) لحد ما يختفي.
+// ══════════════════════════════════════════════
+function fmtFullDate(d){if(!d)return'';return d.split('-').reverse().join('/');}
+// آخر لحظة فى الفترة الحالية (يوم/أسبوع/شهر/سنة) بغض النظر عن أي تصفح للأمام/للخلف
+function currentPeriodEndDate(periodType){
+  const savedOffset=periodOffset;
+  periodOffset=0;
+  const{to}=getRange(periodType);
+  periodOffset=savedOffset;
+  return to;
+}
+// يحسب تاريخ اختفاء الحساب = أول يوم فى الفترة اللي بعد الفترة الحالية
+function computeLockHideFrom(){
+  const periodType=['day','week','month','year'].includes(currentPeriod)?currentPeriod:'month';
+  const end=currentPeriodEndDate(periodType);
+  const next=new Date(end.getFullYear(),end.getMonth(),end.getDate()+1);
+  const hideFrom=next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0')+'-'+String(next.getDate()).padStart(2,'0');
+  return{periodType,hideFrom};
+}
+const PERIOD_LBL={day:'اليوم',week:'الأسبوع',month:'الشهر',year:'السنة'};
+function handleLockBtnClick(){
+  if(debtHistIdx===null)return;
+  const arr=loadData(debtKey());const r=arr[debtHistIdx];if(!r)return;
+  if(r.locked){
+    pgConfirm('الحساب مقفل بالفعل وهيختفي بتاريخ '+fmtFullDate(r.lockHideFrom)+'. تحب تلغي القفل وترجّعه نشط؟',()=>unlockDebtAccount(),'إلغاء القفل');
+    return;
+  }
+  const{periodType,hideFrom}=computeLockHideFrom();
+  pgConfirm('هيتقفل حساب «'+r.name+'» ويتحفظ كملف PDF فى الأرشيف، وهيختفي من الجدول تلقائيًا بداية '+(PERIOD_LBL[periodType]||'الفترة')+' الجاية (بتاريخ '+fmtFullDate(hideFrom)+'). متأكد؟',()=>lockAndArchiveDebtAccount(),'🔒 قفل وأرشفة');
+}
+function applyDhmLockUI(r){
+  const btn=document.getElementById('dhm-lock-btn');
+  const banner=document.getElementById('dhm-locked-banner');
+  const footer=document.getElementById('dhm-footer');
+  if(!btn||!banner||!footer)return;
+  if(r&&r.locked){
+    btn.textContent='🔓';btn.title='الحساب مقفل — اضغط لإلغاء القفل';
+    banner.style.display='block';
+    banner.innerHTML='🔒 الحساب مقفل ومؤرشف كـ PDF — هيختفي تلقائيًا بتاريخ <b>'+fmtFullDate(r.lockHideFrom)+'</b>. تقدر تلغي القفل قبل كده لو حابب.';
+    footer.style.display='none';
+  }else{
+    btn.textContent='🔒';btn.title='قفل الحساب وأرشفته';
+    banner.style.display='none';
+    footer.style.display='';
+  }
+}
+async function lockAndArchiveDebtAccount(){
+  const idx=debtHistIdx;
+  const arr=loadData(debtKey());const r=arr[idx];if(!r)return;
+  const{periodType,hideFrom}=computeLockHideFrom();
+  const btn=document.getElementById('dhm-lock-btn');
+  if(btn){btn.textContent='⏳';btn.disabled=true;}
+  try{
+    const pdfDataUri=await generateDebtStatementPDF(r,debtMode);
+    const txns=r.transactions||[];
+    const pF=txns.filter(t=>t.dir==='for'&&!t.excessTransfer).reduce((s,t)=>s+Number(t.amount||0),0);
+    const pA=txns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
+    const reqEff=Number(r.req||0)+pA;
+    const archive=loadData('debt_archive');
+    const entryId='arc_'+Date.now()+'_'+Math.round(Math.random()*9999);
+    archive.push({
+      id:entryId,name:r.name,mode:debtMode,cat:r.cat||'',
+      lockedAt:todayStr(),hideFrom,periodType,
+      totalReq:reqEff,totalPaid:pF,totalRem:reqEff-pF,
+      pdf:pdfDataUri
+    });
+    saveData('debt_archive',archive);
+    r.locked=true;r.lockHideFrom=hideFrom;r.lockPeriodType=periodType;r.archiveId=entryId;
+    arr[idx]=r;
+    saveData(debtKey(),arr);
+    applyDhmLockUI(r);
+    updateHistHeader(r);
+    renderDebt();
+  }catch(e){
+    console.warn('lockAndArchiveDebtAccount failed',e);
+    alert('حصلت مشكلة أثناء إنشاء أرشيف PDF. حاول تاني.');
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+function unlockDebtAccount(){
+  if(debtHistIdx===null)return;
+  const arr=loadData(debtKey());const r=arr[debtHistIdx];if(!r)return;
+  if(r.archiveId){
+    const archive=loadData('debt_archive').filter(a=>a.id!==r.archiveId);
+    saveData('debt_archive',archive);
+  }
+  delete r.locked;delete r.lockHideFrom;delete r.lockPeriodType;delete r.archiveId;
+  arr[debtHistIdx]=r;
+  saveData(debtKey(),arr);
+  applyDhmLockUI(r);
+  updateHistHeader(r);
+  renderDebt();
+}
+// يتولد كشف حساب HTML خارج الشاشة، يتحول لصورة (يدعم العربي بالكامل)، ثم يوضّب داخل PDF (بيتقسم صفحات لو طويل)
+async function generateDebtStatementPDF(r,mode){
+  const txns=(r.transactions||[]).slice();
+  const pF=txns.filter(t=>t.dir==='for'&&!t.excessTransfer).reduce((s,t)=>s+Number(t.amount||0),0);
+  const pA=txns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
+  const reqEff=Number(r.req||0)+pA;
+  const rem=reqEff-pF;
+  const modeLbl=mode==='creditor'?'دائن':'مدين';
+  const rowsHtml=txns.slice().sort((a,b)=>(a._seq||0)-(b._seq||0)).map(t=>{
+    const isExcess=!!t.excessTransfer;
+    const dirLbl=isExcess?'زيادة مُرحّلة':(t.dir==='for'?'سداد':'إضافة');
+    const color=isExcess?'#1a3a8b':(t.dir==='for'?'#1a6b35':'#8b1a1a');
+    return`<tr>
+      <td style="padding:6px 8px;border-bottom:1px solid #ddd;font-size:12px;">${fmtFullDate(t.date)}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #ddd;font-size:12px;color:${color};font-weight:700;">${dirLbl}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #ddd;font-size:12px;">${t.details||t.pay||'—'}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #ddd;font-size:12px;font-weight:700;">${fmt(t.amount)}</td>
+    </tr>`;
+  }).join('');
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;top:-99999px;left:0;width:720px;background:#fff;direction:rtl;font-family:Cairo,Tahoma,sans-serif;padding:26px;color:#111;';
+  wrap.innerHTML=`
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:20px;font-weight:800;">كشف حساب — ${modeLbl}</div>
+      <div style="font-size:13px;color:#555;margin-top:4px;">تاريخ الإصدار: ${fmtFullDate(todayStr())}</div>
+    </div>
+    <div style="background:#f4f4f4;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">${r.name}</div>
+      <div style="font-size:12px;color:#666;">${r.cat?'التصنيف: '+r.cat:''}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <div style="flex:1;text-align:center;background:#f4f4f4;border-radius:8px;padding:8px;">
+        <div style="font-size:11px;color:#666;">الإجمالي</div><div style="font-size:15px;font-weight:800;">${fmt(reqEff)}</div>
+      </div>
+      <div style="flex:1;text-align:center;background:#f4f4f4;border-radius:8px;padding:8px;">
+        <div style="font-size:11px;color:#666;">المدفوع</div><div style="font-size:15px;font-weight:800;">${fmt(pF)}</div>
+      </div>
+      <div style="flex:1;text-align:center;background:#f4f4f4;border-radius:8px;padding:8px;">
+        <div style="font-size:11px;color:#666;">المتبقي</div><div style="font-size:15px;font-weight:800;">${fmt(rem)}</div>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#eee;">
+        <th style="padding:6px 8px;font-size:12px;text-align:right;">التاريخ</th>
+        <th style="padding:6px 8px;font-size:12px;text-align:right;">النوع</th>
+        <th style="padding:6px 8px;font-size:12px;text-align:right;">التفاصيل</th>
+        <th style="padding:6px 8px;font-size:12px;text-align:right;">المبلغ</th>
+      </tr></thead>
+      <tbody>${rowsHtml||'<tr><td colspan="4" style="padding:10px;text-align:center;color:#999;">لا توجد معاملات</td></tr>'}</tbody>
+    </table>`;
+  document.body.appendChild(wrap);
+  try{
+    const canvas=await html2canvas(wrap,{scale:2,backgroundColor:'#ffffff'});
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'p',unit:'pt',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
+    const imgW=pageW;
+    const imgH=canvas.height*imgW/canvas.width;
+    let heightLeft=imgH;
+    let position=0;
+    const imgData=canvas.toDataURL('image/png');
+    pdf.addImage(imgData,'PNG',0,position,imgW,imgH);
+    heightLeft-=pageH;
+    while(heightLeft>0){
+      position=heightLeft-imgH;
+      pdf.addPage();
+      pdf.addImage(imgData,'PNG',0,position,imgW,imgH);
+      heightLeft-=pageH;
+    }
+    return pdf.output('datauristring');
+  }finally{
+    document.body.removeChild(wrap);
+  }
+}
+// يشيل أي حساب مقفول وصل تاريخ اختفائه من الجدول النشط (الأرشيف نفسه فاضل زي ما هو)
+function purgeExpiredLockedDebts(){
+  const today=todayStr();
+  ['debt_creditor','debt_debtor'].forEach(k=>{
+    const arr=loadData(k);
+    const kept=arr.filter(r=>!(r.locked&&r.lockHideFrom&&today>=r.lockHideFrom));
+    if(kept.length!==arr.length)saveData(k,kept);
+  });
+}
+function downloadArchivedPdf(entryId){
+  const entry=loadData('debt_archive').find(a=>a.id===entryId);
+  if(!entry)return;
+  const a=document.createElement('a');
+  a.href=entry.pdf;
+  a.download='كشف حساب - '+entry.name+'.pdf';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function deleteArchivedEntry(entryId){
+  pgConfirm('هيتشال ملف الـ PDF المحفوظ نهائيًا. متأكد؟',()=>{
+    const archive=loadData('debt_archive').filter(a=>a.id!==entryId);
+    saveData('debt_archive',archive);
+    renderDebtArchive();
+  },'حذف');
+}
+function openDebtArchivePage(){
+  closeFTable();closeEModal();closeDebtHistory();
+  renderDebtArchive();
+  ['pg-home','pg-settings','pg-workspace','pg-reports','pg-log','pg-biz-log','pg-notes','pg-biz-detail'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  document.getElementById('pg-debt-archive').style.display='flex';
+}
+function closeDebtArchivePage(){
+  document.getElementById('pg-debt-archive').style.display='none';
+  showPage('settings');
+}
+function renderDebtArchive(){
+  const list=document.getElementById('debt-archive-list');
+  if(!list)return;
+  const archive=loadData('debt_archive').slice().sort((a,b)=>(b.lockedAt||'').localeCompare(a.lockedAt||''));
+  if(!archive.length){
+    list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:30px 10px;">لا توجد حسابات مؤرشفة بعد</div>';
+    return;
+  }
+  list.innerHTML=archive.map(a=>{
+    const modeLbl=a.mode==='creditor'?'دائن':'مدين';
+    const modeColor=a.mode==='creditor'?'var(--red)':'var(--green)';
+    const hidden=todayStr()>=a.hideFrom;
+    return`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:800;color:var(--txt);">${a.name}</span>
+        <span style="font-size:9px;font-weight:800;color:${modeColor};background:rgba(255,255,255,.06);border-radius:5px;padding:2px 6px;">${modeLbl}</span>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">قُفل بتاريخ ${fmtFullDate(a.lockedAt)} — ${hidden?'مختفي من الجدول':'هيختفي بتاريخ '+fmtFullDate(a.hideFrom)}</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <div style="flex:1;text-align:center;background:var(--card2);border-radius:6px;padding:5px;"><div style="font-size:8px;color:var(--muted);">الإجمالي</div><div style="font-size:11px;font-weight:800;color:var(--txt);">${fmt(a.totalReq)}</div></div>
+        <div style="flex:1;text-align:center;background:var(--card2);border-radius:6px;padding:5px;"><div style="font-size:8px;color:var(--muted);">المدفوع</div><div style="font-size:11px;font-weight:800;color:var(--green);">${fmt(a.totalPaid)}</div></div>
+        <div style="flex:1;text-align:center;background:var(--card2);border-radius:6px;padding:5px;"><div style="font-size:8px;color:var(--muted);">المتبقي</div><div style="font-size:11px;font-weight:800;color:var(--red);">${fmt(a.totalRem)}</div></div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="downloadArchivedPdf('${a.id}')" style="flex:1;background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;padding:6px;cursor:pointer;">📄 تحميل PDF</button>
+        <button onclick="deleteArchivedEntry('${a.id}')" style="background:rgba(240,84,84,.15);border:1px solid rgba(240,84,84,.35);border-radius:6px;color:var(--red);font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;padding:6px 10px;cursor:pointer;">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════
@@ -5745,6 +6018,17 @@ function expandBizCard(key){
   clone.removeAttribute('onclick');
   const ftrBtn=clone.querySelector('.biz-expand-btn');
   if(ftrBtn)ftrBtn.outerHTML='<span class="biz-expand-btn" onclick="closeBizExpand()">✕</span>';
+  // وحّد ارتفاع كل الكروت الموسعة على نفس ارتفاع كرت المشتريات (المرجع)
+  const refCard=document.querySelector('.biz-card[data-biz-key="purchases"]');
+  if(refCard){
+    const probe=refCard.cloneNode(true);
+    probe.removeAttribute('onclick');
+    probe.style.position='fixed';probe.style.left='-9999px';probe.style.top='0';probe.style.visibility='hidden';probe.style.pointerEvents='none';probe.style.transform='none';probe.style.opacity='1';
+    overlay.appendChild(probe);
+    const refH=probe.getBoundingClientRect().height;
+    overlay.removeChild(probe);
+    if(refH>0){clone.style.height=refH+'px';clone.style.overflowY='auto';}
+  }
   slot.appendChild(clone);
   requestAnimationFrame(()=>overlay.classList.add('show'));
 }
@@ -5862,10 +6146,12 @@ function refreshBizDashboard(){
   setTxt('ws-inv-pct',invPct+'%');
   setTxt('ws-inv-count',invItemCount);
   setTxt('ws-inv-low',invLowCount);
-  drawSegmentedRing('ws-inv-ring',invPct,'var(--blue)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36,showText:false});
+  drawSegmentedRing('ws-inv-ring',invPct,'var(--blue)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36,pctId:'ws-inv-ring-pct'});
   setTxt('ws-acc-assets',fmt(totalAssets));
+  setTxt('ws-acc-assets-mini',fmt(totalAssets));
   setTxt('ws-acc-liab',fmt(totalLiabOnly));
   setTxt('ws-acc-equity',fmt(totalEquity));
+  setTxt('ws-acc-liab-mini',fmt(totalLiab));
   const balEl=document.getElementById('ws-acc-balance');
   if(balEl){
     const diff=Math.round((totalAssets-totalLiab)*100)/100;
@@ -6105,11 +6391,32 @@ function toggleCoaCardNode(id){
   coaExpanded[id]=!coaExpanded[id];
   renderCoaCardTree();
 }
+function coaBalanceColHtml(node,data){
+  const subs=(node.children||[]);
+  const subsWithBalance=subs.filter(sub=>Math.abs(coaRowTotal(sub.id,data))>0.0001);
+  const total=subs.reduce((s,sub)=>s+coaRowTotal(sub.id,data),0);
+  const rowsHtml=subsWithBalance.length?subsWithBalance.map(sub=>coaCardSubHtml(sub,data)).join(''):'<div class="biz-po-empty">لا توجد أرصدة حالياً</div>';
+  return `<div class="coa-node">
+    <div class="coa-node-hdr" style="cursor:default;">
+      <span class="coa-name">${node.ico||''} ${esc(node.name)}<span class="coa-count">${fmt(total)}</span></span>
+    </div>
+    <div class="coa-node-body open">${rowsHtml}</div>
+  </div>`;
+}
 function renderCoaCardTree(){
   const wrap=document.getElementById('coa-card-tree-wrap');
   if(!wrap)return;
   const data=loadCoaAccounts();
-  wrap.innerHTML=getCoaStructure().map(node=>coaCardNodeHtml(node,data)).join('');
+  const structure=getCoaStructure();
+  const assetsNode=structure.find(n=>n.id==='assets');
+  const liabNode=structure.find(n=>n.id==='liabilities');
+  const liabNodeDisplay=liabNode?Object.assign({},liabNode,{name:'التزامات وحقوق ملكية'}):null;
+  const others=structure.filter(n=>n.id!=='assets'&&n.id!=='liabilities');
+  const colsHtml=`<div class="coa-balance-cols">
+    <div class="coa-balance-col">${assetsNode?coaBalanceColHtml(assetsNode,data):''}</div>
+    <div class="coa-balance-col">${liabNodeDisplay?coaBalanceColHtml(liabNodeDisplay,data):''}</div>
+  </div>`;
+  wrap.innerHTML=colsHtml+others.map(node=>coaCardNodeHtml(node,data)).join('');
 }
 function renderAccountsCardView(){
   const body=document.getElementById('biz-detail-body');
