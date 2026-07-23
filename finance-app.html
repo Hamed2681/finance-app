@@ -6334,9 +6334,18 @@ function refreshBizDashboard(){
   setTxt('ws-liq-bank-open',fmt(loadBankOpening()));
   updateLiqPendingBlink();
   const coa=loadCoaAccounts();
-  const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
-  const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_treasury','assets_banks','assets_debtors','assets_other_debit']);
-  const manualLiabOnly=sumCoa(['liab_obligations','liab_other_credit']);
+  const coaStruct=getCoaStructure();
+  const findCoaNode=(nodes,id)=>{for(const n of nodes){if(n.id===id)return n;if(n.children){const r=findCoaNode(n.children,id);if(r)return r;}}return null;};
+  /* بيجمع الحسابات اليدوية بس (من غير الـ builtins المحسوبة) فى كل الأوراق تحت عقدة معينة، مهما كان عمقها فى الشجرة —
+     ده اللى بيخلّى أى حساب فرعى بتضيفه بنفسك (زى «خزنة») يظهر فعلاً فى إجمالى الأصول */
+  const sumManualLeaves=node=>{
+    if(!node)return 0;
+    if(node.children&&node.children.length)return node.children.reduce((s,c)=>s+sumManualLeaves(c),0);
+    return (coa[node.id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0);
+  };
+  const sumCoa=ids=>ids.reduce((s,id)=>s+sumManualLeaves(findCoaNode(coaStruct,id)),0);
+  const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_treasury','assets_banks','assets_debtors','assets_intangible','assets_investments','assets_other_debit']);
+  const manualLiabOnly=sumCoa(['liab_obligations','liab_payables','liab_other_credit']);
   const manualEquity=sumCoa(['liab_equity']);
   const totalAssets=customersReceivable+inventoryVal+treasuryVal+bankVal+manualAssets;
   const totalEquity=manualEquity+partnersEquityTotal();
@@ -6512,19 +6521,21 @@ let coaClassOpen={};
 // ── إضافة (Add-on): حسابات شركاء — عند التفعيل، كل شريك بيتحط كصف واحد داخل «حساب الشركاء»
 // فى الخصوم، بقيمة إجمالية = رأس المال + الحساب الجاري (بدل عقدة منفصلة لكل شريك) ──
 function registerPartnerCoaBuiltins(){
-  const rows=[];
+  const capRows=[],curRows=[];
   loadPartners().forEach(p=>{
-    rows.push({key:'partner_'+p.id+'_capital',name:p.name+' — رأس المال',calc:()=>Number(p.capitalOpening||0)});
-    rows.push({key:'partner_'+p.id+'_current',name:p.name+' — حساب جاري',calc:()=>partnerCurrentBalance(p)});
+    capRows.push({key:'partner_'+p.id+'_capital',name:p.name+' — رأس المال',calc:()=>Number(p.capitalOpening||0)});
+    curRows.push({key:'partner_'+p.id+'_current',name:p.name+' — حساب جاري',calc:()=>partnerCurrentBalance(p)});
   });
-  COA_BUILTIN_ROWS['liab_equity']=rows;
+  COA_BUILTIN_ROWS['equity_capital']=capRows;
+  COA_BUILTIN_ROWS['equity_current']=curRows;
 }
 function getCoaStructure(){
   let structure=JSON.parse(JSON.stringify(COA_STRUCTURE));
   if(getSettings().addonPartners){
     registerPartnerCoaBuiltins();
   }else{
-    delete COA_BUILTIN_ROWS['liab_equity'];
+    delete COA_BUILTIN_ROWS['equity_capital'];
+    delete COA_BUILTIN_ROWS['equity_current'];
   }
   return applyCoaOverrides(structure);
 }
@@ -6565,23 +6576,16 @@ const COA_CLASS_TYPES={assets_customers:'customer',liab_suppliers:'supplier'};
 const COA_CLASS_LABELS={customer:'المبيعات/العملاء',supplier:'المشتريات/الموردين'};
 /* حسابات أساسية محسوبة تلقائياً (مش بتتضاف يدوياً) داخل «أصول متداولة» */
 const COA_BUILTIN_ROWS={
-  assets_goods:[
-    {key:'goods_main',name:'بضاعة جاهزة للبيع',calc:()=>(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)},
-    {key:'goods_raw',name:'مواد خام',calc:()=>0},
-    {key:'goods_packaging',name:'مواد تعبئة وتغليف',calc:()=>0},
-    {key:'goods_transit',name:'بضاعة في الطريق',calc:()=>0},
-    {key:'goods_consignment',name:'بضاعة أمانة لدى الغير',calc:()=>0}
+  /* ★ لازم المفتاح يكون نفس id الحساب الفرعى (الورقة/leaf) اللى هيتعرض جواه، مش الأب اللى ليه أبناء —
+     لأن كل الدوال (coaRowTotal/coaCardSubHtml/coaLeafBalance) بتدور بـ sub.id على مستوى الورقة بالظبط */
+  goods_main:[
+    {key:'goods_main',name:'بضاعة جاهزة للبيع',calc:()=>(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)}
   ],
-  assets_treasury:[
-    {key:'treasury_main',name:'الخزينة الرئيسية',calc:()=>treasuryCashVal()},
-    {key:'treasury_petty',name:'صندوق المصروفات النثرية',calc:()=>0},
-    {key:'treasury_branch',name:'خزائن الفروع',calc:()=>0}
+  treasury_main:[
+    {key:'treasury_main',name:'الخزينة الرئيسية',calc:()=>treasuryCashVal()}
   ],
-  assets_banks:[
-    {key:'banks_current',name:'حسابات جارية',calc:()=>bankCashVal()},
-    {key:'banks_savings',name:'حسابات توفير',calc:()=>0},
-    {key:'banks_deposits',name:'ودائع لأجل',calc:()=>0},
-    {key:'banks_pos',name:'حساب نقاط البيع (POS)',calc:()=>0}
+  banks_current:[
+    {key:'banks_current',name:'حسابات جارية',calc:()=>bankCashVal()}
   ]
 };
 function loadCoaAccounts(){
@@ -6757,6 +6761,53 @@ function coaRowTotal(subId,data){
   const accs=data[subId]||[];
   const builtins=(COA_BUILTIN_ROWS[subId]||[]);
   return accs.reduce((s,a)=>s+(Number(a.amount)||0),0)+builtins.reduce((s,b)=>s+(Number(b.calc())||0),0);
+}
+/* ── كل الحسابات اليدوية المضافة فى أى مكان بالشجرة (زى «جمعية»، «سلفة موظف»...)، مع مسارها ورصيدها الحالى —
+   بتتستخدم عشان أي حركة خزينة (إذن قبض/صرف) تقدر تتربط بأي حساب منها وتزود/تنقص رصيده تلقائيًا ── */
+function listLinkableCoaAccounts(){
+  const data=loadCoaAccounts();
+  const out=[];
+  const walk=(nodes,path)=>{
+    (nodes||[]).forEach(n=>{
+      if(n.children&&n.children.length){walk(n.children,path?path+' ← '+n.name:n.name);}
+      else{
+        (data[n.id]||[]).forEach(a=>{
+          out.push({subId:n.id,accId:a.id,shortName:a.name,label:(path?path+' ← ':'')+n.name+' — '+a.name+' ('+fmt(a.amount)+')'});
+        });
+      }
+    });
+  };
+  walk(getCoaStructure(),'');
+  return out;
+}
+/* ── يحدد القسم الأساسى اللى الحساب ده عايش تحته فى الشجرة: أصول / التزامات / إيرادات / مصروفات ── */
+function coaAccountSection(subId){
+  const structure=getCoaStructure();
+  const contains=(node,id)=>{
+    if(node.id===id)return true;
+    if(node.children)return node.children.some(c=>contains(c,id));
+    return false;
+  };
+  const roots=['assets','liabilities','revenue','expenses'];
+  for(const r of roots){
+    const rootNode=structure.find(n=>n.id===r);
+    if(rootNode&&contains(rootNode,subId))return r;
+  }
+  return null;
+}
+/* ── تطبيق أثر حركة مرتبطة (إذن قبض/صرف) على رصيد حساب يدوي محدد —
+   الأصول والمصروفات طبيعتها مدينة (مدين بيزوّدها، دائن بينقصها)، والالتزامات والإيرادات طبيعتها دائنة (العكس بالظبط) ── */
+function applyLinkedAccountDelta(subId,accId,dir,amount){
+  if(!subId||!accId||!amount)return;
+  const data=loadCoaAccounts();
+  const acc=(data[subId]||[]).find(a=>a.id===accId);
+  if(!acc)return;
+  const section=coaAccountSection(subId);
+  const isDebitNormal=(section==='assets'||section==='expenses');
+  const isDebitEntry=dir!=='dec'; // 'inc' = مدين، 'dec' = دائن
+  const sign=(isDebitNormal===isDebitEntry)?1:-1;
+  acc.amount=Math.round((Number(acc.amount||0)+sign*Number(amount))*100)/100;
+  saveCoaAccounts(data);
 }
 /* مجموع أى عقدة فى الشجرة سواء كانت ورقة (حساب) أو مجموعة (لها أبناء) — بيتنادى بشكل تكرارى لدعم التعشيش */
 function coaNodeAmount(node,data){
@@ -7806,8 +7857,8 @@ function openVoucherForm(kind){
     <div class="biz-po-form">
       <div class="biz-po-form-title">${title}</div>
       <select class="biz-po-inp" id="vch-${kind}-type" ${kind==='receipt'?'onchange="vchTypeChanged()"':''}>${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
-      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl} — اكتب أول حروف للاقتراح" autocomplete="off">
-        <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl} — اسم حر، أو اسم حساب موجود فى الشجرة" autocomplete="off" oninput="vchNameInputChanged('${kind}')">
+        <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}${listLinkableCoaAccounts().map(a=>`<option value="${esc(a.label)}">`).join('')}</datalist>
       </div>
       ${kind==='payment'?`
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-payment-recipient" list="vch-payment-recipient-list" placeholder="اسم المستلم — الشخص اللي استلم المبلغ فعلاً" autocomplete="off">
@@ -7817,6 +7868,12 @@ function openVoucherForm(kind){
       <div class="biz-po-frow2">
         <input class="biz-po-inp" id="vch-${kind}-amount" type="number" placeholder="المبلغ">
         <input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}">
+      </div>
+      <div class="biz-po-frow" id="vch-${kind}-linkdir-wrap" style="display:none;">
+        <select class="biz-po-inp" id="vch-${kind}-linkdir">
+          <option value="inc">مدين (عليه)</option>
+          <option value="dec">دائن (له)</option>
+        </select>
       </div>
       ${kind==='receipt'?`
       <div class="biz-po-frow" id="vch-settle-wrap" style="display:none;"><select class="biz-po-inp" id="vch-settle-target" onchange="vchSettleTargetChosen()"></select></div>
@@ -7851,6 +7908,16 @@ function copyNameToRecipient(kind){
   const nameEl=document.getElementById('vch-payment-name');
   const recEl=document.getElementById('vch-payment-recipient');
   if(nameEl&&recEl&&nameEl.value.trim()&&!recEl.value.trim())recEl.value=nameEl.value.trim();
+}
+/* ── لما المستخدم يكتب/يختار فى خانة الاسم: لو اللي كتبه مطابق تمامًا لاسم حساب موجود فعلاً فى الشجرة،
+   نظهر اختيار مدين/دائن عشان يحدد أثره على رصيد الحساب ده؛ لو اسم حر عادي، نخفيه ومفيش ربط ── */
+function vchNameInputChanged(kind){
+  const inp=document.getElementById(`vch-${kind}-name`);
+  const wrap=document.getElementById(`vch-${kind}-linkdir-wrap`);
+  if(!inp||!wrap)return;
+  const val=inp.value.trim();
+  const match=val&&listLinkableCoaAccounts().some(a=>a.label===val);
+  wrap.style.display=match?'flex':'none';
 }
 /* ── لما نوع الإذن يتغير لـ"تسوية قبض": نظهر قائمة منسدلة بكل فروق التحصيل المسجلة
    (سواء على شركاء أو على "أخرى مدينة")، ونخفي قائمة تحصيل العملاء لأنها مالهاش علاقة ── */
@@ -7955,7 +8022,9 @@ function renderVchCustRows(){
 }
 function closeVoucherForm(kind){const s=document.getElementById(voucherFormSlotId(kind));if(s)s.innerHTML='';if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}}
 function saveVoucher(kind){
-  const name=document.getElementById(`vch-${kind}-name`).value.trim();
+  const rawName=document.getElementById(`vch-${kind}-name`).value.trim();
+  const linkMatch=rawName?listLinkableCoaAccounts().find(a=>a.label===rawName):null;
+  const name=linkMatch?linkMatch.shortName:rawName;
   const amount=Number(document.getElementById(`vch-${kind}-amount`).value||0);
   const typeVal=document.getElementById(`vch-${kind}-type`).value||'أخرى';
   const isSettle=kind==='receipt'&&typeVal==='تسوية قبض';
@@ -7977,22 +8046,26 @@ function saveVoucher(kind){
     extraNotes=custLines.map(c=>c.name+': '+fmt(c.amount)).join(' — ');
   }
   if(isSettle&&_vchSettleKey)settleOtherDebitOrPartner(_vchSettleKey,total,date,seq);
+  const linkDir=document.getElementById(`vch-${kind}-linkdir`)?.value||'inc';
   const notesVal=document.getElementById(`vch-${kind}-notes`).value.trim();
   const v={id:(kind==='receipt'?'rcpt_':'pmt_')+Date.now(),seq,name:displayName,amount:total,
     type:typeVal,
     date,
     desc:document.getElementById(`vch-${kind}-desc`).value.trim()||(custLines.length?'تحصيل مديونية عملاء':(isSettle?'تسوية فرق تحصيل':'')),
     notes:[notesVal,extraNotes].filter(Boolean).join(' — ')};
+  if(linkMatch){v.linkSub=linkMatch.subId;v.linkAcc=linkMatch.accId;v.linkDir=linkDir;}
   if(custLines.length){v.lines=custLines.map(c=>({customerName:c.name,amount:Number(c.amount)}));v.status='pending';}
   // خزّن اسم المستلم في الإذن الصرف
   if(kind==='payment'&&recipient)v.recipient=recipient;
   if(kind==='receipt'){const l=loadTreasuryReceipts();l.push(v);saveTreasuryReceipts(l);}
   else{const l=loadTreasuryPayments();l.push(v);saveTreasuryPayments(l);}
+  // لو الإذن مش معلّق (مالوش سطور عملاء بتستنى تأكيد)، أثر الربط بيتطبّق فورًا زي أثر الخزينة بالظبط
+  if(v.linkSub&&v.status!=='pending')applyLinkedAccountDelta(v.linkSub,v.linkAcc,v.linkDir,total);
   pushBizJournal(displayName,total,kind==='receipt'?'in':'out',(kind==='receipt'?'إذن قبض #':'إذن صرف #')+v.seq,kind==='receipt'?'var(--green)':'var(--red)',v.date);
   if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   closeVoucherForm(kind);
   if(kind==='receipt'){renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));refreshBizDashboard();renderAccountsDetail();}
-  else renderPaymentTab(document.getElementById('biz-liquidity-tab-content'));
+  else{renderPaymentTab(document.getElementById('biz-liquidity-tab-content'));refreshBizDashboard();renderAccountsDetail();}
 }
 function viewVoucher(kind,id){
   const list=kind==='receipt'?loadTreasuryReceipts():loadTreasuryPayments();
@@ -8047,6 +8120,7 @@ function saveConfirmFromVoucherView(kind,id){
   const diff=Math.round((Number(v.amount)-confirmedAmount)*100)/100;
   v.status='confirmed';v.confirmedAmount=confirmedAmount;v.confirmedDate=todayStr();
   if(kind==='receipt')saveTreasuryReceipts(list);else saveTreasuryPayments(list);
+  if(v.linkSub)applyLinkedAccountDelta(v.linkSub,v.linkAcc,v.linkDir,confirmedAmount);
   let wentToPartner2=false;
   if(diff>0.001){
     // في إذن الصرف: الفرق يسجَّل كدين على المستلم (الشخص اللي استلم المبلغ فعلاً) وليس المصروف له
@@ -8111,6 +8185,14 @@ function revertVoucherEffects(kind,v){
   const adj=loadPartnerCurrentAdj();
   if(adj.some(a=>a.voucherSeq===v.seq)){
     savePartnerCurrentAdj(adj.filter(a=>a.voucherSeq!==v.seq));
+  }
+  // لو الإذن ده كان مربوط بحساب فى الشجرة وأثره اتطبّق فعلاً (يعني مكانش لسه معلّق)، نرجّع الرصيد زي ما كان
+  if(v.linkSub){
+    const wasPending=v.status==='pending';
+    if(!wasPending){
+      const appliedAmount=Number(v.confirmedAmount!=null?v.confirmedAmount:v.amount)||0;
+      applyLinkedAccountDelta(v.linkSub,v.linkAcc,v.linkDir==='dec'?'inc':'dec',appliedAmount);
+    }
   }
 }
 function deleteVoucher(kind,id){
