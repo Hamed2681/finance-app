@@ -643,6 +643,9 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-ring-badge .biz-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--txt);}
 .biz-expand-overlay .biz-ring-badge{width:52px;height:52px;}
 .biz-expand-overlay .biz-ring-badge .biz-ring-val{font-size:12px;}
+.biz-ring-center{display:flex;justify-content:center;align-items:center;margin:2px 0;}
+#pg-workspace .biz-card[data-biz-key="purchases"] .biz-ring-center .biz-ring-badge,#pg-workspace .biz-card[data-biz-key="sales"] .biz-ring-center .biz-ring-badge{width:60px;height:60px;}
+#pg-workspace .biz-card[data-biz-key="purchases"] .biz-ring-center .biz-ring-val,#pg-workspace .biz-card[data-biz-key="sales"] .biz-ring-center .biz-ring-val{font-size:13px;}
 .biz-card-ftr{display:flex;align-items:center;justify-content:center;gap:6px;margin:auto -7px -7px -7px;background:var(--card2);border-top:1px solid var(--border);border-radius:0 0 11px 11px;padding:4px 8px;}
 .biz-expand-overlay .biz-card-ftr{margin:auto -16px -16px -16px;padding:8px 16px;border-radius:0 0 16px 16px;}
 .biz-card-title{font-size:9.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:center;}
@@ -652,6 +655,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-expand-overlay.show{opacity:1;pointer-events:auto;}
 .biz-expand-overlay .biz-card{width:min(78vw,360px)!important;border-radius:16px!important;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:16px!important;padding-top:34px!important;gap:10px!important;cursor:default;transform:scale(.85);opacity:0;transition:transform .2s cubic-bezier(.2,.9,.3,1.3),opacity .18s ease;}
 .biz-expand-overlay .biz-card-hdr{justify-content:flex-start!important;}
+#pg-workspace .biz-card[data-biz-key="purchases"]>.biz-bar,#pg-workspace .biz-card[data-biz-key="sales"]>.biz-bar,#pg-workspace .biz-card[data-biz-key="expenses"]>.biz-bar{display:none!important;}
+#pg-workspace .biz-card[data-biz-key="purchases"]>.biz-sub,#pg-workspace .biz-card[data-biz-key="sales"]>.biz-sub,#pg-workspace .biz-card[data-biz-key="expenses"]>.biz-sub,#pg-workspace .biz-card[data-biz-key="inventory"]>.biz-sub{display:none!important;}
 .biz-expand-overlay.show .biz-card{transform:scale(1);opacity:1;}
 .biz-expand-overlay .biz-card:active{transform:none;}
 .biz-expand-overlay .biz-card-title{font-size:14px;}
@@ -1842,8 +1847,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(192,57,43,.16);">🛒</span>
-            <span class="biz-ring-badge"><svg id="ws-pur-ring" viewBox="0 0 78 78"></svg><span class="biz-ring-val" id="ws-pur-ring-val">0%</span></span>
           </div>
+          <div class="biz-ring-center"><span class="biz-ring-badge"><svg id="ws-pur-ring" viewBox="0 0 78 78"></svg><span class="biz-ring-val" id="ws-pur-ring-val">0%</span></span></div>
           <div class="biz-lbl" style="text-align:center;">المشتريات</div>
           <div class="biz-val" id="ws-pur-total" style="text-align:center;">0</div>
 
@@ -1889,8 +1894,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(77,168,240,.16);">👥</span>
-            <span class="biz-ring-badge"><svg id="ws-sale-ring" viewBox="0 0 78 78"></svg><span class="biz-ring-val" id="ws-sale-ring-val">0%</span></span>
           </div>
+          <div class="biz-ring-center"><span class="biz-ring-badge"><svg id="ws-sale-ring" viewBox="0 0 78 78"></svg><span class="biz-ring-val" id="ws-sale-ring-val">0%</span></span></div>
           <div class="biz-lbl" style="text-align:center;">المبيعات</div>
           <div class="biz-val" id="ws-sale-total" style="text-align:center;">0</div>
           <div class="biz-sub">من رأس المال <b style="color:var(--blue);">0%</b></div>
@@ -2855,7 +2860,7 @@ function renderDebt(){
 
   function calcRowNets(r){
     const txns=(r.transactions||[]);
-    const pF=txns.filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+    const pF=txns.filter(t=>t.dir==='for'&&!t.excessTransfer).reduce((s,t)=>s+Number(t.amount||0),0);
     const pA=txns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
     const reqEff=Number(r.req||0)+pA;
     return{req:reqEff,net:pF};
@@ -2866,8 +2871,8 @@ function renderDebt(){
     // المطلوب تراكمي — كل pAg بغض النظر عن المدة
     const pAgAll=realTxns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
     // المدفوع مفلتر بالمدة فقط
-    const pForInRange=realTxns.filter(t=>t.dir==='for'&&inRange(t.date||r.date,dFrom,dTo)).reduce((s,t)=>s+Number(t.amount||0),0);
-    const pForAll=realTxns.filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+    const pForInRange=realTxns.filter(t=>t.dir==='for'&&!t.excessTransfer&&inRange(t.date||r.date,dFrom,dTo)).reduce((s,t)=>s+Number(t.amount||0),0);
+    const pForAll=realTxns.filter(t=>t.dir==='for'&&!t.excessTransfer).reduce((s,t)=>s+Number(t.amount||0),0);
     const net=pForAll; // للعرض في الجدول نعرض الكلي
     const netInRange=pForInRange; // للكرت والملخص
     const req=Number(r.req||0)+pAgAll;
@@ -2999,7 +3004,7 @@ function debtTotalsInMode(mode, from, to, catFilter) {
         const added = realTxns.filter(t => t.dir === 'against').reduce((s, t) => s + Number(t.amount || 0), 0);
         const req = Number(r.req || 0) + added;
         totalReq += req;
-        realTxns.filter(t => t.dir === 'for').forEach(t => {
+        realTxns.filter(t => t.dir === 'for' && !t.excessTransfer).forEach(t => {
             const d = t.date || r.date;
             if (!d) return;
             const inB = isBeforeOrEqual(d, to);
@@ -3363,15 +3368,15 @@ function faTypeWriter(el,text,i,done){
 function updateRatioBars(income,exp,commitPaid,credPaid,debPaid,totalExp){
   const pct=(v)=>income>0?Math.min(100,Math.round((v/income)*100)):0;
   // كرت الدخل: نسبة النفقات الإجمالية إلى الدخل (الطوق يملأ بقدر ما أنفقت)
-  drawPercentRing('chart-income-side',pct(totalExp),'#f05454',{pctId:'ct-income-pct',gradient:['#f05454','#e0b030']});
+  drawSegmentedRing('chart-income-side',pct(totalExp),'#f05454',{pctId:'ct-income-pct'});
   // كرت المصروفات (stacked): نسبة المصروفات إلى الدخل
-  drawPercentRing('chart-expense-side',pct(exp),'#7eb8e0',{pctId:'ct-expense-pct',gradient:['#9fd4ff','#4da8f0']});
+  drawSegmentedRing('chart-expense-side',pct(exp),'#7eb8e0',{pctId:'ct-expense-pct'});
   // كرت الالتزامات: نسبة المدفوع من الالتزامات إلى الدخل
-  drawPercentRing('chart-commit-side',pct(commitPaid),'#7eb8e0');
+  drawSegmentedRing('chart-commit-side',pct(commitPaid),'#7eb8e0');
   // كرت الديون: نسبة المدفوع فى التصنيف الحالى (دائن/مدين) إلى الدخل
   const debtPct=debtMode==='creditor'?pct(credPaid):pct(debPaid);
   const debtColor='#7eb8e0';
-  drawPercentRing('chart-debt-side',debtPct,debtColor);
+  drawSegmentedRing('chart-debt-side',debtPct,debtColor);
 }
 
 // ══════════════════════════════════════════════
@@ -3457,16 +3462,19 @@ function drawSegmentedRing(id,pct,color,opts){
   const svg=document.getElementById(id);
   if(!svg)return;
   svg.innerHTML='';
+  const vb=svg.getAttribute('viewBox')||'0 0 78 78';
+  const vbParts=vb.split(/\s+/).map(Number);
+  const W=vbParts[2]||78, H=vbParts[3]||78;
+  const cx=W/2, cy=H/2;
   const segs=opts.segments||12;
   const segGapDeg=opts.gap||6;          // زاوية الفجوة بين كل شريحة
-  const innerR=opts.innerR||22;          // نصف القطر الداخلي للجزء الفاضي
-  const outerR=opts.outerR||32;          // نصف القطر الخارجي للجزء الفاضي
-  const popOuter=opts.popOuter||36;      // نصف القطر الخارجي للجزء البارز
+  const innerR=opts.innerR!=null?opts.innerR:W*0.282;   // نصف القطر الداخلي للجزء الفاضي
+  const outerR=opts.outerR!=null?opts.outerR:W*0.410;   // نصف القطر الخارجي للجزء الفاضي
+  const popOuter=opts.popOuter!=null?opts.popOuter:W*0.462; // نصف القطر الخارجي للجزء البارز
   const startDeg=opts.startDeg||-90;      // ابدأ من فوق
   pct=Math.max(0,Math.min(100,pct));
   const filledCount=Math.round((pct/100)*segs);
   const stepDeg=360/segs;
-  const cx=39, cy=39;
   const NS='http://www.w3.org/2000/svg';
   const polar=(deg,r)=>{const rad=(deg-90)*Math.PI/180;return[cx+r*Math.cos(rad),cy+r*Math.sin(rad)];};
   const arcPath=(cx,cy,r,a0,a1)=>{
@@ -3491,6 +3499,20 @@ function drawSegmentedRing(id,pct,color,opts){
     }
     path.setAttribute('stroke','none');
     svg.appendChild(path);
+  }
+  // تحديث نص النسبة: إما داخل عنصر HTML خارجي (زي البادچات) أو كنص داخل الـ SVG نفسه
+  const pctId=opts.pctId;
+  if(pctId){
+    const el=document.getElementById(pctId);
+    if(el) el.textContent=Math.round(pct)+'%';
+  } else if(opts.showText!==false){
+    const txt=document.createElementNS(NS,'text');
+    txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',Math.max(10,Math.round(W*0.2)));
+    txt.setAttribute('font-family','Cairo,sans-serif');txt.setAttribute('font-weight','800');
+    txt.setAttribute('fill','#dde4ef');
+    txt.textContent=Math.round(pct)+'%';
+    svg.appendChild(txt);
   }
 }
 
@@ -3692,7 +3714,7 @@ function renderEM(type){
     rows.forEach(r=>{
       const txns=r.transactions||[];
       const realTxns=txns;
-      const pFor=realTxns.filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+      const pFor=realTxns.filter(t=>t.dir==='for'&&!t.excessTransfer).reduce((s,t)=>s+Number(t.amount||0),0);
       const pAg=realTxns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
       const net=pFor;
       const req=Number(r.req||0)+pAg;
@@ -4698,7 +4720,7 @@ function updateDhmLinkIncomeVisibility(){
 function updateHistHeader(r){
   const txns=r.transactions||[];
   const realTxns=txns;
-  const pF=realTxns.filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+  const pF=realTxns.filter(t=>t.dir==='for'&&!t.excessTransfer).reduce((s,t)=>s+Number(t.amount||0),0);
   const pA=realTxns.filter(t=>t.dir==='against').reduce((s,t)=>s+Number(t.amount||0),0);
   const net=pF;
   const reqEff=Number(r.req||0)+pA;
@@ -4787,12 +4809,16 @@ function saveDebtTransaction(){
   if(debtMode==='creditor'&&dir==='for'){
     const req=Number(arr[debtHistIdx].req||0);
     const paidSoFar=arr[debtHistIdx].transactions
-      .filter(t=>t.dir==='for').reduce((s,t)=>s+Number(t.amount||0),0);
+      .filter(t=>t.dir==='for'&&!t.excessTransfer).reduce((s,t)=>s+Number(t.amount||0),0);
     const remaining=req-paidSoFar;
     if(amount>remaining&&remaining>0){
       const extra=amount-remaining;
-      // سجل المعاملة الأساسية
-      arr[debtHistIdx].transactions.push({amount,details,pay,dir,date:txnDate,_seq:nextSeq()});
+      // سجل المعاملة الأساسية بمبلغ المتبقي الفعلي فقط، والزيادة كمعاملة منفصلة معلَّمة excessTransfer
+      // عشان متتحسبش ضمن المدفوع/المتبقي فى جدول الدائن (الزيادة دين جديد بيترحّل لجدول المدين)
+      arr[debtHistIdx].transactions.push({amount:remaining,details,pay,dir,date:txnDate,_seq:nextSeq()});
+      if(extra>0){
+        arr[debtHistIdx].transactions.push({amount:extra,details:'زيادة سداد مُرحّلة للمدين',pay,dir,date:txnDate,excessTransfer:true,_seq:nextSeq()});
+      }
       saveData(debtKey(),arr);
       document.getElementById('dhm-amount').value='';
       document.getElementById('dhm-details').value='';
