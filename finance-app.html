@@ -818,6 +818,9 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .coa-balance-col{min-width:0;display:flex;flex-direction:column;gap:6px;}
 .coa-balance-col .coa-node-hdr .coa-name{font-size:10.5px;}
 .coa-balance-col .coa-sub-hdr .coa-name{font-size:10px;}
+.coa-col-compact .coa-acc-row{font-size:9.5px;padding:5px 8px;}
+.coa-col-compact .coa-acc-row>b{font-size:9.5px;}
+.coa-col-compact .coa-node-hdr .coa-count,.coa-col-compact .coa-sub-hdr .coa-count{font-size:9px;}
 .coa-root{font-size:13px;font-weight:800;color:var(--txt);text-align:center;padding:8px;background:var(--card2);border-radius:9px;border:1px solid var(--border);}
 .coa-node{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
 .coa-node-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;cursor:pointer;gap:6px;}
@@ -2514,7 +2517,7 @@ const BIZ_SCOPED_KEYS=new Set(['fm_bank_opening','fm_biz_journal','fm_biz_purcha
   'fm_biz_sales_invoices','fm_biz_sales_returns','fm_classifications','fm_coa_accounts',
   'fm_customer_creditlimits','fm_customer_duedates','fm_customer_openings','fm_inv_damaged','fm_inv_folders','fm_inv_groups','fm_inv_items',
   'fm_inv_returns','fm_inv_sections','fm_inv_warehouses','fm_liq_transfers','fm_manual_customers','fm_manual_suppliers',
-  'fm_partner_current_adj','fm_partners','fm_pinv_no_seq','fm_return_ref_seq','fm_return_ref_seq_sales','fm_seq',
+  'fm_partner_current_adj','fm_partner_capital_adj','fm_partners','fm_pinv_no_seq','fm_return_ref_seq','fm_return_ref_seq_sales','fm_seq',
   'fm_sinv_no_seq','fm_supplier_duedates','fm_supplier_openings','fm_treasury_opening',
   'fm_treasury_payments','fm_treasury_receipts']);
 let currentWs='personal'; // النشاط الحالي (شخصي أو أحد الأنشطة التجارية) — لازم يتعرّف الأول قبل أي استخدام لـ _scopedKey
@@ -6436,6 +6439,7 @@ const COA_STRUCTURE=[
       {id:'equity_capital',name:'رأس المال'},
       {id:'equity_reserves',name:'الاحتياطيات'},
       {id:'equity_retained',name:'أرباح محتجزة (مرحلة)'},
+      {id:'equity_pnl',name:'أرباح وخسائر'},
       {id:'equity_current',name:'جاري الشركاء'},
       {id:'equity_drawings',name:'مسحوبات الشركاء'}
     ]},
@@ -6523,7 +6527,7 @@ let coaClassOpen={};
 function registerPartnerCoaBuiltins(){
   const capRows=[],curRows=[];
   loadPartners().forEach(p=>{
-    capRows.push({key:'partner_'+p.id+'_capital',name:p.name+' — رأس المال',calc:()=>Number(p.capitalOpening||0)});
+    capRows.push({key:'partner_'+p.id+'_capital',name:p.name+' — رأس المال',calc:()=>partnerCapitalBalance(p)});
     curRows.push({key:'partner_'+p.id+'_current',name:p.name+' — حساب جاري',calc:()=>partnerCurrentBalance(p)});
   });
   COA_BUILTIN_ROWS['equity_capital']=capRows;
@@ -6541,9 +6545,9 @@ function getCoaStructure(){
 }
 function partnersEquityTotal(){
   if(!getSettings().addonPartners)return 0;
-  return loadPartners().reduce((s,p)=>s+Number(p.capitalOpening||0)+partnerCurrentBalance(p),0);
+  return loadPartners().reduce((s,p)=>s+partnerCapitalBalance(p)+partnerCurrentBalance(p),0);
 }
-/* ── حساب جاري الشريك: رصيد افتتاحي + أى تسويات لاحقة (زى فرق أذون التحصيل) ── */
+/* ── حساب جاري الشريك: رصيد افتتاحي + أى تسويات لاحقة (زى فرق أذون التحصيل، مسحوبات، إيداعات) ── */
 function loadPartnerCurrentAdj(){return JSON.parse(_getItem('fm_partner_current_adj')||'[]');}
 function savePartnerCurrentAdj(l){_setItem('fm_partner_current_adj',JSON.stringify(l));}
 function partnerCurrentAdjTotal(partnerId){
@@ -6551,6 +6555,15 @@ function partnerCurrentAdjTotal(partnerId){
 }
 function partnerCurrentBalance(p){
   return Number(p.currentOpening||0)+partnerCurrentAdjTotal(p.id);
+}
+/* ── رأس مال الشريك: رصيد افتتاحي + أى زيادات لاحقة (زى مدفوعات شريك لزيادة رأس المال) ── */
+function loadPartnerCapitalAdj(){return JSON.parse(_getItem('fm_partner_capital_adj')||'[]');}
+function savePartnerCapitalAdj(l){_setItem('fm_partner_capital_adj',JSON.stringify(l));}
+function partnerCapitalAdjTotal(partnerId){
+  return loadPartnerCapitalAdj().filter(a=>a.partnerId===partnerId).reduce((s,a)=>s+Number(a.amount||0),0);
+}
+function partnerCapitalBalance(p){
+  return Number(p.capitalOpening||0)+partnerCapitalAdjTotal(p.id);
 }
 const COA_LINK_NODES={
   assets_customers:{bizKey:'sales'},
@@ -6948,7 +6961,7 @@ function renderAccountsCardView(){
   const expNode=structure.find(n=>n.id==='expenses');
   const grid=`<div class="coa-balance-cols">
     <div class="coa-balance-col">${coaSectionHtml(assetsNode,data)}</div>
-    <div class="coa-balance-col">${coaSectionHtml(liabNode,data)}</div>
+    <div class="coa-balance-col coa-col-compact">${coaSectionHtml(liabNode,data)}</div>
   </div>
   <div class="coa-balance-cols" style="margin-top:6px;">
     <div class="coa-balance-col">${coaSectionHtml(revNode,data)}</div>
@@ -7816,7 +7829,7 @@ function renderReceiptTab(c){
 /* ── إذن صرف ── */
 const VOUCHER_TYPES={
   payment:['مصروف','سداد سلفة','سداد عهدة','تحويل','مسحوبات شريك','أخرى'],
-  receipt:['إيراد','تسوية صرف','تسوية قبض','سداد سلفة','إيداع شريك','تحويل','أخرى']
+  receipt:['إيراد','تسوية صرف','تسوية قبض','سداد سلفة','إيداع شريك','مدفوعات شريك','تحويل','أخرى']
 };
 function renderPaymentTab(c){
   const list=loadTreasuryPayments().slice().reverse();
@@ -7856,10 +7869,15 @@ function openVoucherForm(kind){
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">${title}</div>
-      <select class="biz-po-inp" id="vch-${kind}-type" ${kind==='receipt'?'onchange="vchTypeChanged()"':''}>${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
-      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl} — اسم حر، أو اسم حساب موجود فى الشجرة" autocomplete="off" oninput="vchNameInputChanged('${kind}')">
-        <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}${listLinkableCoaAccounts().map(a=>`<option value="${esc(a.label)}">`).join('')}</datalist>
+      <select class="biz-po-inp" id="vch-${kind}-type" onchange="vchTypeChanged('${kind}')">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
+      <div class="biz-po-frow" id="vch-${kind}-partner-wrap" style="display:none;"><select class="biz-po-inp" id="vch-${kind}-partner"></select></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl}" autocomplete="off">
+        <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
       </div>
+      <div class="biz-po-frow"><select class="biz-po-inp" id="vch-${kind}-coasel" onchange="vchCoaSelChanged('${kind}')">
+        <option value="">— ربط بحساب فرعى (اختياري) —</option>
+        ${listLinkableCoaAccounts().map(a=>`<option value="${esc(a.subId)}::${esc(a.accId)}">${esc(a.shortName)}</option>`).join('')}
+      </select></div>
       ${kind==='payment'?`
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-payment-recipient" list="vch-payment-recipient-list" placeholder="اسم المستلم — الشخص اللي استلم المبلغ فعلاً" autocomplete="off">
         <datalist id="vch-payment-recipient-list">${recipientDatalist}</datalist>
@@ -7909,29 +7927,60 @@ function copyNameToRecipient(kind){
   const recEl=document.getElementById('vch-payment-recipient');
   if(nameEl&&recEl&&nameEl.value.trim()&&!recEl.value.trim())recEl.value=nameEl.value.trim();
 }
-/* ── لما المستخدم يكتب/يختار فى خانة الاسم: لو اللي كتبه مطابق تمامًا لاسم حساب موجود فعلاً فى الشجرة،
-   نظهر اختيار مدين/دائن عشان يحدد أثره على رصيد الحساب ده؛ لو اسم حر عادي، نخفيه ومفيش ربط ── */
-function vchNameInputChanged(kind){
-  const inp=document.getElementById(`vch-${kind}-name`);
+/* ── لما المستخدم يختار حساب فرعى من القائمة المنسدلة المختصرة: نملأ خانة الاسم
+   باسم الحساب فقط (مختصر بدون مسار/مبلغ)، ونظهر اختيار مدين/دائن لتحديد أثره على رصيد الحساب ── */
+function vchCoaSelChanged(kind){
+  const sel=document.getElementById(`vch-${kind}-coasel`);
+  const nameInp=document.getElementById(`vch-${kind}-name`);
   const wrap=document.getElementById(`vch-${kind}-linkdir-wrap`);
-  if(!inp||!wrap)return;
-  const val=inp.value.trim();
-  const match=val&&listLinkableCoaAccounts().some(a=>a.label===val);
-  wrap.style.display=match?'flex':'none';
+  if(!sel)return;
+  if(sel.value){
+    const [subId,accId]=sel.value.split('::');
+    const acc=listLinkableCoaAccounts().find(a=>a.subId===subId&&a.accId===accId);
+    if(acc&&nameInp)nameInp.value=acc.shortName;
+    if(wrap)wrap.style.display='flex';
+  }else{
+    if(wrap)wrap.style.display='none';
+  }
 }
-/* ── لما نوع الإذن يتغير لـ"تسوية قبض": نظهر قائمة منسدلة بكل فروق التحصيل المسجلة
-   (سواء على شركاء أو على "أخرى مدينة")، ونخفي قائمة تحصيل العملاء لأنها مالهاش علاقة ── */
-function vchTypeChanged(){
-  const typeEl=document.getElementById('vch-receipt-type');
-  const isSettle=typeEl&&typeEl.value==='تسوية قبض';
-  const settleWrap=document.getElementById('vch-settle-wrap');
-  const custRow=document.getElementById('vch-receipt-custsel');
-  const custList=document.getElementById('vch-receipt-custlist');
-  if(settleWrap)settleWrap.style.display=isSettle?'flex':'none';
-  if(custRow)custRow.style.display=isSettle?'none':'';
-  if(custList)custList.style.display=isSettle?'none':'';
-  _vchSettleKey=null;
-  if(isSettle)renderVchSettleOptions();
+/* ── يحدد نوع أثر حركة الشريك على الشجرة: رصيد جاري ولا رأس مال، وبإشارة زيادة/نقصان ── */
+function partnerMoveConfig(kind,typeVal){
+  const map={
+    'payment:مسحوبات شريك':{target:'current',sign:-1},
+    'receipt:إيداع شريك':{target:'current',sign:1},
+    'receipt:مدفوعات شريك':{target:'capital',sign:1}
+  };
+  return map[kind+':'+typeVal]||null;
+}
+/* ── لما نوع الإذن يتغير:
+   ١) "تسوية قبض" (قبض فقط) → نظهر قائمة منسدلة بكل فروق التحصيل المسجلة (شركاء أو "أخرى مدينة")
+   ٢) حركات الشريك (مسحوبات/إيداع/زيادة رأس مال) → نظهر قائمة اختيار الشريك عشان نعدّل رصيده ── */
+function vchTypeChanged(kind){
+  const typeEl=document.getElementById(`vch-${kind}-type`);
+  const typeVal=typeEl?typeEl.value:'';
+  if(kind==='receipt'){
+    const isSettle=typeVal==='تسوية قبض';
+    const settleWrap=document.getElementById('vch-settle-wrap');
+    const custRow=document.getElementById('vch-receipt-custsel');
+    const custList=document.getElementById('vch-receipt-custlist');
+    if(settleWrap)settleWrap.style.display=isSettle?'flex':'none';
+    if(custRow)custRow.style.display=isSettle?'none':'';
+    if(custList)custList.style.display=isSettle?'none':'';
+    _vchSettleKey=null;
+    if(isSettle)renderVchSettleOptions();
+  }
+  const moveCfg=partnerMoveConfig(kind,typeVal);
+  const pWrap=document.getElementById(`vch-${kind}-partner-wrap`);
+  if(pWrap){
+    if(moveCfg&&getSettings().addonPartners){
+      const partners=loadPartners();
+      const pSel=document.getElementById(`vch-${kind}-partner`);
+      if(pSel)pSel.innerHTML=partners.length?partners.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''):`<option value="">لا يوجد شركاء مسجلون</option>`;
+      pWrap.style.display='flex';
+    }else{
+      pWrap.style.display='none';
+    }
+  }
 }
 function renderVchSettleOptions(){
   const sel=document.getElementById('vch-settle-target');
@@ -8023,7 +8072,8 @@ function renderVchCustRows(){
 function closeVoucherForm(kind){const s=document.getElementById(voucherFormSlotId(kind));if(s)s.innerHTML='';if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}}
 function saveVoucher(kind){
   const rawName=document.getElementById(`vch-${kind}-name`).value.trim();
-  const linkMatch=rawName?listLinkableCoaAccounts().find(a=>a.label===rawName):null;
+  const coaSelVal=document.getElementById(`vch-${kind}-coasel`)?.value||'';
+  const linkMatch=coaSelVal?(()=>{const [subId,accId]=coaSelVal.split('::');return listLinkableCoaAccounts().find(a=>a.subId===subId&&a.accId===accId);})():null;
   const name=linkMatch?linkMatch.shortName:rawName;
   const amount=Number(document.getElementById(`vch-${kind}-amount`).value||0);
   const typeVal=document.getElementById(`vch-${kind}-type`).value||'أخرى';
@@ -8061,6 +8111,40 @@ function saveVoucher(kind){
   else{const l=loadTreasuryPayments();l.push(v);saveTreasuryPayments(l);}
   // لو الإذن مش معلّق (مالوش سطور عملاء بتستنى تأكيد)، أثر الربط بيتطبّق فورًا زي أثر الخزينة بالظبط
   if(v.linkSub&&v.status!=='pending')applyLinkedAccountDelta(v.linkSub,v.linkAcc,v.linkDir,total);
+  // ── حركات الشريك (مسحوبات/إيداع/زيادة رأس مال): تعديل رصيد الحساب الجارى أو رأس المال للشريك المختار ──
+  const moveCfg=partnerMoveConfig(kind,typeVal);
+  if(moveCfg&&getSettings().addonPartners){
+    const partnerId=document.getElementById(`vch-${kind}-partner`)?.value||'';
+    const partner=loadPartners().find(p=>p.id===partnerId);
+    if(partner){
+      const adjAmount=moveCfg.sign*total;
+      const reason=typeVal+' إذن #'+seq;
+      if(moveCfg.target==='capital'){
+        const adj=loadPartnerCapitalAdj();
+        adj.push({id:'padjc_'+Date.now(),partnerId:partner.id,amount:adjAmount,date,reason,voucherSeq:seq});
+        savePartnerCapitalAdj(adj);
+        coaExpanded.liab_equity=true;coaExpanded.equity_capital=true;
+      }else{
+        const adj=loadPartnerCurrentAdj();
+        adj.push({id:'padj_'+Date.now(),partnerId:partner.id,amount:adjAmount,date,reason,voucherSeq:seq});
+        savePartnerCurrentAdj(adj);
+        coaExpanded.liab_equity=true;coaExpanded.equity_current=true;
+      }
+    }
+  }
+  // ── "سداد سلفة" فى إذن الصرف لشخص مش شريك ولا عميل ولا مورد: يتسجل كحساب فرعى تحت "أطراف مدينة أخرى" ──
+  if(kind==='payment'&&typeVal==='سداد سلفة'&&name){
+    const isPartnerName=getSettings().addonPartners&&loadPartners().some(p=>p.name===name);
+    const isCustomerName=getAllCustomerNames().includes(name);
+    const isSupplierName=getAllSupplierNames().includes(name);
+    if(!isPartnerName&&!isCustomerName&&!isSupplierName){
+      const coaAcc=loadCoaAccounts();
+      if(!coaAcc.assets_debtors)coaAcc.assets_debtors=[];
+      coaAcc.assets_debtors.push({id:'acc_'+Date.now(),name,amount:total,voucherSeq:seq});
+      saveCoaAccounts(coaAcc);
+      coaExpanded.assets_current=true;coaExpanded.assets_debtors=true;
+    }
+  }
   pushBizJournal(displayName,total,kind==='receipt'?'in':'out',(kind==='receipt'?'إذن قبض #':'إذن صرف #')+v.seq,kind==='receipt'?'var(--green)':'var(--red)',v.date);
   if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   closeVoucherForm(kind);
@@ -8178,13 +8262,23 @@ function revertVoucherEffects(kind,v){
     if(touched)savePInvoices(pInv);
   }
   const coa=loadCoaAccounts();
+  let coaTouched=false;
   if(coa.assets_other_debit&&coa.assets_other_debit.some(a=>a.voucherSeq===v.seq)){
     coa.assets_other_debit=coa.assets_other_debit.filter(a=>a.voucherSeq!==v.seq);
-    saveCoaAccounts(coa);
+    coaTouched=true;
   }
+  if(coa.assets_debtors&&coa.assets_debtors.some(a=>a.voucherSeq===v.seq)){
+    coa.assets_debtors=coa.assets_debtors.filter(a=>a.voucherSeq!==v.seq);
+    coaTouched=true;
+  }
+  if(coaTouched)saveCoaAccounts(coa);
   const adj=loadPartnerCurrentAdj();
   if(adj.some(a=>a.voucherSeq===v.seq)){
     savePartnerCurrentAdj(adj.filter(a=>a.voucherSeq!==v.seq));
+  }
+  const capAdj=loadPartnerCapitalAdj();
+  if(capAdj.some(a=>a.voucherSeq===v.seq)){
+    savePartnerCapitalAdj(capAdj.filter(a=>a.voucherSeq!==v.seq));
   }
   // لو الإذن ده كان مربوط بحساب فى الشجرة وأثره اتطبّق فعلاً (يعني مكانش لسه معلّق)، نرجّع الرصيد زي ما كان
   if(v.linkSub){
@@ -10903,6 +10997,8 @@ function renderPartnersList(){
   el.innerHTML=list.map(p=>{
     const adjTotal=partnerCurrentAdjTotal(p.id);
     const curBal=partnerCurrentBalance(p);
+    const capAdjTotal=partnerCapitalAdjTotal(p.id);
+    const capBal=partnerCapitalBalance(p);
     return `
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:6px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -10913,6 +11009,7 @@ function renderPartnersList(){
         <input class="s-inp" type="number" value="${p.capitalOpening||0}" placeholder="رأس المال" onchange="updatePartner('${p.id}','capitalOpening',this.value)">
         <input class="s-inp" type="number" value="${p.currentOpening||0}" placeholder="حساب جاري (رصيد افتتاحي)" onchange="updatePartner('${p.id}','currentOpening',this.value)">
       </div>
+      ${capAdjTotal?`<div style="font-size:10px;color:var(--muted);margin-top:4px;">رصيد رأس المال الحالى: <b style="color:var(--txt);">${fmt(capBal)}</b> (شامل زيادات مسجّلة: ${fmt(capAdjTotal)})</div>`:''}
       ${adjTotal?`<div style="font-size:10px;color:var(--muted);margin-top:4px;">رصيد الحساب الجارى الحالى: <b style="color:${curBal<0?'var(--red)':'var(--txt)'};">${fmt(curBal)}</b> (شامل فروق مسجّلة: ${fmt(adjTotal)})</div>`:''}
     </div>`;}).join('');
 }
@@ -10944,6 +11041,7 @@ function removePartner(id){
   pgConfirm('حذف هذا الشريك؟ سيتم حذف حسابه (رأس المال والجاري) من الدليل المحاسبى.',()=>{
     savePartners(loadPartners().filter(x=>x.id!==id));
     savePartnerCurrentAdj(loadPartnerCurrentAdj().filter(a=>a.partnerId!==id));
+    savePartnerCapitalAdj(loadPartnerCapitalAdj().filter(a=>a.partnerId!==id));
     renderPartnersList();
     refreshBizDashboard();
     renderAccountsDetail();
