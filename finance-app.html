@@ -837,6 +837,195 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .coa-acc-row>b{flex-shrink:0;white-space:nowrap;}
 .coa-acc-del{color:var(--red);font-size:12px;cursor:pointer;padding:0 3px;flex-shrink:0;}
 .coa-add-btn{background:none;border:1px dashed var(--border);color:var(--blue);border-radius:7px;padding:6px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;text-align:center;}
+/* أزرار إدارة الدليل المحاسبى (تظهر في الإعدادات فقط) */
+.coa-admin-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid var(--border);cursor:pointer;font-size:11px;transition:all .15s;flex-shrink:0;}
+.coa-admin-btn:hover{background:rgba(77,168,240,.18);border-color:rgba(77,168,240,.4);transform:scale(1.08);}
+
+/* ── الضغط المطوّل لتعديل الدليل المحاسبى ── */
+.coa-pressing{position:relative;overflow:visible;}
+.coa-pressing::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(77,168,240,.08);
+  pointer-events:none;
+  border-radius:inherit;
+}
+.coa-press-ring{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:24px;
+  height:24px;
+  margin:-12px 0 0 -12px;
+  border-radius:50%;
+  border:2px solid var(--blue);
+  border-top-color:transparent;
+  opacity:0;
+  pointer-events:none;
+  transform:rotate(0deg);
+}
+.coa-press-ring.run{
+  opacity:1;
+  animation:coa-press-spin .5s linear forwards;
+}
+@keyframes coa-press-spin{
+  from{transform:rotate(0deg);opacity:1;}
+  to{transform:rotate(360deg);opacity:1;}
+}
+@media (max-width:520px){
+  .coa-press-ring{width:20px;height:20px;margin:-10px 0 0 -10px;}
+}
+
+/* ── بوكسات التعديل/الإضافة العائمة لتعديل الدليل المحاسبى ── */
+.coa-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(3px);
+  animation:coa-modal-fade .2s ease;
+  padding:16px;
+}
+@keyframes coa-modal-fade{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+.coa-modal-box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 16px;
+  width:90%;
+  max-width:380px;
+  box-shadow:0 18px 60px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.04) inset;
+  animation:coa-modal-pop .25s cubic-bezier(.2,.8,.3,1);
+  position:relative;
+  max-height:90vh;
+  overflow-y:auto;
+}
+@keyframes coa-modal-pop{
+  from{opacity:0;transform:translateY(20px) scale(.92);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.coa-modal-title{
+  font-size:15px;
+  font-weight:800;
+  margin-bottom:10px;
+  color:var(--blue);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.coa-modal-title .coa-modal-close{
+  margin-right:auto;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--border);
+  color:var(--muted);
+  width:26px;
+  height:26px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Cairo',sans-serif;
+  transition:all .15s;
+}
+.coa-modal-title .coa-modal-close:hover{
+  background:rgba(192,57,43,.15);
+  color:var(--red);
+  border-color:rgba(192,57,43,.35);
+}
+.coa-modal-meta{
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:12px;
+  line-height:1.6;
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:7px 9px;
+}
+.coa-modal-meta b{color:var(--txt);}
+.coa-modal-meta .protected-tag{color:var(--yellow);font-weight:700;}
+.coa-modal-label{
+  font-size:11px;
+  color:var(--muted);
+  display:block;
+  margin-bottom:4px;
+  font-weight:600;
+}
+.coa-modal-inp{
+  width:100%;
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:8px 10px;
+  color:var(--txt);
+  font-family:'Cairo',sans-serif;
+  font-size:13px;
+  margin-bottom:12px;
+  transition:border-color .15s;
+}
+.coa-modal-inp:focus{
+  outline:none;
+  border-color:var(--blue);
+  background:rgba(77,168,240,.05);
+}
+.coa-modal-inp.ltr{direction:ltr;text-align:left;}
+.coa-modal-btns{
+  display:flex;
+  gap:6px;
+  margin-top:4px;
+}
+.coa-modal-btn{
+  flex:1;
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:9px 8px;
+  font-family:'Cairo',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  color:var(--txt);
+  transition:all .15s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+.coa-modal-btn:hover{background:rgba(255,255,255,.06);}
+.coa-modal-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);flex:1.5;}
+.coa-modal-btn.primary:hover{background:#5fb5f5;border-color:#5fb5f5;}
+.coa-modal-btn.danger{background:rgba(192,57,43,.15);color:var(--red);border-color:rgba(192,57,43,.4);}
+.coa-modal-btn.danger:hover{background:rgba(192,57,43,.25);}
+.coa-modal-reset{
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-size:11px;
+  margin-top:12px;
+  cursor:pointer;
+  width:100%;
+  font-family:'Cairo',sans-serif;
+  padding:6px;
+  border-radius:6px;
+  transition:all .15s;
+}
+.coa-modal-reset:hover{color:var(--blue);background:rgba(77,168,240,.05);}
+
+@media (max-width:520px){
+  .coa-modal-box{padding:16px 14px;width:95%;}
+  .coa-modal-title{font-size:14px;}
+  .coa-modal-btn{font-size:11px;padding:8px 6px;}
+}
 .coa-add-form{display:flex;gap:6px;}
 .coa-add-form input{flex:1;}
 .coa-add-form button{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:0 12px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
@@ -2393,6 +2582,19 @@ function _genericConfirmYes(){
   const cb=_genericConfirmCb;
   closeGenericConfirm();
   if(cb)cb();
+}
+function pgToast(msg){
+  let t=document.getElementById('pg-toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='pg-toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(62,207,106,.95);color:#fff;font-family:"Cairo",sans-serif;font-size:13px;font-weight:700;padding:10px 18px;border-radius:10px;z-index:99999;box-shadow:0 6px 22px rgba(0,0,0,.4);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';});
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},1800);
 }
 function fmtDate(d){if(!d)return'';const[,m,day]=d.split('-');return day+'/'+m;}
 function fmt(n){return Number(n||0).toLocaleString('en-US');}
@@ -6318,13 +6520,13 @@ function registerPartnerCoaBuiltins(){
   COA_BUILTIN_ROWS['liab_equity']=rows;
 }
 function getCoaStructure(){
-  const structure=COA_STRUCTURE.slice();
+  let structure=JSON.parse(JSON.stringify(COA_STRUCTURE));
   if(getSettings().addonPartners){
     registerPartnerCoaBuiltins();
   }else{
     delete COA_BUILTIN_ROWS['liab_equity'];
   }
-  return structure;
+  return applyCoaOverrides(structure);
 }
 function partnersEquityTotal(){
   if(!getSettings().addonPartners)return 0;
@@ -6394,6 +6596,62 @@ function loadCoaAccounts(){
   return data;
 }
 function saveCoaAccounts(o){_setItem('fm_coa_accounts',JSON.stringify(o));}
+
+/* ══════════════════════════════════════════════
+   طبقة تخصيص الدليل المحاسبى (COA Overrides)
+   - تسمح للمستخدم بتغيير اسم/أيقونة/إخفاء أي عقدة موجودة،
+     وإضافة عقد جديدة (كمستوى أدنى تحت group)، أو حذف عقد مضافة.
+   - لا تكسر الـ structure الأصلي: التعديلات تنحفظ في localStorage
+     وتلصق بـ COA_STRUCTURE عند القراءة عبر getCoaStructure().
+   ══════════════════════════════════════════════ */
+function loadCoaOverrides(){
+  return JSON.parse(_getItem('fm_coa_overrides')||'{"edits":{},"adds":[],"removes":[]}');
+}
+function saveCoaOverrides(o){_setItem('fm_coa_overrides',JSON.stringify(o));}
+/* أوراق محمية (built-in) لا يمكن حذفها أو تعديل اسمها الرئيسي (العمود الفقرى للحسابات) */
+const COA_PROTECTED_IDS=new Set([
+  'assets','liabilities','revenue','expenses',
+  'assets_customers','liab_suppliers'
+]);
+/* تطبيق الـ overrides على نسخة من structure وإرجاعها */
+function applyCoaOverrides(structure){
+  const ov=loadCoaOverrides();
+  const walk=(nodes)=>{
+    const out=[];
+    nodes.forEach(n=>{
+      if(ov.removes.includes(n.id)&&!COA_PROTECTED_IDS.has(n.id))return;
+      const e=ov.edits[n.id]||{};
+      const copy={...n};
+      if(e.name!==undefined)copy.name=e.name;
+      if(e.ico!==undefined)copy.ico=e.ico;
+      if(e.hidden&&!COA_PROTECTED_IDS.has(n.id))return;
+      if(copy.children&&copy.children.length){
+        copy.children=walk(copy.children);
+      }
+      out.push(copy);
+    });
+    return out;
+  };
+  const result=walk(structure);
+  // إضافة العقد الجديدة (adds) — كل واحدة يكون لها parentId
+  const addUnder=(nodes,parentId,child)=>{
+    return nodes.map(n=>{
+      if(n.id===parentId){
+        const ch=(n.children||[]).slice();
+        ch.push(child);
+        return {...n,children:ch};
+      }
+      if(n.children&&n.children.length){
+        return {...n,children:addUnder(n.children,parentId,child)};
+      }
+      return n;
+    });
+  };
+  (ov.adds||[]).forEach(a=>{
+    result.length&&addUnder(result,a.parentId,a);
+  });
+  return result;
+}
 function loadPartners(){return JSON.parse(_getItem('fm_partners')||'[]');}
 function savePartners(l){_setItem('fm_partners',JSON.stringify(l));}
 function loadClassifications(){return JSON.parse(_getItem('fm_classifications')||'{"customer":[],"supplier":[]}');}
@@ -6482,6 +6740,11 @@ function renderAccountsDetail(){
   const holder=document.getElementById('set-coa-wrap');
   if(!holder)return;
   holder.innerHTML='';
+  // رسالة إرشادية فوق الشجرة
+  const help=document.createElement('div');
+  help.style.cssText='background:rgba(77,168,240,.08);border:1px solid rgba(77,168,240,.25);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.7;';
+  help.innerHTML='👆 <b style="color:var(--txt);">اضغط مطوّلاً</b> (½ ثانية) على أي حساب لفتح نافذة التعديل (الاسم / الإيموجي / الحذف). <b style="color:var(--txt);">الحسابات المحمية</b> (الأصول، الالتزامات، الإيرادات، المصروفات، العملاء، الموردين) لا يمكن حذفها.';
+  holder.appendChild(help);
   const wrap=document.createElement('div');
   wrap.id='coa-tree-wrap';
   holder.appendChild(wrap);
@@ -6580,6 +6843,42 @@ function renderCoaCardTree(){
   </div>`;
   wrap.innerHTML=colsHtml+others.map(node=>coaCardNodeHtml(node,data)).join('');
 }
+/* ── رصيد حساب نهائي (leaf) في الدليل المحاسبى: مجموع الـ builtins المحسوبة +
+   الحسابات اليدوية المضافة، أو رابط خاص (COA_LINK_TOTALS) لو العقدة مرتبطة ── */
+function coaLeafBalance(subId,data){
+  if(COA_LINK_TOTALS[subId])return COA_LINK_TOTALS[subId]();
+  const builtins=(COA_BUILTIN_ROWS[subId]||[]);
+  const accs=data[subId]||[];
+  const builtinTotal=builtins.reduce((s,b)=>s+(Number(b.calc())||0),0);
+  const manualTotal=accs.reduce((s,a)=>s+(Number(a.amount)||0),0);
+  return builtinTotal+manualTotal;
+}
+/* استخراج كل الـ leaves (العقد النهائية بلا أبناء) داخل عقدة معيّنة مع رصيدها (لو > 0) */
+function collectLeavesWithBalance(node,data,out){
+  out=out||[];
+  if(node.children&&node.children.length){
+    node.children.forEach(c=>collectLeavesWithBalance(c,data,out));
+  }else{
+    const bal=coaLeafBalance(node.id,data);
+    if(Math.abs(bal)>0.0001){
+      out.push({id:node.id,name:node.name,ico:node.ico||'',amount:bal});
+    }
+  }
+  return out;
+}
+/* بناء قسم واحد (أصول / التزامات / إيرادات / مصروفات) بصفحة كرت الحسابات */
+function coaSectionHtml(node,data){
+  if(!node)return '';
+  const leaves=collectLeavesWithBalance(node,data);
+  const total=leaves.reduce((s,l)=>s+l.amount,0);
+  const rowsHtml=leaves.length?leaves.map(l=>`<div class="coa-acc-row"><span>${l.ico?l.ico+' ':''}${esc(l.name)}</span><b>${fmt(l.amount)}</b></div>`).join(''):'<div class="biz-po-empty">لا توجد حسابات لها رصيد حالياً</div>';
+  return `<div class="coa-node">
+    <div class="coa-node-hdr" style="cursor:default;">
+      <span class="coa-name">${node.ico||''} ${esc(node.name)}<span class="coa-count">${fmt(total)}</span></span>
+    </div>
+    <div class="coa-node-body open">${rowsHtml}</div>
+  </div>`;
+}
 function renderAccountsCardView(){
   const body=document.getElementById('biz-detail-body');
   const hint=document.createElement('div');
@@ -6590,7 +6889,271 @@ function renderAccountsCardView(){
   wrap.id='coa-card-tree-wrap';
   wrap.className='coa-tree';
   body.appendChild(wrap);
-  renderCoaCardTree();
+  const data=loadCoaAccounts();
+  const structure=getCoaStructure();
+  const assetsNode=structure.find(n=>n.id==='assets');
+  const liabNode=structure.find(n=>n.id==='liabilities');
+  const revNode=structure.find(n=>n.id==='revenue');
+  const expNode=structure.find(n=>n.id==='expenses');
+  const grid=`<div class="coa-balance-cols">
+    <div class="coa-balance-col">${coaSectionHtml(assetsNode,data)}</div>
+    <div class="coa-balance-col">${coaSectionHtml(liabNode,data)}</div>
+  </div>
+  <div class="coa-balance-cols" style="margin-top:6px;">
+    <div class="coa-balance-col">${coaSectionHtml(revNode,data)}</div>
+    <div class="coa-balance-col">${coaSectionHtml(expNode,data)}</div>
+  </div>`;
+  wrap.innerHTML=grid;
+}
+
+/* ══════════════════════════════════════════════
+   واجهة تعديل الدليل المحاسبى (في الإعدادات)
+   - تعديل اسم/إيموجي/حذف/إضافة عقدة فرعية جديدة
+   - مودال واحد موحد للتعديل وآخر للإضافة
+   ══════════════════════════════════════════════ */
+function openCoaEditModal(nodeId){
+  const struct=getCoaStructure();
+  const findNode=(nodes,id)=>{for(const n of nodes){if(n.id===id)return n;if(n.children){const r=findNode(n.children,id);if(r)return r;}}return null;};
+  const node=findNode(struct,nodeId);
+  if(!node)return;
+  const ov=loadCoaOverrides();
+  const edit=ov.edits[nodeId]||{};
+  const currentName=edit.name!==undefined?edit.name:(node.name||'');
+  const currentIco=edit.ico!==undefined?edit.ico:(node.ico||'');
+  const protectedNode=COA_PROTECTED_IDS.has(nodeId);
+  const builtHtml=`
+    <div class="coa-modal-overlay" onclick="if(event.target===this)closeCoaEditModal()">
+      <div class="coa-modal-box" role="dialog" aria-modal="true">
+        <div class="coa-modal-title">
+          <span>✏️ تعديل الحساب</span>
+          <button type="button" class="coa-modal-close" onclick="closeCoaEditModal()" aria-label="إغلاق">✕</button>
+        </div>
+        <div class="coa-modal-meta">المعرّف: <b>${esc(nodeId)}</b>${protectedNode?' <span class="protected-tag">🛡️ محمي — لا يمكن حذفه</span>':''}</div>
+        <label class="coa-modal-label">الاسم</label>
+        <input class="coa-modal-inp" id="coa-edit-name" value="${esc(currentName)}">
+        <label class="coa-modal-label">الإيموجي (اختياري)</label>
+        <input class="coa-modal-inp ltr" id="coa-edit-ico" value="${esc(currentIco)}" placeholder="مثل: 🏦">
+        <div class="coa-modal-btns">
+          <button class="coa-modal-btn primary" onclick="saveCoaEdit('${nodeId}')">💾 حفظ</button>
+          ${!protectedNode?`<button class="coa-modal-btn danger" onclick="deleteCoaNode('${nodeId}','${esc(currentName)}')">🗑 حذف</button>`:''}
+          <button class="coa-modal-btn" onclick="closeCoaEditModal()">إلغاء</button>
+        </div>
+        <button class="coa-modal-reset" onclick="resetCoaOverride('${nodeId}')">↺ استعادة الاسم الأصلي</button>
+      </div>
+    </div>`;
+  const holder=document.createElement('div');
+  holder.id='coa-edit-modal-holder';
+  holder.innerHTML=builtHtml;
+  document.body.appendChild(holder);
+  setTimeout(()=>{document.getElementById('coa-edit-name')?.focus();document.getElementById('coa-edit-name')?.select();},50);
+}
+function closeCoaEditModal(){
+  const h=document.getElementById('coa-edit-modal-holder');
+  if(h)h.remove();
+}
+function saveCoaEdit(nodeId){
+  const name=(document.getElementById('coa-edit-name')?.value||'').trim();
+  const ico=(document.getElementById('coa-edit-ico')?.value||'').trim();
+  if(!name){pgConfirm('من فضلك أدخل اسم الحساب',()=>{},'حسناً');return;}
+  const ov=loadCoaOverrides();
+  if(!ov.edits)ov.edits={};
+  ov.edits[nodeId]={name,ico};
+  // لو كانت محذوفة سابقاً، نلغي الحذف
+  ov.removes=(ov.removes||[]).filter(id=>id!==nodeId);
+  saveCoaOverrides(ov);
+  closeCoaEditModal();
+  pgToast('تم حفظ التعديل ✓');
+  renderAccountsDetail();
+  // حدّث صفحة كرت الحسابات لو كانت مفتوحة
+  if(typeof renderCoaCardTree==='function')renderCoaCardTree();
+}
+function resetCoaOverride(nodeId){
+  const ov=loadCoaOverrides();
+  if(ov.edits)delete ov.edits[nodeId];
+  saveCoaOverrides(ov);
+  closeCoaEditModal();
+  pgToast('تم استعادة الاسم الأصلي ✓');
+  renderAccountsDetail();
+  if(typeof renderCoaCardTree==='function')renderCoaCardTree();
+}
+function deleteCoaNode(nodeId,name){
+  // حماية الـ nodes الأساسية
+  if(COA_PROTECTED_IDS.has(nodeId)){
+    pgConfirm('لا يمكن حذف هذا الحساب لأنه جزء من البنية الأساسية (مثل: العملاء، الموردين، الأصول، الالتزامات). يمكنك تعديل اسمه أو إخفاؤه فقط.',()=>{},'حسناً');
+    return;
+  }
+  // منع حذف group فيه leaves مرئية
+  const struct=getCoaStructure();
+  const findNode=(nodes,id)=>{for(const n of nodes){if(n.id===id)return n;if(n.children){const r=findNode(n.children,id);if(r)return r;}}return null;};
+  const node=findNode(struct,nodeId);
+  if(node&&node.children&&node.children.length){
+    pgConfirm(`هذا الحساب "${esc(name||nodeId)}" يحوي حسابات فرعية (${node.children.length}). حذفه سيخفيها كلها. هل تريد المتابعة؟`,()=>{
+      const ov=loadCoaOverrides();
+      if(!ov.removes)ov.removes=[];
+      if(!ov.removes.includes(nodeId))ov.removes.push(nodeId);
+      // حذف كل الـ children من الـ removes لو موجودين
+      const collectIds=(n,out)=>{out.push(n.id);(n.children||[]).forEach(c=>collectIds(c,out));return out;};
+      const allIds=collectIds(node,[]);
+      ov.removes=ov.removes.filter(id=>!allIds.includes(id)||id===nodeId);
+      saveCoaOverrides(ov);
+      closeCoaEditModal();
+      pgToast('تم الحذف ✓');
+      renderAccountsDetail();
+      if(typeof renderCoaCardTree==='function')renderCoaCardTree();
+    },'نعم، احذف');
+    return;
+  }
+  // leaf عادي → حذف مباشر
+  pgConfirm(`هل تريد حذف الحساب "${esc(name||nodeId)}"؟ سيختفي من الشجرة وعرض الحسابات.`,()=>{
+    const ov=loadCoaOverrides();
+    if(!ov.removes)ov.removes=[];
+    if(!ov.removes.includes(nodeId))ov.removes.push(nodeId);
+    saveCoaOverrides(ov);
+    closeCoaEditModal();
+    pgToast('تم الحذف ✓');
+    renderAccountsDetail();
+    if(typeof renderCoaCardTree==='function')renderCoaCardTree();
+  },'نعم، احذف');
+}
+/* إضافة عقدة فرعية جديدة تحت group موجود */
+function openCoaAddNodeModal(parentId){
+  const struct=getCoaStructure();
+  const findNode=(nodes,id)=>{for(const n of nodes){if(n.id===id)return n;if(n.children){const r=findNode(n.children,id);if(r)return r;}}return null;};
+  const parent=findNode(struct,parentId);
+  if(!parent)return;
+  const builtHtml=`
+    <div class="coa-modal-overlay" onclick="if(event.target===this)closeCoaAddNodeModal()">
+      <div class="coa-modal-box" role="dialog" aria-modal="true">
+        <div class="coa-modal-title">
+          <span>➕ إضافة حساب فرعي</span>
+          <button type="button" class="coa-modal-close" onclick="closeCoaAddNodeModal()" aria-label="إغلاق">✕</button>
+        </div>
+        <div class="coa-modal-meta">سيضاف تحت: <b>${parent.ico?parent.ico+' ':''}${esc(parent.name)}</b></div>
+        <label class="coa-modal-label">اسم الحساب الجديد</label>
+        <input class="coa-modal-inp" id="coa-add-name" placeholder="مثال: حساب بنكي آخر">
+        <label class="coa-modal-label">الإيموجي (اختياري)</label>
+        <input class="coa-modal-inp ltr" id="coa-add-ico" placeholder="🏦">
+        <div class="coa-modal-btns">
+          <button class="coa-modal-btn primary" onclick="saveCoaAddNode('${parentId}')">➕ إضافة</button>
+          <button class="coa-modal-btn" onclick="closeCoaAddNodeModal()">إلغاء</button>
+        </div>
+      </div>
+    </div>`;
+  const holder=document.createElement('div');
+  holder.id='coa-addnode-modal-holder';
+  holder.innerHTML=builtHtml;
+  document.body.appendChild(holder);
+  setTimeout(()=>{document.getElementById('coa-add-name')?.focus();},50);
+}
+function closeCoaAddNodeModal(){
+  const h=document.getElementById('coa-addnode-modal-holder');
+  if(h)h.remove();
+}
+function saveCoaAddNode(parentId){
+  const name=(document.getElementById('coa-add-name')?.value||'').trim();
+  const ico=(document.getElementById('coa-add-ico')?.value||'').trim();
+  if(!name){pgConfirm('من فضلك أدخل اسم الحساب',()=>{},'حسناً');return;}
+  const ov=loadCoaOverrides();
+  if(!ov.adds)ov.adds=[];
+  const newId='coa_user_'+Date.now();
+  ov.adds.push({id:newId,parentId,name,ico,children:[]});
+  saveCoaOverrides(ov);
+  closeCoaAddNodeModal();
+  pgToast('تم إضافة الحساب ✓');
+  // فتح الـ parent لو كان مقفول
+  coaExpanded[parentId]=true;
+  renderAccountsDetail();
+  if(typeof renderCoaCardTree==='function')renderCoaCardTree();
+}
+/* أزرار التحكم بجانب كل عقدة (تظهر في شجرة الإعدادات فقط) */
+function coaAdminActionsHtml(nodeId){
+  return '';
+}
+
+/* ══════════════════════════════════════════════
+   نظام الضغط المطول لتعديل الدليل المحاسبى
+   - ضغطة قصيرة ← توسيع/طي العقدة (السلوك الحالي)
+   - ضغطة مطولة (≥ 500ms) ← فتح مودال التعديل
+   - على العقد الأوراق (leaves) بدون children: نفس السلوك
+   ══════════════════════════════════════════════ */
+const COA_LONG_PRESS_MS=500;
+let _coaLongPressTimer=null;
+let _coaLongPressTriggered=false;
+let _coaLongPressTargetId=null;
+let _coaLongPressProgressEl=null;
+let _coaLongPressProgressStart=0;
+
+function coaStartLongPress(nodeId,event){
+  if(event.type==='mousedown'&&event.button!==0)return;
+  if(_coaLongPressTimer)clearTimeout(_coaLongPressTimer);
+  _coaLongPressTriggered=false;
+  _coaLongPressTargetId=nodeId;
+  _coaLongPressProgressStart=Date.now();
+
+  // شريط تقدم بسيط (دائرة) يظهر على العقدة أثناء الضغط
+  const el=event.currentTarget;
+  if(el){
+    el.classList.add('coa-pressing');
+    const ring=document.createElement('span');
+    ring.className='coa-press-ring';
+    el.appendChild(ring);
+    _coaLongPressProgressEl=ring;
+    // تشغيل الأنميشن
+    requestAnimationFrame(()=>ring.classList.add('run'));
+  }
+
+  _coaLongPressTimer=setTimeout(()=>{
+    _coaLongPressTriggered=true;
+    // اهتزاز خفيف (موبايل) عند تحقق الضغط المطوّل
+    if(navigator.vibrate)navigator.vibrate(30);
+    openCoaEditModal(nodeId);
+    coaCancelLongPress();
+  },COA_LONG_PRESS_MS);
+}
+function coaCancelLongPress(){
+  if(_coaLongPressTimer){
+    clearTimeout(_coaLongPressTimer);
+    _coaLongPressTimer=null;
+  }
+  // إزالة الأنميشن من أي عنصر
+  document.querySelectorAll('.coa-pressing').forEach(e=>e.classList.remove('coa-pressing'));
+  document.querySelectorAll('.coa-press-ring').forEach(e=>e.remove());
+  _coaLongPressProgressEl=null;
+  _coaLongPressTargetId=null;
+}
+function coaIsLongPress(){return _coaLongPressTriggered;}
+function coaBindLongPress(el,nodeId){
+  if(!el)return;
+  // لمستخدم الموبايل: touch events
+  el.addEventListener('touchstart',e=>{coaLastTouch={x:e.touches[0]?.clientX||0,y:e.touches[0]?.clientY||0};coaStartLongPress(nodeId,e);},{passive:true});
+  el.addEventListener('touchend',e=>{coaLastTouch=null;coaCancelLongPress();});
+  el.addEventListener('touchcancel',e=>{coaLastTouch=null;coaCancelLongPress();});
+  el.addEventListener('touchmove',e=>{
+    // لو الإصبع اتحرك أكتر من 10px نعتبره سحب ونتجاهل
+    const t=e.touches[0];
+    if(t&&coaLastTouch&&(Math.abs(t.clientX-coaLastTouch.x)>10||Math.abs(t.clientY-coaLastTouch.y)>10)){
+      coaLastTouch=null;
+      coaCancelLongPress();
+    }
+  },{passive:true});
+  // للديسكتوب: mousedown/mouseup/mouseleave
+  el.addEventListener('mousedown',e=>{coaStartLongPress(nodeId,e);});
+  el.addEventListener('mouseup',e=>{coaCancelLongPress();});
+  el.addEventListener('mouseleave',e=>{coaCancelLongPress();});
+  // منع click لو كان long press
+  el.addEventListener('click',e=>{
+    if(_coaLongPressTriggered){e.stopPropagation();e.preventDefault();_coaLongPressTriggered=false;}
+  },true);
+}
+let coaLastTouch=null;
+
+/* ربط الضغط المطول على جميع الـ headers في شجرة الإعدادات بعد كل render */
+function coaBindAllLongPress(){
+  const wrap=document.getElementById('coa-tree-wrap');
+  if(!wrap)return;
+  wrap.querySelectorAll('[data-coa-id]').forEach(el=>{
+    coaBindLongPress(el,el.getAttribute('data-coa-id'));
+  });
 }
 function renderCoaTree(){
   const wrap=document.getElementById('coa-tree-wrap');
@@ -6600,13 +7163,15 @@ function renderCoaTree(){
     <div class="coa-root">🌳 الرئيسية — الدليل المحاسبى</div>
     ${getCoaStructure().map(node=>coaNodeHtml(node,data)).join('')}
   </div>`;
+  coaBindAllLongPress();
 }
 function coaNodeHtml(node,data){
   const open=!!coaExpanded[node.id];
   if(node.children&&node.children.length){
     return `<div class="coa-node">
-      <div class="coa-node-hdr" onclick="toggleCoaNode('${node.id}')">
+      <div class="coa-node-hdr" data-coa-id="${node.id}" onclick="toggleCoaNode('${node.id}')">
         <span class="coa-name">${node.ico||''} ${esc(node.name)}</span>
+        ${coaAdminActionsHtml(node.id)}
         <span class="coa-arrow ${open?'open':''}">◀</span>
       </div>
       <div class="coa-node-body ${open?'open':''}">
@@ -6621,8 +7186,9 @@ function coaGroupSubHtml(node,data){
   const open=!!coaExpanded[node.id];
   const totalAmt=coaNodeAmount(node,data);
   return `<div class="coa-sub">
-    <div class="coa-sub-hdr" onclick="toggleCoaNode('${node.id}')">
+    <div class="coa-sub-hdr" data-coa-id="${node.id}" onclick="toggleCoaNode('${node.id}')">
       <span class="coa-name">${node.ico?node.ico+' ':''}${esc(node.name)}<span class="coa-count">${fmt(totalAmt)}</span></span>
+      ${coaAdminActionsHtml(node.id)}
       <span class="coa-arrow ${open?'open':''}">◀</span>
     </div>
     <div class="coa-sub-body ${open?'open':''}" style="padding-right:9px;">
@@ -6669,16 +7235,18 @@ function coaSubHtml(sub,data,isTop){
         <button class="coa-add-btn" onclick="openCoaAddForm('${sub.id}')">+ إضافة حساب</button>`;
   if(isTop){
     return `<div class="coa-node">
-      <div class="coa-node-hdr" onclick="toggleCoaNode('${sub.id}')">
+      <div class="coa-node-hdr" data-coa-id="${sub.id}" onclick="toggleCoaNode('${sub.id}')">
         <span class="coa-name">${sub.ico?sub.ico+' ':''}${esc(sub.name)}<span class="coa-count">${fmt(totalAmt)}</span></span>
+        ${coaAdminActionsHtml(sub.id)}
         <span class="coa-arrow ${open?'open':''}">◀</span>
       </div>
       <div class="coa-node-body ${open?'open':''}" id="coa-body-${sub.id}">${bodyHtml}</div>
     </div>`;
   }
   return `<div class="coa-sub">
-      <div class="coa-sub-hdr" onclick="toggleCoaNode('${sub.id}')">
+      <div class="coa-sub-hdr" data-coa-id="${sub.id}" onclick="toggleCoaNode('${sub.id}')">
         <span class="coa-name">${sub.ico?sub.ico+' ':''}${esc(sub.name)}<span class="coa-count">${fmt(totalAmt)}</span></span>
+        ${coaAdminActionsHtml(sub.id)}
         <span class="coa-arrow ${open?'open':''}">◀</span>
       </div>
       <div class="coa-sub-body ${open?'open':''}" id="coa-body-${sub.id}">${bodyHtml}</div>
