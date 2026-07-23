@@ -5862,7 +5862,7 @@ function refreshBizDashboard(){
   setTxt('ws-inv-pct',invPct+'%');
   setTxt('ws-inv-count',invItemCount);
   setTxt('ws-inv-low',invLowCount);
-  drawSegmentedRing('ws-inv-ring',invPct,'var(--blue)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36});
+  drawSegmentedRing('ws-inv-ring',invPct,'var(--blue)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36,showText:false});
   setTxt('ws-acc-assets',fmt(totalAssets));
   setTxt('ws-acc-liab',fmt(totalLiabOnly));
   setTxt('ws-acc-equity',fmt(totalEquity));
