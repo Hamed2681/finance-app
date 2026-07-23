@@ -816,24 +816,26 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .coa-tree{display:flex;flex-direction:column;gap:6px;}
 .coa-balance-cols{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:start;}
 .coa-balance-col{min-width:0;display:flex;flex-direction:column;gap:6px;}
-.coa-balance-col .coa-node-hdr .coa-name{font-size:11.5px;}
-.coa-balance-col .coa-name{white-space:normal;}
+.coa-balance-col .coa-node-hdr .coa-name{font-size:10.5px;}
+.coa-balance-col .coa-sub-hdr .coa-name{font-size:10px;}
 .coa-root{font-size:13px;font-weight:800;color:var(--txt);text-align:center;padding:8px;background:var(--card2);border-radius:9px;border:1px solid var(--border);}
 .coa-node{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
-.coa-node-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;cursor:pointer;}
-.coa-node-hdr .coa-name{font-size:12.5px;font-weight:800;color:var(--txt);display:flex;align-items:center;gap:6px;}
-.coa-node-hdr .coa-arrow{font-size:10px;color:var(--muted);transition:transform .15s;}
+.coa-node-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;cursor:pointer;gap:6px;}
+.coa-node-hdr .coa-name{font-size:12.5px;font-weight:800;color:var(--txt);display:flex;align-items:center;gap:6px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.coa-node-hdr .coa-arrow{font-size:10px;color:var(--muted);transition:transform .15s;flex-shrink:0;}
 .coa-node-hdr .coa-arrow.open{transform:rotate(90deg);}
 .coa-node-body{display:none;padding:0 8px 8px;flex-direction:column;gap:6px;}
 .coa-node-body.open{display:flex;}
 .coa-sub{background:var(--card2);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.coa-sub-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;cursor:pointer;}
-.coa-sub-hdr .coa-name{font-size:11.5px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:6px;}
-.coa-count{font-size:10px;color:var(--muted);font-weight:600;background:var(--bg);border-radius:6px;padding:1px 6px;}
+.coa-sub-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;cursor:pointer;gap:6px;}
+.coa-sub-hdr .coa-name{font-size:11.5px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:6px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.coa-count{font-size:10px;color:var(--muted);font-weight:600;background:var(--bg);border-radius:6px;padding:1px 6px;flex-shrink:0;white-space:nowrap;}
 .coa-sub-body{display:none;padding:6px 9px 9px;flex-direction:column;gap:5px;}
 .coa-sub-body.open{display:flex;}
-.coa-acc-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:11.5px;color:var(--txt);}
-.coa-acc-del{color:var(--red);font-size:12px;cursor:pointer;padding:0 3px;}
+.coa-acc-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:11.5px;color:var(--txt);gap:6px;}
+.coa-acc-row>span:first-child{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.coa-acc-row>b{flex-shrink:0;white-space:nowrap;}
+.coa-acc-del{color:var(--red);font-size:12px;cursor:pointer;padding:0 3px;flex-shrink:0;}
 .coa-add-btn{background:none;border:1px dashed var(--border);color:var(--blue);border-radius:7px;padding:6px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;text-align:center;}
 .coa-add-form{display:flex;gap:6px;}
 .coa-add-form input{flex:1;}
@@ -1578,7 +1580,7 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
     <div class="s-sec"><div class="s-sec-title">🗄️ أرشيف الديون</div><div class="s-row"><span class="s-lbl">الحسابات المقفلة والمؤرشفة</span><button class="s-btn-add" onclick="openDebtArchivePage()" style="width:auto;padding:6px 14px;font-size:11px;font-family:'Cairo',sans-serif;">عرض الأرشيف</button></div></div>
     <div id="set-biz-group" style="display:none;">
       <div class="s-sec">
-        <div class="s-sec-title">🌳 شجرة الحسابات</div>
+        <div class="s-sec-title">🌳 الدليل المحاسبى</div>
         <div id="set-coa-wrap"></div>
       </div>
       <div class="s-sec">
@@ -6131,7 +6133,7 @@ function refreshBizDashboard(){
   updateLiqPendingBlink();
   const coa=loadCoaAccounts();
   const sumCoa=ids=>ids.reduce((s,id)=>s+((coa[id]||[]).reduce((a,x)=>a+(Number(x.amount)||0),0)),0);
-  const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_funds','assets_other_debit']);
+  const manualAssets=sumCoa(['assets_fixed','assets_goods','assets_treasury','assets_banks','assets_debtors','assets_other_debit']);
   const manualLiabOnly=sumCoa(['liab_obligations','liab_other_credit']);
   const manualEquity=sumCoa(['liab_equity']);
   const totalAssets=customersReceivable+inventoryVal+treasuryVal+bankVal+manualAssets;
@@ -6166,12 +6168,16 @@ function refreshBizDashboard(){
 const COA_STRUCTURE=[
   {id:'assets',name:'الأصول',ico:'🏛️',children:[
     {id:'assets_fixed',name:'أصول ثابتة'},
-    {id:'assets_goods',name:'بضائع'},
-    {id:'assets_funds',name:'أموال'},
-    {id:'assets_customers',name:'عملاء'},
+    {id:'assets_current',name:'أصول متداولة',children:[
+      {id:'assets_treasury',name:'خزنة'},
+      {id:'assets_banks',name:'بنوك'},
+      {id:'assets_goods',name:'بضائع'},
+      {id:'assets_customers',name:'عملاء'},
+      {id:'assets_debtors',name:'مدينون'}
+    ]},
     {id:'assets_other_debit',name:'أخرى مدينة'}
   ]},
-  {id:'liabilities',name:'الخصوم',ico:'📕',children:[
+  {id:'liabilities',name:'التزامات وحقوق ملكية',ico:'📕',children:[
     {id:'liab_equity',name:'حساب الشركاء'},
     {id:'liab_suppliers',name:'موردين'},
     {id:'liab_obligations',name:'التزامات'},
@@ -6241,11 +6247,24 @@ const COA_BUILTIN_ROWS={
   assets_goods:[
     {key:'goods',name:'بضائع',calc:()=>(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)}
   ],
-  assets_funds:[
-    {key:'funds',name:'أموال',calc:()=>treasuryCashVal()+bankCashVal()}
+  assets_treasury:[
+    {key:'treasury',name:'خزنة',calc:()=>treasuryCashVal()}
+  ],
+  assets_banks:[
+    {key:'banks',name:'بنوك',calc:()=>bankCashVal()}
   ]
 };
-function loadCoaAccounts(){return JSON.parse(_getItem('fm_coa_accounts')||'{}');}
+function loadCoaAccounts(){
+  const data=JSON.parse(_getItem('fm_coa_accounts')||'{}');
+  /* ترحيل: «أموال» القديمة كانت تجمع الخزنة والبنوك معاً، بعد الفصل بينهما بتتحول
+     أى حسابات فرعية يدوية كانت مضافة تحتها إلى «بنوك» تلقائياً حفاظاً على البيانات */
+  if(data.assets_funds&&data.assets_funds.length){
+    data.assets_banks=[...(data.assets_banks||[]),...data.assets_funds];
+    delete data.assets_funds;
+    saveCoaAccounts(data);
+  }
+  return data;
+}
 function saveCoaAccounts(o){_setItem('fm_coa_accounts',JSON.stringify(o));}
 function loadPartners(){return JSON.parse(_getItem('fm_partners')||'[]');}
 function savePartners(l){_setItem('fm_partners',JSON.stringify(l));}
@@ -6348,7 +6367,23 @@ function coaRowTotal(subId,data){
   const builtins=(COA_BUILTIN_ROWS[subId]||[]);
   return accs.reduce((s,a)=>s+(Number(a.amount)||0),0)+builtins.reduce((s,b)=>s+(Number(b.calc())||0),0);
 }
+/* مجموع أى عقدة فى الشجرة سواء كانت ورقة (حساب) أو مجموعة (لها أبناء) — بيتنادى بشكل تكرارى لدعم التعشيش */
+function coaNodeAmount(node,data){
+  if(node.children&&node.children.length)return node.children.reduce((s,c)=>s+coaNodeAmount(c,data),0);
+  return coaRowTotal(node.id,data);
+}
 function coaCardSubHtml(sub,data,isTop){
+  if(sub.children&&sub.children.length){
+    const total=coaNodeAmount(sub,data);
+    const open=!!coaExpanded[sub.id];
+    return `<div class="${isTop?'coa-node':'coa-sub'}">
+      <div class="${isTop?'coa-node-hdr':'coa-sub-hdr'}" onclick="toggleCoaCardNode('${sub.id}')">
+        <span class="coa-name">${sub.ico?sub.ico+' ':''}${esc(sub.name)}<span class="coa-count">${fmt(total)}</span></span>
+        <span class="coa-arrow ${open?'open':''}">◀</span>
+      </div>
+      <div class="${isTop?'coa-node-body':'coa-sub-body'} ${open?'open':''}">${sub.children.map(c=>coaCardSubHtml(c,data,false)).join('')}</div>
+    </div>`;
+  }
   if(COA_LINK_TOTALS[sub.id]){
     const total=COA_LINK_TOTALS[sub.id]();
     return `<div class="${isTop?'coa-node':'coa-sub'}">
@@ -6373,7 +6408,7 @@ function coaCardSubHtml(sub,data,isTop){
 }
 function coaCardNodeHtml(node,data){
   if(node.children&&node.children.length){
-    const total=node.children.reduce((s,sub)=>s+coaRowTotal(sub.id,data),0);
+    const total=node.children.reduce((s,sub)=>s+coaNodeAmount(sub,data),0);
     const open=!!coaExpanded[node.id];
     return `<div class="coa-node">
       <div class="coa-node-hdr" onclick="toggleCoaCardNode('${node.id}')">
@@ -6393,8 +6428,8 @@ function toggleCoaCardNode(id){
 }
 function coaBalanceColHtml(node,data){
   const subs=(node.children||[]);
-  const subsWithBalance=subs.filter(sub=>Math.abs(coaRowTotal(sub.id,data))>0.0001);
-  const total=subs.reduce((s,sub)=>s+coaRowTotal(sub.id,data),0);
+  const subsWithBalance=subs.filter(sub=>Math.abs(coaNodeAmount(sub,data))>0.0001);
+  const total=subs.reduce((s,sub)=>s+coaNodeAmount(sub,data),0);
   const rowsHtml=subsWithBalance.length?subsWithBalance.map(sub=>coaCardSubHtml(sub,data)).join(''):'<div class="biz-po-empty">لا توجد أرصدة حالياً</div>';
   return `<div class="coa-node">
     <div class="coa-node-hdr" style="cursor:default;">
@@ -6410,11 +6445,10 @@ function renderCoaCardTree(){
   const structure=getCoaStructure();
   const assetsNode=structure.find(n=>n.id==='assets');
   const liabNode=structure.find(n=>n.id==='liabilities');
-  const liabNodeDisplay=liabNode?Object.assign({},liabNode,{name:'التزامات وحقوق ملكية'}):null;
   const others=structure.filter(n=>n.id!=='assets'&&n.id!=='liabilities');
   const colsHtml=`<div class="coa-balance-cols">
     <div class="coa-balance-col">${assetsNode?coaBalanceColHtml(assetsNode,data):''}</div>
-    <div class="coa-balance-col">${liabNodeDisplay?coaBalanceColHtml(liabNodeDisplay,data):''}</div>
+    <div class="coa-balance-col">${liabNode?coaBalanceColHtml(liabNode,data):''}</div>
   </div>`;
   wrap.innerHTML=colsHtml+others.map(node=>coaCardNodeHtml(node,data)).join('');
 }
@@ -6422,7 +6456,7 @@ function renderAccountsCardView(){
   const body=document.getElementById('biz-detail-body');
   const hint=document.createElement('div');
   hint.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-size:11px;color:var(--muted);';
-  hint.innerHTML=`<span>لإضافة أو حذف حسابات فرعية، ادخل شجرة الحسابات من الإعدادات</span><button class="coa-add-btn" style="flex-shrink:0;" onclick="closeBizDetail();showPage('settings');">⚙️ الإعدادات</button>`;
+  hint.innerHTML=`<span>لإضافة أو حذف حسابات فرعية، ادخل الدليل المحاسبى من الإعدادات</span><button class="coa-add-btn" style="flex-shrink:0;" onclick="closeBizDetail();showPage('settings');">⚙️ الإعدادات</button>`;
   body.appendChild(hint);
   const wrap=document.createElement('div');
   wrap.id='coa-card-tree-wrap';
@@ -6435,7 +6469,7 @@ function renderCoaTree(){
   if(!wrap)return;
   const data=loadCoaAccounts();
   wrap.innerHTML=`<div class="coa-tree">
-    <div class="coa-root">🌳 الرئيسية — شجرة الحسابات</div>
+    <div class="coa-root">🌳 الرئيسية — الدليل المحاسبى</div>
     ${getCoaStructure().map(node=>coaNodeHtml(node,data)).join('')}
   </div>`;
 }
@@ -6454,6 +6488,20 @@ function coaNodeHtml(node,data){
   }
   return coaSubHtml(node,data,true);
 }
+/* مجموعة متوسطة (زى «أصول متداولة») ليها حسابات فرعية بداخلها بدل ما تكون حساب مباشر */
+function coaGroupSubHtml(node,data){
+  const open=!!coaExpanded[node.id];
+  const totalAmt=coaNodeAmount(node,data);
+  return `<div class="coa-sub">
+    <div class="coa-sub-hdr" onclick="toggleCoaNode('${node.id}')">
+      <span class="coa-name">${node.ico?node.ico+' ':''}${esc(node.name)}<span class="coa-count">${fmt(totalAmt)}</span></span>
+      <span class="coa-arrow ${open?'open':''}">◀</span>
+    </div>
+    <div class="coa-sub-body ${open?'open':''}" style="padding-right:9px;">
+      ${node.children.map(c=>coaSubHtml(c,data,false)).join('')}
+    </div>
+  </div>`;
+}
 function navigateCoaLink(subId){
   const t=COA_LINK_NODES[subId];
   if(!t)return;
@@ -6465,6 +6513,7 @@ function toggleCoaClassPanel(subId){
   renderCoaTree();
 }
 function coaSubHtml(sub,data,isTop){
+  if(sub.children&&sub.children.length)return coaGroupSubHtml(sub,data);
   const link=COA_LINK_NODES[sub.id];
   const accs=data[sub.id]||[];
   const builtins=(COA_BUILTIN_ROWS[sub.id]||[]).map(b=>({name:b.name,amount:b.calc()}));
@@ -10114,7 +10163,7 @@ function updatePartner(id,field,val){
   renderAccountsDetail();
 }
 function removePartner(id){
-  pgConfirm('حذف هذا الشريك؟ سيتم حذف حسابه (رأس المال والجاري) من شجرة الحسابات.',()=>{
+  pgConfirm('حذف هذا الشريك؟ سيتم حذف حسابه (رأس المال والجاري) من الدليل المحاسبى.',()=>{
     savePartners(loadPartners().filter(x=>x.id!==id));
     savePartnerCurrentAdj(loadPartnerCurrentAdj().filter(a=>a.partnerId!==id));
     renderPartnersList();
