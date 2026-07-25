@@ -827,6 +827,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .coa-col-compact .coa-acc-row>b{font-size:9.5px;}
 .coa-col-compact .coa-node-hdr .coa-count,.coa-col-compact .coa-sub-hdr .coa-count{font-size:9px;}
 .coa-root{font-size:13px;font-weight:800;color:var(--txt);text-align:center;padding:8px;background:var(--card2);border-radius:9px;border:1px solid var(--border);}
+.ca-group-hdr{cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;}
+.ca-group-arrow{font-size:11px;color:var(--muted);transition:transform .15s ease;}
 .coa-node{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
 .coa-node-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;cursor:pointer;gap:6px;}
 .coa-node-hdr .coa-name{font-size:12.5px;font-weight:800;color:var(--txt);display:flex;align-items:center;gap:6px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -7572,9 +7574,21 @@ function renderAccountsCardView(){
   body.appendChild(wrap);
   const tree=loadCaTree();
   wrap.innerHTML=CA_GROUP_ORDER.map((g,i)=>`
-    <div class="coa-root" style="${i?'margin-top:10px;':''}">${g.label}</div>
-    ${CA_ROOTS.filter(r=>r.group===g.group).map(r=>caCardRootHtml(r.id,tree)).join('')}
+    <div class="coa-root ca-group-hdr" style="${i?'margin-top:10px;':''}" onclick="toggleCaGroup('${g.group}')">
+      <span>${g.label}</span><span class="ca-group-arrow" id="ca-group-arrow-${g.group}">▾</span>
+    </div>
+    <div class="ca-group-body" id="ca-group-body-${g.group}">
+      ${CA_ROOTS.filter(r=>r.group===g.group).map(r=>caCardRootHtml(r.id,tree)).join('')}
+    </div>
   `).join('');
+}
+function toggleCaGroup(group){
+  const body=document.getElementById('ca-group-body-'+group);
+  const arrow=document.getElementById('ca-group-arrow-'+group);
+  if(!body)return;
+  const collapsed=body.style.display==='none';
+  body.style.display=collapsed?'':'none';
+  if(arrow)arrow.textContent=collapsed?'▾':'▸';
 }
 
 /* ══════════════════════════════════════════════
