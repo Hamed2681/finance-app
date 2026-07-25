@@ -104,9 +104,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .scard:active{transform:scale(.99);}
 .scard-inner{display:flex;align-items:stretch;min-height:90px;border-radius:14px 14px 0 0;}
 .scard.income  .scard-inner,
-.scard.expense .scard-inner,
+.scard.expense .scard-inner{background:linear-gradient(180deg,#26211a 0%,#18140f 100%);border:1px solid rgba(158,163,168,.22);box-shadow:inset 0 1px 0 var(--sk-hi),inset 0 -8px 14px -10px rgba(0,0,0,.55);}
 .scard.commit  .scard-inner,
-.scard.debt    .scard-inner{background:linear-gradient(180deg,#26211a 0%,#18140f 100%);border:1px solid rgba(158,163,168,.22);box-shadow:inset 0 1px 0 var(--sk-hi),inset 0 -8px 14px -10px rgba(0,0,0,.55);}
+.scard.debt    .scard-inner{background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(158,163,168,.18);box-shadow:inset 0 1px 0 var(--sk-hi),inset 0 -8px 14px -10px rgba(0,0,0,.55);}
 /* left accent bar: قضيب نحاسي مصقول */
 .scard.income  .scard-accent,
 .scard.expense .scard-accent,
@@ -2152,7 +2152,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[class*="-inp"]:
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:stretch;background:#0a0c10;border-radius:14px;padding:6px;">
 
         <!-- المشتريات / الموردين -->
-        <div class="biz-card" style="border:none;background:var(--bg);" data-biz-key="purchases" onclick="openBizDetail('purchases')">
+        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="purchases" onclick="openBizDetail('purchases')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(182,76,62,.16);">🛒</span>
@@ -2176,7 +2176,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[class*="-inp"]:
         </div>
 
         <!-- المخزون -->
-        <div class="biz-card" style="border:none;align-items:center;text-align:center;background:var(--bg);" data-biz-key="inventory" onclick="openBizDetail('inventory')">
+        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);align-items:center;text-align:center;background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="inventory" onclick="openBizDetail('inventory')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('inventory')">⤢</span>
           <div class="biz-card-hdr" style="width:100%;">
             <span class="biz-ico" style="background:rgba(158,163,168,.16);">🎓</span>
@@ -2198,7 +2198,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[class*="-inp"]:
         </div>
 
         <!-- المبيعات / العملاء -->
-        <div class="biz-card" style="border:none;background:var(--bg);" data-biz-key="sales" onclick="openBizDetail('sales')">
+        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="sales" onclick="openBizDetail('sales')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(158,163,168,.16);">👥</span>
@@ -6390,7 +6390,7 @@ function refreshBizDashboard(){
   setTxt('ws-pur-rem-pct',pRemPct+'%');
   setTxt('ws-pur-paid',fmt(pPaid));
   setW('ws-pur-paidbar',pPaidPct);setW('ws-pur-rembar',pRemPct);setW('ws-pur-bar',pTotal>0?100:0);
-  drawSegmentedRing('ws-pur-ring',pPaidPct,'var(--green)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36});
+  drawSegmentedRing('ws-pur-ring',pPaidPct,'var(--red)',{segments:12,gap:5,innerR:20,outerR:30,popOuter:36});
   setTxt('ws-pur-ring-val',pPaidPct+'%');
 
   /* المبيعات/العملاء */
@@ -6762,6 +6762,10 @@ function caRemoveNode(list,nodeId){
 /* «بنوك» حساب حقيقى ثابت (مش رقم افتراضى بس) تحت «أموال» — محمى من الحذف، قابل لإعادة التسمية،
    وممكن تضيف تحته حسابات بنكية فرعية بالاسم (زى بنك QNB) بنفس آلية أى حساب تانى */
 const CA_BANK_GENERIC_ID='ca_bank_generic';
+function caBiLabel(key){
+  const labels={ca_bi_bank:'البنك',ca_bi_treasury:'الخزينة الرئيسية'};
+  return labels[key]||key;
+}
 function ensureBankGenericCaNode(){
   const tree=loadCaTree();
   if(!tree.ca_funds)tree.ca_funds=[];
@@ -7516,19 +7520,41 @@ function caCardChildListHtml(list,isFunds){
   if(isFunds)return list.map(c=>caCardFundsNodeHtml(c)).filter(Boolean).join('');
   return list.map(c=>caCardGenericNodeHtml(c)).filter(Boolean).join('');
 }
+/* الصفوف الثابتة المحسوبة تلقائياً لكل جذر محمي فى شجرة الحسابات المستقلة (مرتبطة ببيانات حقيقية) */
+function caRootBuiltinRows(rootId){
+  if(rootId==='ca_goods')return [{name:'بضاعة جاهزة للبيع',amount:(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)}];
+  if(rootId==='ca_customers')return [{name:'ذمم عملاء',amount:customersReceivableTotal()}];
+  if(rootId==='ca_suppliers')return [{name:'مستحقات موردين',amount:suppliersPayableTotal()}];
+  if(rootId==='ca_funds')return caFundsAccountRows();
+  return [];
+}
+function caRootBuiltinHtml(rootId){
+  return caRootBuiltinRows(rootId).filter(r=>r.amount).map(r=>`<div class="coa-acc-row"><span>${esc(r.name)}</span><b>${fmt(r.amount)}</b></div>`).join('');
+}
+function caRootTotal(rootId){
+  const builtinTotal=caRootBuiltinRows(rootId).reduce((s,r)=>s+(Number(r.amount)||0),0);
+  const tree=loadCaTree();
+  const children=tree[rootId]||[];
+  const isFunds=rootId==='ca_funds';
+  const nodeTotal=(node)=>{
+    const bal=isFunds?(bankAccountVal(node.id)||0):Number(node.balance||0);
+    return bal+(node.children||[]).reduce((s,c)=>s+nodeTotal(c),0);
+  };
+  return builtinTotal+children.reduce((s,c)=>s+nodeTotal(c),0);
+}
 function caCardRootHtml(rootId,tree){
   const meta=caRootMeta(rootId);
   const total=caRootTotal(rootId);
   const children=tree[rootId]||[];
   const isFunds=rootId==='ca_funds';
   const childHtml=caCardChildListHtml(children,isFunds);
-  const hasBuiltin=!!(CA_BUILTIN_ROWS[rootId]||CA_LINK_TOTALS[rootId]||(isFunds&&(caFundsAccountRows().length||childHtml)));
+  const hasBuiltin=!!(caRootBuiltinRows(rootId).length||childHtml);
   return `<div class="coa-node">
     <div class="coa-node-hdr" style="cursor:default;">
       <span class="coa-name">${meta.locked?'🔒 ':''}${meta.ico||''} ${esc(meta.name)}${total!==null?`<span class="coa-count">${fmt(total)}</span>`:''}</span>
     </div>
     <div class="coa-node-body open">
-      ${caRootBuiltinHtml(rootId,false)}
+      ${caRootBuiltinHtml(rootId)}
       ${childHtml||(hasBuiltin?'':'<div class="biz-po-empty">لا توجد حسابات مضافة بعد</div>')}
     </div>
   </div>`;
