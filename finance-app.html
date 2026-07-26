@@ -769,8 +769,18 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .inv-add-fab{border:none;border-radius:7px;padding:5px 12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;background:var(--green);color:#08221a;}
 .inv-add-fab.small{padding:3px 10px;font-size:12px;}
 .inv-items-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.inv-items-rows2{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.inv-item-row2{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0;}
+.inv-item-row2-top{display:flex;align-items:center;justify-content:space-between;gap:5px;}
+.inv-item-row2-code{font-size:16px;flex-shrink:0;}
+.inv-item-row2-qty{font-size:9px;color:var(--muted);font-weight:600;}
+.inv-item-row2-meta{display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0;}
+.inv-item-row2-name{font-size:11px;font-weight:900;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.inv-item-row2-meta b{color:#2dd4a7;font-size:11px;font-weight:900;flex-shrink:0;}
 .inv-item-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 4px;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;}
+.inv-item-card-top{display:flex;align-items:center;justify-content:center;gap:4px;}
 .inv-item-card-ic{font-size:15px;}
+.inv-item-card-qty{font-size:9.5px;color:var(--muted);font-weight:700;}
 .inv-item-card-name{font-size:9.5px;font-weight:700;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .inv-item-card-meta{display:flex;flex-direction:column;gap:1px;font-size:8.5px;color:var(--muted);}
 .inv-item-card-meta b{color:#2dd4a7;font-size:9.5px;}
@@ -827,7 +837,14 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .coa-col-compact .coa-acc-row>b{font-size:9.5px;}
 .coa-col-compact .coa-node-hdr .coa-count,.coa-col-compact .coa-sub-hdr .coa-count{font-size:9px;}
 .coa-root{font-size:13px;font-weight:800;color:var(--txt);text-align:center;padding:8px;background:var(--card2);border-radius:9px;border:1px solid var(--border);}
-.ca-group-hdr{cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;}
+.ca-group-hdr{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;}
+.ca-group-hdr-ico{font-size:14px;flex-shrink:0;}
+.ca-group-hdr-mid{flex:1;text-align:center;}
+.ca-group-hdr-assets{background:rgba(158,163,168,.14);border-color:rgba(158,163,168,.3);}
+.ca-group-hdr-liab{background:rgba(182,76,62,.14);border-color:rgba(182,76,62,.32);}
+.ca-group-hdr-equity{background:rgba(147,112,219,.16);border-color:rgba(147,112,219,.35);}
+.ca-group-hdr-revenue{background:rgba(74,157,95,.16);border-color:rgba(74,157,95,.35);}
+.ca-group-hdr-expenses{background:rgba(209,165,63,.16);border-color:rgba(209,165,63,.35);}
 .ca-group-arrow{font-size:11px;color:var(--muted);transition:transform .15s ease;}
 .coa-node{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
 .coa-node-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;cursor:pointer;gap:6px;}
@@ -843,6 +860,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .coa-sub-body{display:none;padding:6px 9px 9px;flex-direction:column;gap:5px;}
 .coa-sub-body.open{display:flex;}
 .coa-acc-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:11.5px;color:var(--txt);gap:6px;}
+.ca-link-btn{cursor:pointer;color:var(--blue);font-weight:800;text-decoration:underline;text-underline-offset:2px;}
+.ca-link-btn:active{opacity:.7;}
 .coa-acc-row>span:first-child{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .coa-acc-row>b{flex-shrink:0;white-space:nowrap;}
 .coa-acc-del{color:var(--red);font-size:12px;cursor:pointer;padding:0 3px;flex-shrink:0;}
@@ -2154,7 +2173,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[class*="-inp"]:
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:stretch;background:#0a0c10;border-radius:14px;padding:6px;">
 
         <!-- المشتريات / الموردين -->
-        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="purchases" onclick="openBizDetail('purchases')">
+        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="purchases" onclick="bizPurchaseTab='invoice';openBizDetail('purchases')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(182,76,62,.16);">🛒</span>
@@ -2165,7 +2184,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[class*="-inp"]:
 
           <div class="biz-sub">من رأس المال <b style="color:var(--red);">0%</b></div>
           <div class="biz-bar"><div id="ws-pur-bar" style="width:0%;background:var(--red);"></div></div>
-          <div class="biz-lbl" style="text-align:center;">موردين</div>
+          <div class="biz-lbl ca-link-btn" style="text-align:center;" onclick="event.stopPropagation();caGoToSuppliers()">موردين ‹</div>
           <div class="biz-val" id="ws-pur-suppliers-rem" style="text-align:center;color:var(--red);">0</div>
           <div class="biz-split-bar"><div id="ws-pur-paidbar" style="width:0%;background:var(--green);"></div><div id="ws-pur-rembar" style="width:0%;background:var(--red);"></div></div>
           <div class="biz-split-lbls expand-only">
@@ -2200,7 +2219,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[class*="-inp"]:
         </div>
 
         <!-- المبيعات / العملاء -->
-        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="sales" onclick="openBizDetail('sales')">
+        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="sales" onclick="bizSalesTab='invoice';openBizDetail('sales')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(158,163,168,.16);">👥</span>
@@ -2210,7 +2229,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[class*="-inp"]:
           <div class="biz-val" id="ws-sale-total" style="text-align:center;">0</div>
           <div class="biz-sub">من رأس المال <b style="color:var(--blue);">0%</b></div>
           <div class="biz-bar"><div id="ws-sale-bar" style="width:0%;background:var(--blue);"></div></div>
-          <div class="biz-lbl" style="text-align:center;">عملاء</div>
+          <div class="biz-lbl ca-link-btn" style="text-align:center;" onclick="event.stopPropagation();caGoToCustomers()">عملاء ‹</div>
           <div class="biz-val" id="ws-sale-customers-rem" style="text-align:center;color:var(--blue);">0</div>
           <div class="biz-split-bar"><div id="ws-sale-collectedbar" style="width:0%;background:var(--blue);"></div><div id="ws-sale-rembar" style="width:0%;background:var(--red);"></div></div>
           <div class="biz-split-lbls expand-only">
@@ -6729,11 +6748,11 @@ const CA_ROOTS=[
 ];
 /* ترتيب الأقسام الرئيسية بصفحة إنشاء الحسابات */
 const CA_GROUP_ORDER=[
-  {group:'assets',label:'🏛️ أصول'},
-  {group:'liab',label:'📕 التزامات'},
-  {group:'equity',label:'🏛️ حقوق ملكية'},
-  {group:'revenue',label:'📈 إيرادات'},
-  {group:'expenses',label:'📉 مصروفات'}
+  {group:'assets',ico:'🏛️',label:'أصول'},
+  {group:'liab',ico:'📕',label:'التزامات'},
+  {group:'equity',ico:'🏛️',label:'حقوق ملكية'},
+  {group:'revenue',ico:'📈',label:'إيرادات'},
+  {group:'expenses',ico:'📉',label:'مصروفات'}
 ];
 function loadCaTree(){return JSON.parse(_getItem('fm_ca_tree')||'{}');}
 function saveCaTree(o){_setItem('fm_ca_tree',JSON.stringify(o));}
@@ -7138,10 +7157,15 @@ function ensurePartnerEquityCaNodes(){
   if(!curNode){curNode={id:'ca_n_'+nextSeq(),name:'الجارى',children:[]};tree.ca_equity.push(curNode);}
   capNode.children=capNode.children||[];
   curNode.children=curNode.children||[];
-  const partnerNames=loadPartners().map(p=>p.name);
-  partnerNames.forEach(name=>{
-    if(!capNode.children.some(c=>c.name===name))capNode.children.push({id:'ca_n_'+nextSeq(),name,children:[]});
-    if(!curNode.children.some(c=>c.name===name))curNode.children.push({id:'ca_n_'+nextSeq(),name,children:[]});
+  const partners=loadPartners();
+  const partnerNames=partners.map(p=>p.name);
+  partners.forEach(p=>{
+    let capChild=capNode.children.find(c=>c.name===p.name);
+    if(!capChild){capChild={id:'ca_n_'+nextSeq(),name:p.name,children:[]};capNode.children.push(capChild);}
+    capChild.balance=partnerCapitalBalance(p);
+    let curChild=curNode.children.find(c=>c.name===p.name);
+    if(!curChild){curChild={id:'ca_n_'+nextSeq(),name:p.name,children:[]};curNode.children.push(curChild);}
+    curChild.balance=partnerCurrentBalance(p);
   });
   // إزالة حسابات الشركاء اللى اتحذفوا
   capNode.children=capNode.children.filter(c=>partnerNames.includes(c.name));
@@ -7525,13 +7549,18 @@ function caCardChildListHtml(list,isFunds){
 /* الصفوف الثابتة المحسوبة تلقائياً لكل جذر محمي فى شجرة الحسابات المستقلة (مرتبطة ببيانات حقيقية) */
 function caRootBuiltinRows(rootId){
   if(rootId==='ca_goods')return [{name:'بضاعة جاهزة للبيع',amount:(typeof loadInvWarehouses==='function'?loadInvWarehouses():[]).reduce((s,w)=>s+warehouseTotals(w.id).val,0)}];
-  if(rootId==='ca_customers')return [{name:'ذمم عملاء',amount:customersReceivableTotal()}];
-  if(rootId==='ca_suppliers')return [{name:'مستحقات موردين',amount:suppliersPayableTotal()}];
+  if(rootId==='ca_customers')return [{name:'ذمم عملاء',amount:customersReceivableTotal(),action:'caGoToCustomers()'}];
+  if(rootId==='ca_suppliers')return [{name:'مستحقات موردين',amount:suppliersPayableTotal(),action:'caGoToSuppliers()'}];
   if(rootId==='ca_funds')return caFundsAccountRows();
   return [];
 }
+function caGoToCustomers(){closeBizDetail();openBizDetail('sales');switchSalesTab('customers');}
+function caGoToSuppliers(){closeBizDetail();openBizDetail('purchases');switchPurchaseTab('suppliers');}
 function caRootBuiltinHtml(rootId){
-  return caRootBuiltinRows(rootId).filter(r=>r.amount).map(r=>`<div class="coa-acc-row"><span>${esc(r.name)}</span><b>${fmt(r.amount)}</b></div>`).join('');
+  return caRootBuiltinRows(rootId).filter(r=>r.amount||r.action).map(r=>{
+    const nameHtml=r.action?`<span class="ca-link-btn" onclick="event.stopPropagation();${r.action}">${esc(r.name)} ‹</span>`:`<span>${esc(r.name)}</span>`;
+    return `<div class="coa-acc-row">${nameHtml}<b>${fmt(r.amount)}</b></div>`;
+  }).join('');
 }
 function caRootTotal(rootId){
   const builtinTotal=caRootBuiltinRows(rootId).reduce((s,r)=>s+(Number(r.amount)||0),0);
@@ -7563,6 +7592,7 @@ function caCardRootHtml(rootId,tree){
 }
 function renderAccountsCardView(){
   ensureBankGenericCaNode();
+  if(getSettings().addonPartners)ensurePartnerEquityCaNodes();
   const body=document.getElementById('biz-detail-body');
   const hint=document.createElement('div');
   hint.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-size:11px;color:var(--muted);';
@@ -7573,14 +7603,18 @@ function renderAccountsCardView(){
   wrap.className='coa-tree';
   body.appendChild(wrap);
   const tree=loadCaTree();
-  wrap.innerHTML=CA_GROUP_ORDER.map((g,i)=>`
-    <div class="coa-root ca-group-hdr" style="${i?'margin-top:10px;':''}" onclick="toggleCaGroup('${g.group}')">
-      <span>${g.label}</span><span class="ca-group-arrow" id="ca-group-arrow-${g.group}">▾</span>
+  wrap.innerHTML=CA_GROUP_ORDER.map((g,i)=>{
+    const groupTotal=CA_ROOTS.filter(r=>r.group===g.group).reduce((s,r)=>s+caRootTotal(r.id),0);
+    return`
+    <div class="coa-root ca-group-hdr ca-group-hdr-${g.group}" style="${i?'margin-top:10px;':''}" onclick="toggleCaGroup('${g.group}')">
+      <span class="coa-count">${fmt(groupTotal)}</span>
+      <span class="ca-group-hdr-mid">${g.label} <span class="ca-group-arrow" id="ca-group-arrow-${g.group}">▸</span></span>
+      <span class="ca-group-hdr-ico">${g.ico}</span>
     </div>
-    <div class="ca-group-body" id="ca-group-body-${g.group}">
+    <div class="ca-group-body" id="ca-group-body-${g.group}" style="display:none;">
       ${CA_ROOTS.filter(r=>r.group===g.group).map(r=>caCardRootHtml(r.id,tree)).join('')}
     </div>
-  `).join('');
+  `;}).join('');
 }
 function toggleCaGroup(group){
   const body=document.getElementById('ca-group-body-'+group);
@@ -9093,11 +9127,11 @@ function openInvoiceForm(){
         <div class="pinv-addrow" onclick="addInvItemRow()">+ إضافة صنف</div>
         <div class="pinv-total-row">إجمالي المشتريات: <span id="pinv-total">0.00</span></div>
         <div class="pinv-twocards">
-          <div class="pinv-mini"><span class="top"><span class="ico">🧾</span><span class="lbl">مدفوع</span></span><input id="pinv-paid" type="number" value="0" oninput="updInvRemaining()"></div>
+          <div class="pinv-mini"><span class="top"><span class="ico">🧾</span><span class="lbl">مدفوع</span></span><input id="pinv-paid" type="number" placeholder="0" oninput="updInvRemaining()"></div>
           <div class="pinv-mini"><span class="top"><span class="ico">📄</span><span class="lbl">متبقي</span></span><span class="val" id="pinv-remaining">0.00</span></div>
         </div>
         <div class="pinv-notes-meta">
-          <span>عدد الدفعات: <input id="pinv-installments" type="number" min="1" value="1" style="width:34px;"></span>
+          <span>عدد الدفعات: <input id="pinv-installments" type="number" min="1" placeholder="1" style="width:34px;"></span>
           <span>تاريخ الاستحقاق: <input id="pinv-duedate" type="date"></span>
         </div>
         <textarea class="pinv-notes" id="pinv-notes" placeholder="ملاحظات" rows="2"></textarea>
@@ -9289,7 +9323,7 @@ function returnRowHtml(r){
   </div>`;
 }
 function openReturnForm(){
-  _pRetItems=[{name:'',qty:1,price:0}];
+  _pRetItems=[{name:'',qty:'',price:''}];
   document.getElementById('return-form-slot').innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">مردود مشتريات جديد</div>
@@ -9357,8 +9391,8 @@ function updRetItem(i,field,val){
   const valInp=document.getElementById('pret-value');
   if(valInp&&!valInp.dataset.touched)valInp.value=total?total.toFixed(2):'';
 }
-function addRetItemRow(){_pRetItems.push({name:'',qty:1,price:0});renderRetItemsTable();}
-function delRetItem(i){_pRetItems.splice(i,1);if(!_pRetItems.length)_pRetItems.push({name:'',qty:1,price:0});renderRetItemsTable();}
+function addRetItemRow(){_pRetItems.push({name:'',qty:'',price:''});renderRetItemsTable();}
+function delRetItem(i){_pRetItems.splice(i,1);if(!_pRetItems.length)_pRetItems.push({name:'',qty:'',price:''});renderRetItemsTable();}
 function closeReturnForm(){const s=document.getElementById('return-form-slot');if(s)s.innerHTML='';}
 function saveReturn(print){
   const supplierName=document.getElementById('pret-supplier').value.trim();
@@ -9546,7 +9580,7 @@ function openManualEntityForm(type){
       <div class="biz-po-form-title">${type==='customer'?'عميل سابق برصيد افتتاحي':'مورد سابق برصيد افتتاحي'}</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="ent-manual-name" placeholder="${type==='customer'?'اسم العميل':'اسم المورد'}"></div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="ent-manual-phone" placeholder="رقم الهاتف"></div>
-      <div class="biz-po-frow"><input class="biz-po-inp" id="ent-manual-opening" type="number" placeholder="الرصيد الافتتاحي" value="0"></div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="ent-manual-opening" type="number" placeholder="الرصيد الافتتاحي"></div>
       <div class="biz-po-btns">
         <button class="biz-po-btn save" onclick="saveManualEntity('${type}')">حفظ</button>
         <button class="biz-po-btn cancel" onclick="closeManualEntityForm('${type}')">إلغاء</button>
@@ -9759,7 +9793,7 @@ function nextSInvNoPreview(){
 }
 function commitSInvNo(n){_setItem('fm_sinv_no_seq',String(n));}
 function openInvoiceFormS(){
-  _sInvItems=[{name:'',qty:1,price:0}];
+  _sInvItems=[{name:'',qty:'',price:''}];
   const autoNo=nextSInvNoPreview();
   document.getElementById('invoice-form-slot').innerHTML=`
     <div class="biz-po-form">
@@ -9777,7 +9811,7 @@ function openInvoiceFormS(){
       <div class="biz-po-addrow" onclick="addInvItemRowS()">+ إضافة صنف</div>
       <div class="biz-po-total-row"><span>الإجمالي</span><b id="sinv-total">0.00</b></div>
       <div class="biz-po-frow2">
-        <input class="biz-po-inp" id="sinv-paid" type="number" placeholder="المدفوع" value="0" oninput="updInvRemainingS()">
+        <input class="biz-po-inp" id="sinv-paid" type="number" placeholder="المدفوع" oninput="updInvRemainingS()">
         <div class="biz-po-remaining">متبقي: <b id="sinv-remaining">0.00</b></div>
       </div>
       ${getSettings().addonInstallments?`<div class="biz-po-frow2" style="align-items:center;">
@@ -9787,7 +9821,7 @@ function openInvoiceFormS(){
       </div>
       <div id="sinv-install-panel" style="display:none;flex-direction:column;gap:6px;">
         <div class="biz-po-frow2">
-          <input class="biz-po-inp" id="sinv-inst-count" type="number" placeholder="عدد الأقساط" value="1" min="1" oninput="previewInstallmentsS()">
+          <input class="biz-po-inp" id="sinv-inst-count" type="number" placeholder="عدد الأقساط" min="1" oninput="previewInstallmentsS()">
           <select class="biz-po-inp" id="sinv-inst-freq" onchange="previewInstallmentsS()">
             <option value="monthly">شهري</option>
             <option value="biweekly">كل أسبوعين</option>
@@ -9855,8 +9889,8 @@ function updInvItemS(i,field,val){
   const totalEl=document.getElementById('sinv-total');if(totalEl)totalEl.textContent=fmt(total);
   updInvRemainingS();
 }
-function addInvItemRowS(){_sInvItems.push({name:'',qty:1,price:0});renderInvItemsTableS();}
-function delInvItemS(i){_sInvItems.splice(i,1);if(!_sInvItems.length)_sInvItems.push({name:'',qty:1,price:0});renderInvItemsTableS();}
+function addInvItemRowS(){_sInvItems.push({name:'',qty:'',price:''});renderInvItemsTableS();}
+function delInvItemS(i){_sInvItems.splice(i,1);if(!_sInvItems.length)_sInvItems.push({name:'',qty:'',price:''});renderInvItemsTableS();}
 function updInvRemainingS(){
   const total=_sInvItems.reduce((s,it)=>s+(Number(it.qty)||0)*(Number(it.price)||0),0);
   const paid=Number(document.getElementById('sinv-paid')?.value||0);
@@ -10433,7 +10467,7 @@ function nextReturnRefPreviewS(){
 }
 function commitReturnRefS(refNo){_setItem('fm_return_ref_seq_sales',String(refNo));}
 function openReturnFormS(){
-  _sRetItems=[{name:'',qty:1,price:0}];
+  _sRetItems=[{name:'',qty:'',price:''}];
   document.getElementById('return-form-slot').innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">مردود مبيعات جديد</div>
@@ -10495,8 +10529,8 @@ function updRetItemS(i,field,val){
   const valInp=document.getElementById('sret-value');
   if(valInp&&!valInp.dataset.touched)valInp.value=total?total.toFixed(2):'';
 }
-function addRetItemRowS(){_sRetItems.push({name:'',qty:1,price:0});renderRetItemsTableS();}
-function delRetItemS(i){_sRetItems.splice(i,1);if(!_sRetItems.length)_sRetItems.push({name:'',qty:1,price:0});renderRetItemsTableS();}
+function addRetItemRowS(){_sRetItems.push({name:'',qty:'',price:''});renderRetItemsTableS();}
+function delRetItemS(i){_sRetItems.splice(i,1);if(!_sRetItems.length)_sRetItems.push({name:'',qty:'',price:''});renderRetItemsTableS();}
 function closeReturnFormS(){const s=document.getElementById('return-form-slot');if(s)s.innerHTML='';}
 function saveReturnS(print){
   const customerName=document.getElementById('sret-customer').value.trim();
@@ -10831,48 +10865,67 @@ function renderInvRoot(){
 /* ── قائمة المخازن ── */
 /* ── رمز تلقائي للصنف حسب اسمه، يظهر جوه بطاقة الصنف بالمخزون ── */
 const ITEM_ICON_RULES=[
+  [/كابل|شاحن|charger|cable|adapter|محول/,'🔌'],
+  [/سماعة|سماعات|headphone|earphone|airpods/,'🎧'],
   [/موبايل|هاتف|تليفون|فون|iphone|samsung|phone/,'📱'],
   [/لابتوب|كمبيوتر|laptop|computer|pc\b/,'💻'],
   [/شاشة|تلفزيون|tv\b|monitor/,'📺'],
-  [/سماعة|سماعات|headphone|earphone/,'🎧'],
-  [/كابل|شاحن|charger|cable/,'🔌'],
-  [/بطارية|battery/,'🔋'],
+  [/بطارية|battery|باور بانك|powerbank/,'🔋'],
+  [/كاميرا|camera/,'📷'],
+  [/طابعة|printer/,'🖨️'],
+  [/فلاشة|فلاش ميموري|usb\b|ذاكرة/,'💾'],
+  [/ماوس|فأرة|mouse/,'🖱️'],
+  [/كيبورد|لوحة مفاتيح|keyboard/,'⌨️'],
   [/قميص|تيشرت|بلوزة|shirt/,'👕'],
   [/بنطلون|جينز|pants|jeans/,'👖'],
   [/فستان|dress/,'👗'],
-  [/حذاء|جزمة|شوز|shoe/,'👟'],
-  [/شنطة|حقيبة|bag/,'👜'],
+  [/جاكيت|معطف|coat|jacket/,'🧥'],
+  [/حذاء|جزمة|شوز|شبشب|صندل|shoe/,'👟'],
+  [/شنطة|حقيبة|bag|محفظة|wallet/,'👜'],
   [/ساعة|watch/,'⌚'],
   [/نظارة|glasses/,'👓'],
+  [/كاب|طاقية|قبعة|hat|cap\b/,'🧢'],
+  [/جوارب|شراب|socks/,'🧦'],
+  [/مكياج|روج|احمر شفايف|makeup|lipstick/,'💄'],
+  [/عطر|برفان|perfume/,'🧴'],
   [/كتاب|book|مصحف/,'📚'],
   [/قلم|pen\b|pencil/,'✏️'],
   [/ورق|paper|كشكول|دفتر|كراسة/,'📒'],
+  [/حقيبة مدرسية|شنطة مدرسة|backpack/,'🎒'],
   [/أرز|رز\b|rice/,'🍚'],
   [/سكر|sugar/,'🧂'],
-  [/زيت|oil/,'🧴'],
+  [/زيت|oil/,'🫙'],
   [/شاي|tea\b/,'🍵'],
   [/قهوة|coffee|نسكافيه/,'☕'],
   [/لبن|حليب|milk/,'🥛'],
   [/جبنة|جبن|cheese/,'🧀'],
   [/خبز|عيش|bread/,'🍞'],
+  [/بيض|egg/,'🥚'],
   [/تفاح|موز|برتقال|فاكهة|فواكه|fruit/,'🍎'],
   [/خضار|خضروات|طماطم|بطاطس|vegetable/,'🥦'],
   [/لحمة|لحم|فراخ|دجاج|meat|chicken/,'🍗'],
   [/سمك|فسيخ|fish/,'🐟'],
   [/مياه|مياة|ماية|water/,'💧'],
   [/عصير|juice/,'🧃'],
+  [/شيبسي|بسكويت|حلويات|شوكولاتة|شيكولاتة|snack|chocolate|candy/,'🍫'],
   [/دواء|علاج|أقراص|كبسول|medicine|pharma/,'💊'],
   [/صابون|شامبو|منظف|soap|shampoo|detergent/,'🧼'],
   [/معجون|فرشاة|toothpaste|toothbrush/,'🪥'],
+  [/مناديل|tissue|فوط/,'🧻'],
   [/مفك|مطرقة|عدة|أدوات|tool/,'🔧'],
+  [/مسمار|برغي|nail|screw/,'🔩'],
   [/دهان|بويه|paint/,'🎨'],
   [/كرسي|طاولة|ترابيزة|furniture|chair|table/,'🪑'],
+  [/سرير|فراش|bed/,'🛏️'],
   [/لمبة|إضاءة|light|lamp/,'💡'],
   [/لعبة|العاب|toy/,'🧸'],
   [/سيارة|عربية|car\b/,'🚗'],
   [/دراجة|عجلة|bike/,'🚲'],
   [/زهور|ورد|flower/,'🌸'],
-  [/سجاير|دخان|cigarette/,'🚬']
+  [/سجاير|دخان|cigarette/,'🚬'],
+  [/كرة|رياضة|جيم|ball|sport|gym/,'⚽'],
+  [/بامبرز|حفاض|رضاعة|baby|diaper/,'🍼'],
+  [/فلتر|مكنسة|غسالة|ثلاجة|بوتاجاز|appliance/,'🧯']
 ];
 function itemIcon(name){
   const n=(name||'').toLowerCase();
@@ -10918,9 +10971,9 @@ function invFlatItemsPreviewHtml(whId){
   return`<div class="inv-items-grid">${items.map(it=>{
     const hasQty=Number(it.qty||0)>0;
     return`<div class="inv-item-card${hasQty?' has-qty':''}" onclick="event.stopPropagation();openWarehouse('${whId}')">
-      <div class="inv-item-card-ic">${itemIcon(it.name)}</div>
+      <div class="inv-item-card-top"><span class="inv-item-card-ic">${itemIcon(it.name)}</span><span class="inv-item-card-qty">${it.qty}</span></div>
       <div class="inv-item-card-name">${esc(it.name)}</div>
-      <div class="inv-item-card-meta"><span>${it.qty} قطعة</span><b>${fmt(it.cost)}</b></div>
+      <div class="inv-item-card-meta"><b>${fmt(it.cost)}</b></div>
     </div>`;
   }).join('')}</div>`;
 }
@@ -11067,16 +11120,15 @@ function itemsListHtml(items){
   if(!items.length)return'';
   if(invItemsView==='grid'){
     return`<div class="inv-items-grid">${items.map(it=>`<div class="inv-item-card" onclick="editInvItem('${it.id}')">
-      <div class="inv-item-card-ic">${itemIcon(it.name)}</div>
+      <div class="inv-item-card-top"><span class="inv-item-card-ic">${itemIcon(it.name)}</span><span class="inv-item-card-qty">${it.qty}</span></div>
       <div class="inv-item-card-name">${esc(it.name)}</div>
-      <div class="inv-item-card-meta"><span>${it.qty} قطعة</span><b>${fmt(it.cost)}</b></div>
+      <div class="inv-item-card-meta"><b>${fmt(it.cost)}</b></div>
     </div>`).join('')}</div>`;
   }
-  return`<div class="biz-po-tbl-wrap"><div class="biz-po-items-hdr" style="grid-template-columns:16px 1fr 40px 55px;"><span>م</span><span>الصنف</span><span>الكمية</span><span>التكلفة</span></div>
-    ${items.map((it,i)=>`<div class="biz-po-item-row" style="grid-template-columns:16px 1fr 40px 55px;cursor:pointer;" onclick="editInvItem('${it.id}')">
-      <span class="m">${i+1}</span><span>${itemIcon(it.name)} ${esc(it.name)}</span><span>${it.qty}</span><span class="amt">${fmt(it.cost)}</span>
-    </div>`).join('')}
-  </div>`;
+  return`<div class="inv-items-rows2">${items.map(it=>`<div class="inv-item-row2" onclick="editInvItem('${it.id}')">
+    <div class="inv-item-row2-top"><span class="inv-item-row2-code">${itemIcon(it.name)}</span><span class="inv-item-row2-qty">${it.qty}</span></div>
+    <div class="inv-item-row2-meta"><span class="inv-item-row2-name">${esc(it.name)}</span><b>${fmt(it.cost)}</b></div>
+  </div>`).join('')}</div>`;
 }
 function renderInvItemsTab(c){
   migrateInvFolders();
@@ -11161,8 +11213,8 @@ function renderInvAddSlot(){
       <div class="biz-po-form-title">صنف جديد</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="itm-name" placeholder="اسم الصنف"></div>
       <div class="biz-po-frow2">
-        <input class="biz-po-inp" id="itm-qty" type="number" placeholder="الكمية" value="1">
-        <input class="biz-po-inp" id="itm-cost" type="number" placeholder="تكلفة الوحدة" value="0">
+        <input class="biz-po-inp" id="itm-qty" type="number" placeholder="الكمية">
+        <input class="biz-po-inp" id="itm-cost" type="number" placeholder="تكلفة الوحدة">
       </div>
       ${barcodeOn?'<div class="biz-po-frow"><input class="biz-po-inp" id="itm-barcode" placeholder="الباركود"></div>':''}
       <div class="biz-po-btns">
@@ -11269,8 +11321,8 @@ function openAddInvEntryForm(kind){
       <div class="biz-po-form-title">${label} جديد</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="ie-name" placeholder="اسم الصنف"></div>
       <div class="biz-po-frow2">
-        <input class="biz-po-inp" id="ie-qty" type="number" placeholder="الكمية" value="1">
-        <input class="biz-po-inp" id="ie-cost" type="number" placeholder="تكلفة الوحدة" value="0">
+        <input class="biz-po-inp" id="ie-qty" type="number" placeholder="الكمية">
+        <input class="biz-po-inp" id="ie-cost" type="number" placeholder="تكلفة الوحدة">
       </div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="ie-date" type="date" value="${todayStr()}"></div>
       <textarea class="biz-po-inp" id="ie-notes" placeholder="ملاحظات" rows="2" style="resize:none;"></textarea>
