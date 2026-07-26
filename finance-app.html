@@ -94,7 +94,12 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 
 .scard-progress-fill{height:100%;border-radius:0 0 14px 14px;transition:width .6s cubic-bezier(.2,.8,.3,1);background:var(--green)!important;}
 /* شريط صفوف الديون */
-#tbody-debt tr td,#tbody-debt-em tr td{height:42px;}
+#tbody-debt tr td,#tbody-debt-em tr td{height:47px;}
+#tbody-debt td.td-name,#tbody-debt-em td.td-name{font-size:14px!important;}
+#tbody-debt td.td-g,#tbody-debt td.td-b,#tbody-debt td.td-r,#tbody-debt td.td-y,#tbody-debt td.td-rp,#tbody-debt td.td-rn,#tbody-debt td.td-m:not(.td-date):not(.td-pay),
+#tbody-debt-em td.td-g,#tbody-debt-em td.td-b,#tbody-debt-em td.td-r,#tbody-debt-em td.td-y,#tbody-debt-em td.td-rp,#tbody-debt-em td.td-rn,#tbody-debt-em td.td-m:not(.td-date):not(.td-pay){font-size:15px!important;}
+#tbody-debt td.td-date,#tbody-debt-em td.td-date{font-size:11px!important;}
+#tbody-debt td.td-pay,#tbody-debt-em td.td-pay{font-size:8px!important;}
 #tbody-debt tr td:last-child,#tbody-debt-em tr td:last-child{position:relative;overflow:hidden;}
 #tbody-debt tr.bar-none td:last-child::after,#tbody-debt-em tr.bar-none td:last-child::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--red);}
 #tbody-debt tr.bar-full td:last-child::after,#tbody-debt-em tr.bar-full td:last-child::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--green);}
@@ -559,17 +564,14 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .budget-sum-val{font-size:14px;font-weight:800;display:block;margin-top:2px;}
 .budget-tbl-wrap{flex:1;overflow-y:auto;scrollbar-width:none;}
 .budget-tbl-wrap::-webkit-scrollbar{display:none;}
-.budget-tbl-wrap table{width:100%;border-collapse:separate;border-spacing:0 5px;}
-.budget-tbl-wrap th{position:sticky;top:0;background:#253445;font-size:10px;font-weight:700;color:var(--muted);padding:6px 4px;text-align:center;border-bottom:1px solid rgba(255,241,214,.08);z-index:2;}
-.budget-tbl-wrap tbody tr{background:#3a3a3a;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(255,241,214,.04),0 2px 6px rgba(0,0,0,.35);transition:transform .35s cubic-bezier(.2,.8,.3,1),box-shadow .25s ease;}
-.budget-tbl-wrap tbody tr:nth-child(even){background:#434343;}
-.budget-tbl-wrap td{font-size:12px;font-weight:600;padding:8px 4px;text-align:center;color:var(--txt);background:transparent;border:none;}
-.budget-tbl-wrap tr td:first-child{border-radius:0 8px 8px 0;}
-.budget-tbl-wrap tr td:last-child{border-radius:8px 0 0 8px;}
-.budget-tbl-wrap tbody tr:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(158,163,168,.25),0 6px 14px rgba(0,0,0,.5);}
-.budget-tbl-wrap tbody tr:hover td{background:rgba(158,163,168,.06)!important;}
-.budget-tbl-wrap tbody tr.opening-row{background:rgba(255,200,0,.14)!important;box-shadow:inset 0 0 0 1px rgba(255,200,0,.35),0 2px 6px rgba(0,0,0,.35);}
-.budget-tbl-wrap tbody tr.opening-row td{color:var(--yellow);font-weight:800;font-size:12px;}
+.budget-tbl-wrap table{width:100%;border-collapse:collapse;}
+.budget-tbl-wrap th{position:sticky;top:0;background:var(--card2);font-size:11px;font-weight:700;color:var(--muted);padding:11px 4px;text-align:center;border-bottom:1px solid var(--border);z-index:2;}
+.budget-tbl-wrap tbody tr{background:var(--card);border-bottom:1px solid var(--border);transition:background .15s ease;}
+.budget-tbl-wrap tbody tr:nth-child(even){background:var(--card2);}
+.budget-tbl-wrap td{font-size:13px;font-weight:600;padding:11px 4px;text-align:center;color:var(--txt);background:transparent;border:none;}
+.budget-tbl-wrap tbody tr:hover td{background:rgba(158,163,168,.06);}
+.budget-tbl-wrap tbody tr.opening-row{background:rgba(255,200,0,.1);}
+.budget-tbl-wrap tbody tr.opening-row td{color:var(--yellow);font-weight:800;font-size:13px;}
 /* إعدادات الميزانية */
 .commit-item-row{display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:8px;background:var(--card2);border:1px solid var(--border);margin-bottom:4px;cursor:default;transition:opacity .2s,transform .15s,box-shadow .15s;user-select:none;}
 .commit-item-row.dragging{opacity:.4;transform:scale(.97);}
