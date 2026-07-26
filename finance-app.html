@@ -99,7 +99,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 #tbody-debt td.td-g,#tbody-debt td.td-b,#tbody-debt td.td-r,#tbody-debt td.td-y,#tbody-debt td.td-rp,#tbody-debt td.td-rn,#tbody-debt td.td-m:not(.td-date):not(.td-pay),
 #tbody-debt-em td.td-g,#tbody-debt-em td.td-b,#tbody-debt-em td.td-r,#tbody-debt-em td.td-y,#tbody-debt-em td.td-rp,#tbody-debt-em td.td-rn,#tbody-debt-em td.td-m:not(.td-date):not(.td-pay){font-size:15px!important;}
 #tbody-debt td.td-date,#tbody-debt-em td.td-date{font-size:11px!important;}
-#tbody-debt td.td-pay,#tbody-debt-em td.td-pay{font-size:8px!important;}
+#tbody-debt tr td.td-pay,#tbody-debt-em tr td.td-pay{font-size:8px!important;}
+#tbody-debt tr:nth-child(odd) .td-g,#tbody-debt tr:nth-child(odd) .td-rp,#tbody-debt-em tr:nth-child(odd) .td-g,#tbody-debt-em tr:nth-child(odd) .td-rp{color:#27ae60!important;}
+#tbody-debt tr:nth-child(even) .td-g,#tbody-debt tr:nth-child(even) .td-rp,#tbody-debt-em tr:nth-child(even) .td-g,#tbody-debt-em tr:nth-child(even) .td-rp{color:#2ecc71!important;}
 #tbody-debt tr td:last-child,#tbody-debt-em tr td:last-child{position:relative;overflow:hidden;}
 #tbody-debt tr.bar-none td:last-child::after,#tbody-debt-em tr.bar-none td:last-child::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--red);}
 #tbody-debt tr.bar-full td:last-child::after,#tbody-debt-em tr.bar-full td:last-child::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--green);}
@@ -7328,6 +7330,10 @@ function setAcctMgmtView(v){
   acctMgmtView=v;
   renderAccountsDetail();
 }
+function refreshAccountsViews(){
+  renderAccountsDetail();
+  if(document.getElementById('ca-card-tree-wrap'))renderAccountsCardView();
+}
 function renderAccountsDetail(){
   const holder=document.getElementById('set-coa-wrap');
   if(!holder)return;
@@ -8456,16 +8462,16 @@ function addVoucherDiffDebt(personName,amount,voucherSeq,label){
     const adj=loadPartnerCurrentAdj();
     adj.push({id:'padj_'+Date.now(),partnerId:partner.id,amount:-amount,date:todayStr(),reason:'فرق '+label+' إذن #'+voucherSeq,voucherSeq});
     savePartnerCurrentAdj(adj);
-    coaExpanded.liab_equity=true;
-    renderCoaTree();
+    refreshAccountsViews();
+    refreshBizDashboard();
     return true;
   }
-  const data=loadCoaAccounts();
-  if(!data.assets_other_debit)data.assets_other_debit=[];
-  data.assets_other_debit.push({id:'acc_'+Date.now(),name:personName+' — فرق '+label+' إذن #'+voucherSeq,amount,voucherSeq});
-  saveCoaAccounts(data);
-  coaExpanded.assets_other_debit=true;
-  renderCoaTree();
+  const tree=loadCaTree();
+  if(!tree.ca_other_assets)tree.ca_other_assets=[];
+  tree.ca_other_assets.push({id:'ca_n_'+nextSeq(),name:personName+' — فرق '+label+' إذن #'+voucherSeq,children:[],balance:amount,voucherSeq});
+  saveCaTree(tree);
+  refreshAccountsViews();
+  refreshBizDashboard();
   return false;
 }
 function openTreasuryOpeningForm(){
@@ -8617,6 +8623,8 @@ function buildRecipientDatalist(){
   const set=new Set();
   // أسماء الموردين (المستفيد المحتمل من الصرف)
   getAllSupplierNames().forEach(n=>n&&set.add(n));
+  // الشركاء
+  try{loadPartners().forEach(p=>{if(p&&p.name)set.add(p.name);});}catch(_){}
   // الموظفين (إذا كان الإضافة مفعلة)
   try{
     const emp=JSON.parse(_getItem('fm_employees')||'[]');
@@ -8692,9 +8700,9 @@ function renderVchSettleOptions(){
   const sel=document.getElementById('vch-settle-target');
   if(!sel)return;
   const opts=[];
-  const coa=loadCoaAccounts();
-  (coa.assets_other_debit||[]).forEach(a=>{
-    opts.push({key:'coa:'+a.id,label:a.name+' — '+fmt(a.amount)});
+  const tree=loadCaTree();
+  (tree.ca_other_assets||[]).filter(a=>a.voucherSeq).forEach(a=>{
+    opts.push({key:'coa:'+a.id,label:a.name+' — '+fmt(a.balance)});
   });
   if(getSettings().addonPartners){
     loadPartners().forEach(p=>{
@@ -8726,12 +8734,12 @@ function settleOtherDebitOrPartner(key,amount,date,voucherSeq){
   }
   if(key.indexOf('coa:')===0){
     const accId=key.slice('coa:'.length);
-    const data=loadCoaAccounts();
-    const acc=(data.assets_other_debit||[]).find(a=>a.id===accId);
+    const tree=loadCaTree();
+    const acc=(tree.ca_other_assets||[]).find(a=>a.id===accId);
     if(acc){
-      acc.amount=Math.round(Math.max(Number(acc.amount||0)-amount,0)*100)/100;
-      if(acc.amount<=0.001)data.assets_other_debit=data.assets_other_debit.filter(a=>a.id!==accId);
-      saveCoaAccounts(data);
+      acc.balance=Math.round(Math.max(Number(acc.balance||0)-amount,0)*100)/100;
+      if(acc.balance<=0.001)tree.ca_other_assets=tree.ca_other_assets.filter(a=>a.id!==accId);
+      saveCaTree(tree);
     }
   }
 }
@@ -8854,8 +8862,8 @@ function saveVoucher(kind){
   pushBizJournal(displayName,total,kind==='receipt'?'in':'out',(kind==='receipt'?'إذن قبض #':'إذن صرف #')+v.seq,kind==='receipt'?'var(--green)':'var(--red)',v.date);
   if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   closeVoucherForm(kind);
-  if(kind==='receipt'){renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));refreshBizDashboard();renderAccountsDetail();}
-  else{renderPaymentTab(document.getElementById('biz-liquidity-tab-content'));refreshBizDashboard();renderAccountsDetail();}
+  if(kind==='receipt'){renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));refreshBizDashboard();refreshAccountsViews();}
+  else{renderPaymentTab(document.getElementById('biz-liquidity-tab-content'));refreshBizDashboard();refreshAccountsViews();}
 }
 function viewVoucher(kind,id){
   const list=kind==='receipt'?loadTreasuryReceipts():loadTreasuryPayments();
@@ -8969,15 +8977,16 @@ function revertVoucherEffects(kind,v){
   }
   const coa=loadCoaAccounts();
   let coaTouched=false;
-  if(coa.assets_other_debit&&coa.assets_other_debit.some(a=>a.voucherSeq===v.seq)){
-    coa.assets_other_debit=coa.assets_other_debit.filter(a=>a.voucherSeq!==v.seq);
-    coaTouched=true;
-  }
   if(coa.assets_debtors&&coa.assets_debtors.some(a=>a.voucherSeq===v.seq)){
     coa.assets_debtors=coa.assets_debtors.filter(a=>a.voucherSeq!==v.seq);
     coaTouched=true;
   }
   if(coaTouched)saveCoaAccounts(coa);
+  const caTree=loadCaTree();
+  if(caTree.ca_other_assets&&caTree.ca_other_assets.some(a=>a.voucherSeq===v.seq)){
+    caTree.ca_other_assets=caTree.ca_other_assets.filter(a=>a.voucherSeq!==v.seq);
+    saveCaTree(caTree);
+  }
   const adj=loadPartnerCurrentAdj();
   if(adj.some(a=>a.voucherSeq===v.seq)){
     savePartnerCurrentAdj(adj.filter(a=>a.voucherSeq!==v.seq));
@@ -9004,6 +9013,7 @@ function deleteVoucher(kind,id){
   closeVoucherForm(kind);
   bizEntityDetail=null; // عشان لما يتفتح تفاصيل العميل/المورد تاني تظهر بالأرقام الصحيحة بعد التراجع
   refreshBizDashboard();
+  refreshAccountsViews();
 }
 
 /* ══════════════════════════════════════════════
@@ -9117,7 +9127,8 @@ function openInvoiceForm(){
         <div class="pinv-section">
           <div class="pinv-section-hdr">👤 بيانات المورد</div>
           <div class="pinv-section-row">
-            <input id="pinv-supplier" placeholder="اسم المورد">
+            <input id="pinv-supplier" list="pinv-supplier-list" placeholder="اسم المورد" autocomplete="off">
+            <datalist id="pinv-supplier-list">${getAllSupplierNames().map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
             <input id="pinv-phone" placeholder="رقم الهاتف">
           </div>
           ${whs.length?`<select class="pinv-wh-sel" id="pinv-wh">${whOptionsHtml()}</select>`:''}
@@ -9257,15 +9268,56 @@ function saveInvoice(print){
   const list=loadPInvoices();list.push(inv);savePInvoices(list);
   pushBizJournal(supplierName,total,'out','فاتورة مشتريات #'+(inv.invNo||inv.seq),'#8b6cf0',inv.date);
   if(paid>0){
+    openPInvVoucherPrompt(inv,paid,print);
+  }else{
+    closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
+    refreshBizDashboard();
+    if(print)setTimeout(()=>window.print(),300);
+  }
+}
+function openPInvVoucherPrompt(inv,paid,print){
+  const seq=nextSeq();
+  document.getElementById('invoice-form-slot').innerHTML=`
+    <div class="biz-po-form">
+      <div class="biz-po-form-title">📤 إذن صرف — دفعة فاتورة مشتريات</div>
+      <div class="biz-po-frow">
+        <input class="biz-po-inp" id="pinv-vch-name" list="pinv-vch-name-list" placeholder="اسم المستلم/القائم بالشراء (مالك، شريك، أو موظف)" autocomplete="off">
+        <datalist id="pinv-vch-name-list">${buildRecipientDatalist()}</datalist>
+        <input class="biz-po-inp" value="رقم القيد #${seq}" disabled>
+      </div>
+      <div class="biz-po-frow">
+        <input class="biz-po-inp" value="${inv.invNo?'فاتورة #'+esc(inv.invNo):'فاتورة #'+inv.seq}" disabled>
+        <input class="biz-po-inp" value="${esc(inv.supplierName)}" disabled>
+      </div>
+      <div class="biz-po-frow"><input class="biz-po-inp" id="pinv-vch-amount" type="number" placeholder="المبلغ" value="${paid}"></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="savePInvVoucherPrompt('${inv.id}',${seq},${print?'true':'false'})">حفظ</button>
+        <button class="biz-po-btn cancel" onclick="cancelPInvVoucherPrompt(${print?'true':'false'})">إلغاء</button>
+      </div>
+    </div>`;
+}
+function savePInvVoucherPrompt(invId,seq,print){
+  const inv=loadPInvoices().find(x=>x.id===invId);
+  const nameEl=document.getElementById('pinv-vch-name');
+  const amtEl=document.getElementById('pinv-vch-amount');
+  const name=nameEl?nameEl.value.trim():'';
+  const amount=Number(amtEl?amtEl.value:0)||0;
+  if(!name){pgConfirm('من فضلك اكتب اسم مين استلم المبلغ وقام بعملية الشراء',()=>{},'حسناً');return;}
+  if(amount>0&&inv){
     const payments=loadTreasuryPayments();
-    payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:supplierName,amount:paid,type:'شراء',
+    payments.push({id:'pmt_'+Date.now(),seq,name,amount,type:'شراء',
       date:inv.date,desc:'دفعة فاتورة مشتريات '+(inv.invNo?'#'+inv.invNo:'#'+inv.seq),notes:'',
-      status:'pending',sourceInvId:inv.id,recipient:supplierName});
+      status:'pending',sourceInvId:inv.id,recipient:name});
     saveTreasuryPayments(payments);
   }
   closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
   refreshBizDashboard();
-  if(paid>0)pgConfirm('تم حفظ الفاتورة، وسُجّل إذن صرف معلق بقيمة '+fmt(paid)+' فى انتظار تأكيد المبلغ فعلياً من قسم الخزينة',()=>{},'تمام');
+  if(amount>0)pgConfirm('تم حفظ الفاتورة، وسُجّل إذن صرف معلق بقيمة '+fmt(amount)+' فى انتظار تأكيد المبلغ فعلياً من قسم الخزينة',()=>{},'تمام');
+  if(print)setTimeout(()=>window.print(),300);
+}
+function cancelPInvVoucherPrompt(print){
+  closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
+  refreshBizDashboard();
   if(print)setTimeout(()=>window.print(),300);
 }
 function viewInvoice(id){
