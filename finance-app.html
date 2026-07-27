@@ -742,6 +742,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-po-frow{display:flex;}
 .biz-po-frow2{display:flex;gap:6px;}
 .biz-po-inp{flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;padding:7px 8px;}
+select{background:var(--card2);color:var(--txt);}
+select option{background:var(--card2);color:var(--txt);padding:10px 16px;min-width:160px;}
 .biz-po-tbl-wrap{display:flex;flex-direction:column;gap:6px;}
 .biz-po-items-hdr{display:grid;grid-template-columns:18px 1fr 34px 44px 52px 16px;gap:5px;padding:0 14px;font-size:9px;color:var(--muted);font-weight:700;}
 .biz-po-item-row{display:grid;grid-template-columns:18px 1fr 34px 44px 52px 16px;align-items:center;gap:5px;border-radius:999px;padding:8px 14px;}
@@ -1065,6 +1067,10 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .biz-po-sup-card{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 10px;display:flex;flex-direction:column;gap:5px;cursor:pointer;}
 .biz-po-sup-top{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:800;color:var(--txt);}
 .biz-po-sup-bottom{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--muted);}
+.sup-bal-inp{width:74px;font-size:12px;text-align:center;background:var(--card2);border:1px solid var(--blue);border-radius:6px;color:var(--txt);padding:2px 4px;font-family:'Cairo',sans-serif;}
+#inline-pay-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:9998;background:var(--card);border:1px solid var(--blue);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 26px rgba(0,0,0,.45);font-family:'Cairo',sans-serif;}
+#inline-pay-bar span{font-size:11.5px;color:var(--muted);white-space:nowrap;}
+#inline-pay-bar button{border:none;border-radius:9px;padding:6px 13px;font-size:12px;font-weight:800;font-family:'Cairo',sans-serif;cursor:pointer;}
 /* ── دفتر عميل/مورد: جدول له/عليه ── */
 .biz-ledger-wrap{display:flex;flex-direction:column;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:8px;}
 .biz-ledger-hdr{display:grid;grid-template-columns:1.3fr .9fr 1fr 1fr;gap:5px;padding:0 4px 4px;font-size:9.5px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);}
@@ -8540,7 +8546,7 @@ function renderReceiptTab(c){
 }
 /* ── إذن صرف ── */
 const VOUCHER_TYPES={
-  payment:['مصروف','سداد سلفة','سداد عهدة','تحويل','مسحوبات شريك','أخرى'],
+  payment:['مصروف','سداد مورد','سداد سلفة','سداد عهدة','تحويل','مسحوبات شريك','أخرى'],
   receipt:['إيراد','تسوية صرف','تسوية قبض','سداد سلفة','إيداع شريك','مدفوعات شريك','تحويل','أخرى']
 };
 function renderPaymentTab(c){
@@ -8568,6 +8574,7 @@ function voucherRowHtml(v,kind){
 }
 function voucherFormSlotId(kind){return kind+'-form-slot';}
 let _vchReceiptCustomers=[];
+let _vchPaySuppliers=[];
 let _vchSettleKey=null;
 function openVoucherForm(kind){
   const title=kind==='receipt'?'إذن قبض جديد':'إذن صرف جديد';
@@ -8580,9 +8587,24 @@ function openVoucherForm(kind){
   if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
-      <div class="biz-po-form-title">${title}</div>
-      <select class="biz-po-inp" id="vch-${kind}-type" onchange="vchTypeChanged('${kind}')">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
-      <div class="biz-po-frow" id="vch-${kind}-partner-wrap" style="display:none;"><select class="biz-po-inp" id="vch-${kind}-partner"></select></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <select class="biz-po-inp" id="vch-${kind}-type" onchange="vchTypeChanged('${kind}')" style="flex:0 0 auto;width:auto;">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
+        <div class="biz-po-form-title" style="margin:0;flex:1;">${title}</div>
+      </div>
+      <div class="biz-po-frow" id="vch-${kind}-partner-wrap" style="display:none;">
+        <select class="biz-po-inp" id="vch-${kind}-partner" onchange="vchPartnerSelChosen('${kind}')"></select>
+        <input class="biz-po-inp" id="vch-${kind}-partner-seq-preview" disabled>
+      </div>
+      ${kind==='payment'?`
+      <div id="vch-payment-supwrap" style="display:none;flex-direction:column;gap:10px;">
+        <div class="biz-po-frow2">
+          <input class="biz-po-inp" id="vch-payment-payer" placeholder="اسم الصراف">
+          <input class="biz-po-inp" id="vch-payment-seqpreview" disabled>
+        </div>
+        <div class="biz-po-frow"><select class="biz-po-inp" id="vch-payment-supsel" onchange="vchAddSupplierRow()"></select></div>
+        <div id="vch-payment-suplist"></div>
+      </div>`:''}
+      <div id="vch-${kind}-namecoa-wrap">
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl}" autocomplete="off">
         <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
       </div>
@@ -8590,14 +8612,16 @@ function openVoucherForm(kind){
         <option value="">— ربط بحساب فرعى (اختياري) —</option>
         ${listLinkableCoaAccounts().map(a=>`<option value="${esc(a.subId)}::${esc(a.accId)}">${esc(a.shortName)}</option>`).join('')}
       </select></div>
+      </div>
       ${kind==='payment'?`
-      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-payment-recipient" list="vch-payment-recipient-list" placeholder="اسم المستلم — الشخص اللي استلم المبلغ فعلاً" autocomplete="off">
+      <div class="biz-po-frow" id="vch-payment-recipient-wrap">
+      <input class="biz-po-inp" id="vch-payment-recipient" list="vch-payment-recipient-list" placeholder="اسم المستلم — الشخص اللي استلم المبلغ فعلاً" autocomplete="off">
         <datalist id="vch-payment-recipient-list">${recipientDatalist}</datalist>
         <button type="button" class="biz-po-btn save" style="flex:0 0 auto;padding:7px 10px;font-size:12px;" onclick="copyNameToRecipient('payment')" title="نسخ اسم المصروف له">↓</button>
       </div>`:''}
       <div class="biz-po-frow2">
-        <input class="biz-po-inp" id="vch-${kind}-amount" type="number" placeholder="المبلغ">
-        <input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}">
+        <span id="vch-${kind}-amount-wrap" style="flex:1;display:flex;"><input class="biz-po-inp" id="vch-${kind}-amount" type="number" placeholder="المبلغ" style="flex:1;"></span>
+        <span id="vch-${kind}-date-wrap"><input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}"></span>
       </div>
       <div class="biz-po-frow" id="vch-${kind}-linkdir-wrap" style="display:none;">
         <select class="biz-po-inp" id="vch-${kind}-linkdir">
@@ -8606,17 +8630,23 @@ function openVoucherForm(kind){
         </select>
       </div>
       ${kind==='receipt'?`
-      <div class="biz-po-frow" id="vch-settle-wrap" style="display:none;"><select class="biz-po-inp" id="vch-settle-target" onchange="vchSettleTargetChosen()"></select></div>
+      <div class="biz-po-frow" id="vch-settle-wrap" style="display:none;">
+        <select class="biz-po-inp" id="vch-settle-target" onchange="vchSettleTargetChosen()"></select>
+        <input class="biz-po-inp" id="vch-settle-seq-preview" disabled>
+      </div>
       <div class="biz-po-frow"><select class="biz-po-inp" id="vch-receipt-custsel" onchange="vchAddCustomerRow()"></select></div>
       <div id="vch-receipt-custlist"></div>`:''}
+      <div id="vch-${kind}-extra-wrap">
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-desc" placeholder="البيان"></div>
       <textarea class="biz-po-inp" id="vch-${kind}-notes" placeholder="ملاحظات" rows="2" style="resize:none;"></textarea>
+      </div>
       <div class="biz-po-btns">
         <button class="biz-po-btn save" onclick="saveVoucher('${kind}')">حفظ</button>
         <button class="biz-po-btn cancel" onclick="closeVoucherForm('${kind}')">إلغاء</button>
       </div>
     </div>`;
   if(kind==='receipt')renderVchCustRows();
+  if(kind==='payment'){_vchPaySuppliers=[];renderVchSupRows();}
 }
 /* ── بناء قائمة اقتراحات لحقل المستلم (إذن صرف): الموردين + الموظفين + أسماء مستلمين سابقين ── */
 function buildRecipientDatalist(){
@@ -8672,47 +8702,129 @@ function partnerMoveConfig(kind,typeVal){
 function vchTypeChanged(kind){
   const typeEl=document.getElementById(`vch-${kind}-type`);
   const typeVal=typeEl?typeEl.value:'';
+  const moveCfg=partnerMoveConfig(kind,typeVal);
   if(kind==='receipt'){
-    const isSettle=typeVal==='تسوية قبض';
+    const isSettle=typeVal==='تسوية قبض'||typeVal==='تسوية صرف';
+    const isPartnerMove=!!moveCfg;
+    const minimal=isSettle||isPartnerMove;
     const settleWrap=document.getElementById('vch-settle-wrap');
     const custRow=document.getElementById('vch-receipt-custsel');
     const custList=document.getElementById('vch-receipt-custlist');
+    const namecoaWrap=document.getElementById('vch-receipt-namecoa-wrap');
+    const extraWrap=document.getElementById('vch-receipt-extra-wrap');
+    const dateWrap=document.getElementById('vch-receipt-date-wrap');
     if(settleWrap)settleWrap.style.display=isSettle?'flex':'none';
-    if(custRow)custRow.style.display=isSettle?'none':'';
-    if(custList)custList.style.display=isSettle?'none':'';
+    if(custRow)custRow.style.display=minimal?'none':'';
+    if(custList)custList.style.display=minimal?'none':'';
+    if(namecoaWrap)namecoaWrap.style.display=minimal?'none':'';
+    if(extraWrap)extraWrap.style.display=minimal?'none':'';
+    if(dateWrap)dateWrap.style.display=minimal?'none':'';
     _vchSettleKey=null;
-    if(isSettle)renderVchSettleOptions();
+    if(isSettle){
+      renderVchSettleOptions(typeVal);
+      const seqPrev=document.getElementById('vch-settle-seq-preview');
+      if(seqPrev)seqPrev.value='رقم القيد #'+(Number(_getItem('fm_seq')||0)+1);
+    }
   }
-  const moveCfg=partnerMoveConfig(kind,typeVal);
   const pWrap=document.getElementById(`vch-${kind}-partner-wrap`);
   if(pWrap){
     if(moveCfg&&getSettings().addonPartners){
       const partners=loadPartners();
       const pSel=document.getElementById(`vch-${kind}-partner`);
-      if(pSel)pSel.innerHTML=partners.length?partners.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''):`<option value="">لا يوجد شركاء مسجلون</option>`;
+      if(pSel)pSel.innerHTML=partners.length?`<option value="">اسم الشريك...</option>`+partners.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''):`<option value="">لا يوجد شركاء مسجلون</option>`;
       pWrap.style.display='flex';
+      const pSeqPrev=document.getElementById(`vch-${kind}-partner-seq-preview`);
+      if(pSeqPrev)pSeqPrev.value='رقم القيد #'+(Number(_getItem('fm_seq')||0)+1);
+      vchPartnerSelChosen(kind);
     }else{
       pWrap.style.display='none';
     }
   }
+  if(kind==='payment'){
+    const isSupplierPay=typeVal==='سداد مورد';
+    const namecoaWrap=document.getElementById('vch-payment-namecoa-wrap');
+    const amtWrap=document.getElementById('vch-payment-amount-wrap');
+    const recWrap=document.getElementById('vch-payment-recipient-wrap');
+    const extraWrap=document.getElementById('vch-payment-extra-wrap');
+    const supWrap=document.getElementById('vch-payment-supwrap');
+    if(namecoaWrap)namecoaWrap.style.display=isSupplierPay?'none':'';
+    if(amtWrap)amtWrap.style.display=isSupplierPay?'none':'flex';
+    if(recWrap)recWrap.style.display=isSupplierPay?'none':'';
+    if(extraWrap)extraWrap.style.display=isSupplierPay?'none':'';
+    if(supWrap)supWrap.style.display=isSupplierPay?'flex':'none';
+    if(isSupplierPay){
+      _vchPaySuppliers=[];
+      renderVchSupRows();
+      const seqPrev=document.getElementById('vch-payment-seqpreview');
+      if(seqPrev)seqPrev.value='رقم القيد #'+(Number(_getItem('fm_seq')||0)+1);
+    }
+  }
 }
-function renderVchSettleOptions(){
+/* ── إدارة قائمة "سداد مورد" داخل إذن الصرف: إضافة مورد من قائمة منسدلة + مبلغ لكل مورد + إجمالي ── */
+function vchAddSupplierRow(){
+  const sel=document.getElementById('vch-payment-supsel');
+  if(!sel)return;
+  const name=sel.value;
+  if(!name)return;
+  if(_vchPaySuppliers.some(s=>s.name===name))return;
+  const due=supplierDueList().find(s=>s.name===name);
+  _vchPaySuppliers.push({name,amount:due?due.dueTotal:0});
+  renderVchSupRows();
+}
+function vchRemoveSupRow(i){_vchPaySuppliers.splice(i,1);renderVchSupRows();}
+function vchUpdSupAmt(i,val){if(_vchPaySuppliers[i])_vchPaySuppliers[i].amount=Number(val||0);updVchSupTotalLbl();}
+function updVchSupTotalLbl(){
+  const el=document.getElementById('vch-payment-suptotal');
+  if(!el)return;
+  const total=_vchPaySuppliers.reduce((s,c)=>s+Number(c.amount||0),0);
+  el.textContent=fmt(total);
+}
+function renderVchSupSelect(){
+  const sel=document.getElementById('vch-payment-supsel');
+  if(!sel)return;
+  const allNames=getAllSupplierNames().filter(n=>!_vchPaySuppliers.some(s=>s.name===n));
+  sel.innerHTML=`<option value="">+ اختر مورداً لإضافته...</option>`+allNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+}
+function renderVchSupRows(){
+  const wrap=document.getElementById('vch-payment-suplist');
+  if(!wrap)return;
+  renderVchSupSelect();
+  if(!_vchPaySuppliers.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=_vchPaySuppliers.map((s,i)=>`
+    <div class="biz-po-frow2" style="align-items:center;margin-top:6px;">
+      <div class="biz-po-inp" style="flex:1.4;background:rgba(255,241,214,.04);">${esc(s.name)}</div>
+      <input class="biz-po-inp" style="flex:1;" type="number" value="${s.amount}" placeholder="المبلغ" oninput="vchUpdSupAmt(${i},this.value)">
+      <button type="button" class="biz-po-btn cancel" style="flex:0 0 auto;padding:7px 10px;" onclick="vchRemoveSupRow(${i})">×</button>
+    </div>`).join('')+
+    `<div style="text-align:left;font-size:11px;color:var(--muted);margin-top:4px;">الإجمالي: <b id="vch-payment-suptotal" style="color:var(--red);">${fmt(_vchPaySuppliers.reduce((s,c)=>s+Number(c.amount||0),0))}</b></div>`;
+}
+function vchPartnerSelChosen(kind){
+  const sel=document.getElementById(`vch-${kind}-partner`);
+  const nameEl=document.getElementById(`vch-${kind}-name`);
+  if(sel&&nameEl){
+    const opt=sel.options[sel.selectedIndex];
+    nameEl.value=(opt&&sel.value)?opt.textContent:'';
+  }
+}
+function renderVchSettleOptions(settleType){
   const sel=document.getElementById('vch-settle-target');
   if(!sel)return;
+  const wantLabel=settleType==='تسوية صرف'?'شراء':'تحصيل';
   const opts=[];
   const tree=loadCaTree();
-  (tree.ca_other_assets||[]).filter(a=>a.voucherSeq).forEach(a=>{
+  (tree.ca_other_assets||[]).filter(a=>a.voucherSeq&&a.name.indexOf('فرق '+wantLabel+' ')>-1).forEach(a=>{
     opts.push({key:'coa:'+a.id,label:a.name+' — '+fmt(a.balance)});
   });
   if(getSettings().addonPartners){
     loadPartners().forEach(p=>{
       const bal=partnerCurrentBalance(p);
-      if(bal<-0.001)opts.push({key:'partner:'+p.id,label:p.name+' (شريك) — عليه '+fmt(-bal)});
+      const lbl=bal<-0.001?'عليه '+fmt(-bal):(bal>0.001?'له '+fmt(bal):'رصيد صفر');
+      opts.push({key:'partner:'+p.id,label:p.name+' (شريك - حساب جارى) — '+lbl});
     });
   }
-  sel.innerHTML=`<option value="">اختر صاحب الفرق المطلوب تحصيله...</option>`+
+  sel.innerHTML=`<option value="">اختر الاسم...</option>`+
     opts.map(o=>`<option value="${esc(o.key)}">${esc(o.label)}</option>`).join('');
-  if(!opts.length)sel.innerHTML=`<option value="">لا توجد فروق تحصيل مسجلة حاليًا</option>`;
+  if(!opts.length)sel.innerHTML=`<option value="">لا توجد فروق مسجلة لهذا النوع حاليًا</option>`;
 }
 function vchSettleTargetChosen(){
   const sel=document.getElementById('vch-settle-target');
@@ -8723,12 +8835,12 @@ function vchSettleTargetChosen(){
   if(nameEl)nameEl.value=label;
 }
 /* ── تطبيق مبلغ "تسوية قبض" فعليًا: يقفل/يقلل حساب "أخرى مدينة" أو يعدّل الحساب الجارى للشريك ── */
-function settleOtherDebitOrPartner(key,amount,date,voucherSeq){
+function settleOtherDebitOrPartner(key,amount,date,voucherSeq,typeVal){
   if(!key||amount<=0.001)return;
   if(key.indexOf('partner:')===0){
     const partnerId=key.slice('partner:'.length);
     const adj=loadPartnerCurrentAdj();
-    adj.push({id:'padj_'+Date.now(),partnerId,amount:amount,date,reason:'تسوية قبض إذن #'+voucherSeq,voucherSeq});
+    adj.push({id:'padj_'+Date.now(),partnerId,amount:amount,date,reason:(typeVal||'تسوية قبض')+' إذن #'+voucherSeq,voucherSeq});
     savePartnerCurrentAdj(adj);
     return;
   }
@@ -8791,17 +8903,26 @@ function saveVoucher(kind){
   const name=linkMatch?linkMatch.shortName:rawName;
   const amount=Number(document.getElementById(`vch-${kind}-amount`).value||0);
   const typeVal=document.getElementById(`vch-${kind}-type`).value||'أخرى';
-  const isSettle=kind==='receipt'&&typeVal==='تسوية قبض';
+  const isSettle=kind==='receipt'&&(typeVal==='تسوية قبض'||typeVal==='تسوية صرف');
+  const isSupplierPay=kind==='payment'&&typeVal==='سداد مورد';
   const custLines=(kind==='receipt'&&!isSettle)?_vchReceiptCustomers.filter(c=>Number(c.amount)>0):[];
-  if(!name&&!custLines.length){pgConfirm(kind==='receipt'?'من فضلك أدخل اسم المستلم منه أو اختر عميلاً من القائمة':'من فضلك أدخل اسم المصروف له',()=>{},'حسناً');return;}
+  const supLines=isSupplierPay?_vchPaySuppliers.filter(s=>Number(s.amount)>0):[];
+  const payerName=isSupplierPay?(document.getElementById('vch-payment-payer')?.value||'').trim():'';
+  if(isSupplierPay){
+    if(!payerName){pgConfirm('من فضلك أدخل اسم الصراف',()=>{},'حسناً');return;}
+    if(!supLines.length){pgConfirm('من فضلك أدخل مبلغ مورد واحد على الأقل',()=>{},'حسناً');return;}
+  }else if(!name&&!custLines.length){
+    pgConfirm(kind==='receipt'?'من فضلك أدخل اسم المستلم منه أو اختر عميلاً من القائمة':'من فضلك أدخل اسم المصروف له',()=>{},'حسناً');return;
+  }
   // حقل المستلم (إذن صرف فقط) — اختياري، يستخدم لتسجيل فرق التأكيد كدين على المستلم
-  const recipient=(kind==='payment')?(document.getElementById('vch-payment-recipient')?.value.trim()||''):'';
+  const recipient=(kind==='payment'&&!isSupplierPay)?(document.getElementById('vch-payment-recipient')?.value.trim()||''):'';
   const custTotal=Math.round(custLines.reduce((s,c)=>s+Number(c.amount||0),0)*100)/100;
-  const total=Math.round((amount+custTotal)*100)/100;
+  const supTotal=Math.round(supLines.reduce((s,c)=>s+Number(c.amount||0),0)*100)/100;
+  const total=isSupplierPay?supTotal:Math.round((amount+custTotal)*100)/100;
   if(!total){pgConfirm('من فضلك أدخل المبلغ',()=>{},'حسناً');return;}
   const date=document.getElementById(`vch-${kind}-date`).value||todayStr();
   const seq=nextSeq();
-  const displayName=name||(custLines.length===1?custLines[0].name:'تحصيل عملاء ('+custLines.length+')');
+  const displayName=isSupplierPay?payerName:(name||(custLines.length===1?custLines[0].name:'تحصيل عملاء ('+custLines.length+')'));
   let extraNotes='';
   if(custLines.length){
     const sInv=loadSInvoices();
@@ -8809,21 +8930,31 @@ function saveVoucher(kind){
     saveSInvoices(sInv);
     extraNotes=custLines.map(c=>c.name+': '+fmt(c.amount)).join(' — ');
   }
-  if(isSettle&&_vchSettleKey)settleOtherDebitOrPartner(_vchSettleKey,total,date,seq);
+  // ── "سداد مورد": توزيع مبلغ كل مورد فى القائمة على فواتيره المفتوحة، زى شاشة "💸 سداد" بالظبط لكن من داخل إذن الصرف نفسه ──
+  if(supLines.length){
+    const pInv=loadPInvoices();
+    supLines.forEach(l=>distributeSupplierPayment(pInv,l.name,Number(l.amount),date,seq));
+    savePInvoices(pInv);
+    extraNotes=supLines.map(l=>l.name+': '+fmt(l.amount)).join(' — ');
+    bizEntityDetail=null;
+    if(document.getElementById('biz-purchase-tab-content'))renderSuppliersTab(document.getElementById('biz-purchase-tab-content'));
+  }
+  if(isSettle&&_vchSettleKey)settleOtherDebitOrPartner(_vchSettleKey,total,date,seq,typeVal);
   const linkDir=document.getElementById(`vch-${kind}-linkdir`)?.value||'inc';
-  const notesVal=document.getElementById(`vch-${kind}-notes`).value.trim();
+  const notesVal=document.getElementById(`vch-${kind}-notes`)?.value.trim()||'';
   const v={id:(kind==='receipt'?'rcpt_':'pmt_')+Date.now(),seq,name:displayName,amount:total,
     type:typeVal,
     date,
-    desc:document.getElementById(`vch-${kind}-desc`).value.trim()||(custLines.length?'تحصيل مديونية عملاء':(isSettle?'تسوية فرق تحصيل':'')),
+    desc:document.getElementById(`vch-${kind}-desc`)?.value.trim()||(custLines.length?'تحصيل مديونية عملاء':(supLines.length?'سداد مديونية موردين ('+supLines.length+' مورد)':(isSettle?'تسوية فرق تحصيل':''))),
     notes:[notesVal,extraNotes].filter(Boolean).join(' — ')};
   if(linkMatch){v.linkSub=linkMatch.subId;v.linkAcc=linkMatch.accId;v.linkDir=linkDir;}
   if(custLines.length){v.lines=custLines.map(c=>({customerName:c.name,amount:Number(c.amount)}));v.status='pending';}
+  if(supLines.length){v.lines=supLines.map(l=>({supplierName:l.name,amount:Number(l.amount)}));v.status='pending';v.payer=payerName;}
   // خزّن اسم المستلم في الإذن الصرف
   if(kind==='payment'&&recipient)v.recipient=recipient;
   if(kind==='receipt'){const l=loadTreasuryReceipts();l.push(v);saveTreasuryReceipts(l);}
   else{const l=loadTreasuryPayments();l.push(v);saveTreasuryPayments(l);}
-  // لو الإذن مش معلّق (مالوش سطور عملاء بتستنى تأكيد)، أثر الربط بيتطبّق فورًا زي أثر الخزينة بالظبط
+  // لو الإذن مش معلّق (مالوش سطور عملاء/موردين بتستنى تأكيد)، أثر الربط بيتطبّق فورًا زي أثر الخزينة بالظبط
   if(v.linkSub&&v.status!=='pending')applyLinkedAccountDelta(v.linkSub,v.linkAcc,v.linkDir,total);
   // ── حركات الشريك (مسحوبات/إيداع/زيادة رأس مال): تعديل رصيد الحساب الجارى أو رأس المال للشريك المختار ──
   const moveCfg=partnerMoveConfig(kind,typeVal);
@@ -8861,6 +8992,7 @@ function saveVoucher(kind){
   }
   pushBizJournal(displayName,total,kind==='receipt'?'in':'out',(kind==='receipt'?'إذن قبض #':'إذن صرف #')+v.seq,kind==='receipt'?'var(--green)':'var(--red)',v.date);
   if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
+  if(isSupplierPay)_vchPaySuppliers=[];
   closeVoucherForm(kind);
   if(kind==='receipt'){renderReceiptTab(document.getElementById('biz-liquidity-tab-content'));if(document.getElementById('biz-sales-tab-content'))renderCustomersTab(document.getElementById('biz-sales-tab-content'));refreshBizDashboard();refreshAccountsViews();}
   else{renderPaymentTab(document.getElementById('biz-liquidity-tab-content'));refreshBizDashboard();refreshAccountsViews();}
@@ -9569,6 +9701,10 @@ function buildEntityLedger(type,name){
   returns.filter(r=>(r[nameField]||'—')===name).forEach(r=>{
     rows.push({date:r.date||'',invNo:'مرتجع #'+r.refNo,debit:0,credit:r.returnValue,_sd:r.date||''});
   });
+  if(type==='supplier'){
+    // فى حساب المورد القطبية معكوسة عن حساب العميل: الفاتورة تزود المستحق له (دائن)، والسداد والمرتجع يقللوه (مدين)
+    rows.forEach(r=>{const t=r.debit;r.debit=r.credit;r.credit=t;});
+  }
   rows.sort((a,b)=>(a._sd||'').localeCompare(b._sd||''));
   let bal=0;
   rows.forEach(r=>{bal+=r.debit-r.credit;r.balance=bal;});
@@ -9731,7 +9867,11 @@ function supplierCardHtml(s,clsStore,openings,dueDates){
   const cls=((clsStore&&clsStore.supplier)||[]).find(c=>c.members.includes(s.name));
   const dueDate=(dueDates&&dueDates[s.name])||'';
   const dueOverdue=dueDate&&dueDate<=todayStr();
-  return `<div class="biz-po-sup-card" onclick="openEntityDetail('supplier','${esc(s.name)}')">    <div class="biz-po-sup-top"><span>${esc(s.name)}${cls?` <span style="font-size:9.5px;color:var(--blue);background:rgba(158,163,168,.15);border-radius:5px;padding:1px 6px;margin-right:4px;">${esc(cls.name)}</span>`:''}</span><span style="color:${balance>0?'var(--red)':'var(--green)'};font-size:12px;">${fmt(balance)}</span></div>
+  const queued=Number(_inlineSupplierPay[s.name]||0);
+  const balCellHtml=balance>0
+    ?`<span class="sup-bal-cell" style="color:${queued>0?'var(--yellow)':'var(--red)'};font-size:12px;cursor:pointer;" onclick="event.stopPropagation();editSupplierBalCell(this,'${esc(s.name)}',${balance})">${queued>0?('✎ '+fmt(queued)):fmt(balance)}</span>`
+    :`<span style="color:var(--green);font-size:12px;">${fmt(balance)}</span>`;
+  return `<div class="biz-po-sup-card" onclick="openEntityDetail('supplier','${esc(s.name)}')">    <div class="biz-po-sup-top"><span>${esc(s.name)}${cls?` <span style="font-size:9.5px;color:var(--blue);background:rgba(158,163,168,.15);border-radius:5px;padding:1px 6px;margin-right:4px;">${esc(cls.name)}</span>`:''}</span>${balCellHtml}</div>
     <div class="biz-po-sup-bottom">
       <span>${s.phone?esc(s.phone):'—'}</span>
       <span>إجمالي: ${fmt(s.total)} · مدفوع: ${fmt(s.paid)}${s.returned?' · مردود: '+fmt(s.returned):''}</span>
@@ -10416,15 +10556,79 @@ function distributeSupplierPayment(pInv,supplierName,amount,date,voucherSeq){
   return left;
 }
 let _payDue=[];
-function openPayModal(){
-  _payDue=supplierDueList();
+let _inlinePayModeActive=false;
+function showPayModalWithDue(dueList){
+  _payDue=dueList;
   const nameEl=document.getElementById('pay-payer-name');if(nameEl)nameEl.value='';
   const recEl=document.getElementById('pay-recipient');if(recEl)recEl.value='';
   const dateEl=document.getElementById('pay-date');if(dateEl)dateEl.value=todayStr();
   renderPayList();
   document.getElementById('pay-modal').classList.add('show');
 }
-function closePayModal(){document.getElementById('pay-modal').classList.remove('show');}
+function openPayModal(){showPayModalWithDue(supplierDueList());}
+function closePayModal(){
+  document.getElementById('pay-modal').classList.remove('show');
+  if(_inlinePayModeActive){
+    _inlinePayModeActive=false;
+    _inlineSupplierPay={};
+    renderInlinePayBar();
+    const c=document.getElementById('biz-purchase-tab-content');
+    if(c)renderSuppliersTab(c);
+  }
+}
+/* ══════════════════════════════════════════════
+   تعديل مباشر على خلية "عليه" فى كارت المورد: كتابة مبلغ السداد
+   مباشرة داخل قائمة الموردين (بدون فتح نافذة السداد أولاً)، مع تجميع
+   كل الموردين اللى اتكتب لهم مبلغ فى شريط عائم، وعند الضغط على "خروج"
+   يظهر مربع تأكيد الحفظ ثم ينشأ إذن صرف سداد واحد يجمعهم كلهم
+   ══════════════════════════════════════════════ */
+let _inlineSupplierPay={};
+function editSupplierBalCell(el,name,balance){
+  if(!el||el.tagName==='INPUT')return;
+  const current=_inlineSupplierPay[name]!=null?_inlineSupplierPay[name]:balance;
+  const input=document.createElement('input');
+  input.type='number';
+  input.value=current;
+  input.className='sup-bal-inp';
+  input.onclick=e=>e.stopPropagation();
+  input.onkeydown=e=>{if(e.key==='Enter')input.blur();};
+  input.onblur=()=>commitSupplierBalCell(input,name,balance);
+  el.replaceWith(input);
+  input.focus();input.select();
+}
+function commitSupplierBalCell(input,name,balance){
+  const val=Number(input.value||0);
+  if(val>0)_inlineSupplierPay[name]=val;else delete _inlineSupplierPay[name];
+  renderInlinePayBar();
+  const c=document.getElementById('biz-purchase-tab-content');
+  if(c)renderSuppliersTab(c);
+}
+function renderInlinePayBar(){
+  const entries=Object.entries(_inlineSupplierPay).filter(([,v])=>Number(v)>0);
+  let bar=document.getElementById('inline-pay-bar');
+  if(!entries.length){if(bar)bar.remove();return;}
+  const total=entries.reduce((s,[,v])=>s+Number(v),0);
+  if(!bar){bar=document.createElement('div');bar.id='inline-pay-bar';document.body.appendChild(bar);}
+  bar.innerHTML=`
+    <span>موردون: <b style="color:var(--txt);">${entries.length}</b> · الإجمالي: <b style="color:var(--red);">${fmt(total)}</b></span>
+    <button style="background:var(--blue);color:#fff;" onclick="exitInlineSupplierPay()">🚪 خروج</button>
+    <button style="background:transparent;color:var(--muted);border:1px solid var(--border);" onclick="discardInlineSupplierPay()">تجاهل</button>`;
+}
+function discardInlineSupplierPay(){
+  _inlineSupplierPay={};
+  renderInlinePayBar();
+  const c=document.getElementById('biz-purchase-tab-content');
+  if(c)renderSuppliersTab(c);
+}
+function exitInlineSupplierPay(){
+  const entries=Object.entries(_inlineSupplierPay).filter(([,v])=>Number(v)>0);
+  if(!entries.length)return;
+  const total=entries.reduce((s,[,v])=>s+Number(v),0);
+  pgConfirm(`هل تريد حفظ التغييرات؟ سيتم إنشاء إذن صرف سداد لـ ${entries.length} مورد بإجمالي ${fmt(total)}`,()=>{
+    _inlinePayModeActive=true;
+    showPayModalWithDue(entries.map(([name,amt])=>({name,dueTotal:Number(amt)})));
+  },'حفظ');
+}
 function renderPayList(){
   const wrap=document.getElementById('pay-list');
   if(!wrap)return;
