@@ -2466,7 +2466,6 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
       <input class="ws-name-inp" id="pay-payer-name" placeholder="اسم الصارف" style="flex:1;">
       <input class="ws-name-inp" id="pay-seq-preview" disabled style="flex:1;">
     </div>
-    <input class="ws-name-inp" id="pay-recipient" placeholder="اسم المستلم (اختياري — اتركه فارغاً ليطابق اسم الصارف)">
     <input class="ws-name-inp" id="pay-date" type="date">
     <select class="ws-name-inp" id="pay-add-sup" onchange="payAddSupplierRow()"></select>
     <div class="collect-list" id="pay-list"></div>
@@ -8697,8 +8696,8 @@ function renderReceiptTab(c){
 }
 /* ── إذن صرف ── */
 const VOUCHER_TYPES={
-  payment:['مصروف','سداد سلفة','سداد عهدة','تحويل','مسحوبات شريك','أخرى'],
-  receipt:['إيراد','تسوية صرف','تسوية قبض','سداد سلفة','إيداع شريك','مدفوعات شريك','تحويل','أخرى']
+  payment:['مصروفات','سداد سلفة','تحويل','مسحوبات شريك','أخرى'],
+  receipt:['إيراد مبيعات','تسوية صرف','تسوية قبض','سداد سلفة','إيداع شريك','مدفوعات شريك','تحويل','أخرى']
 };
 function renderPaymentTab(c){
   const list=loadTreasuryPayments().slice().reverse();
@@ -8712,14 +8711,22 @@ function renderPaymentTab(c){
       <div class="biz-po-list">${list.length?list.map(v=>voucherRowHtml(v,'payment')).join(''):'<div class="biz-po-empty">لا توجد أذون صرف مسجلة بعد</div>'}</div>
     </div>`;
 }
+/* اسم الصراف (فى إذن سداد موردين متعدد) شيء مختلف عن اسم المورد نفسه؛
+   لما يكون فى الإذن بنود (v.lines) بأسماء موردين/عملاء، الاسم اللى بيتعرض كعنوان
+   للإذن المفروض يكون اسم المورد/العميل مش اسم الصراف اللى دفع المبلغ فعليًا */
+function voucherLineNames(v){
+  if(!v.lines||!v.lines.length)return '';
+  const names=v.lines.map(l=>l.supplierName||l.customerName).filter(Boolean);
+  if(!names.length)return '';
+  return names.length===1?names[0]:names.join('، ');
+}
 function voucherRowHtml(v,kind){
   const color=kind==='receipt'?'var(--green)':'var(--red)';
   const pendingBadge=v.status==='pending'?' <span style="font-size:9px;color:var(--yellow);">⏳ معلق</span>':'';
   const typeBadge=v.type?` <span style="font-size:9px;color:var(--blue);background:rgba(158,163,168,.15);border-radius:5px;padding:1px 6px;">${esc(v.type)}</span>`:'';
-  // للمستلم في الإذن الصرف (يظهر بادچ صغير بجانب الاسم)
-  const recipientBadge=(kind==='payment'&&v.recipient)?` <span style="font-size:9px;color:var(--yellow);background:rgba(209,165,63,.14);border-radius:5px;padding:1px 6px;" title="المستلم">👤 ${esc(v.recipient)}</span>`:'';
+  const displayName=voucherLineNames(v)||v.name;
   return `<div class="biz-po-row" onclick="viewVoucher('${kind}','${v.id}')">
-    <div class="biz-po-row-top"><b>${esc(v.name)||'—'}${pendingBadge}${recipientBadge}</b><span>#${v.seq}</span></div>
+    <div class="biz-po-row-top"><b>${esc(displayName)||'—'}${pendingBadge}</b><span>#${v.seq}</span></div>
     <div class="biz-po-row-bottom"><span>${v.date||''}${typeBadge}</span><b style="color:${color};">${fmt(v.amount)}</b></div>
   </div>`;
 }
@@ -8732,8 +8739,6 @@ function openVoucherForm(kind){
   let types=(VOUCHER_TYPES[kind]||[]).slice();
   if(kind==='receipt'&&getSettings().addonEmployees)types.splice(types.indexOf('تسوية قبض')+1,0,'تسوية عهدة');
   const suggestNames=kind==='receipt'?getAllCustomerNames():getAllSupplierNames();
-  // المستلم في إذن الصرف: اقتراحات من الموردين + الموظفين + أسماء مستلمي أذون سابقة
-  const recipientDatalist=kind==='payment'?buildRecipientDatalist():'';
   if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
@@ -8745,6 +8750,16 @@ function openVoucherForm(kind){
         <select class="biz-po-inp" id="vch-${kind}-partner" onchange="vchPartnerSelChosen('${kind}')"></select>
         <input class="biz-po-inp" id="vch-${kind}-partner-seq-preview" disabled>
       </div>
+      ${kind==='payment'?`
+      <div id="vch-payment-expwrap" style="display:none;flex-direction:column;gap:10px;">
+        <div class="biz-po-frow2">
+          <input class="biz-po-inp" id="vch-payment-payer" placeholder="اسم الصراف">
+          <input class="biz-po-inp" id="vch-payment-exp-seqpreview" disabled>
+        </div>
+        <div class="biz-po-frow"><input class="biz-po-inp" id="vch-payment-benad" list="vch-payment-benad-list" placeholder="البند" autocomplete="off">
+          <datalist id="vch-payment-benad-list"></datalist>
+        </div>
+      </div>`:''}
       <div id="vch-${kind}-namecoa-wrap">
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl}" autocomplete="off">
         <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
@@ -8754,12 +8769,6 @@ function openVoucherForm(kind){
         ${listLinkableCoaAccounts().map(a=>`<option value="${esc(a.subId)}::${esc(a.accId)}">${esc(a.shortName)}</option>`).join('')}
       </select></div>
       </div>
-      ${kind==='payment'?`
-      <div class="biz-po-frow" id="vch-payment-recipient-wrap">
-      <input class="biz-po-inp" id="vch-payment-recipient" list="vch-payment-recipient-list" placeholder="اسم المستلم — الشخص اللي استلم المبلغ فعلاً" autocomplete="off">
-        <datalist id="vch-payment-recipient-list">${recipientDatalist}</datalist>
-        <button type="button" class="biz-po-btn save" style="flex:0 0 auto;padding:7px 10px;font-size:12px;" onclick="copyNameToRecipient('payment')" title="نسخ اسم المصروف له">↓</button>
-      </div>`:''}
       <div class="biz-po-frow2">
         <input class="biz-po-inp" id="vch-${kind}-amount" type="number" placeholder="المبلغ">
         <span id="vch-${kind}-date-wrap"><input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}"></span>
@@ -8787,6 +8796,14 @@ function openVoucherForm(kind){
       </div>
     </div>`;
   if(kind==='receipt')renderVchCustRows();
+  vchTypeChanged(kind);
+}
+/* ── اقتراحات "البند" لإذن صرف من نوع مصروفات: من بنود أذون مصروفات سابقة (النشاط التجاري) فقط،
+   لا علاقة لها ببنود المصروفات الشخصية (تلك تخص قسم الشخصى وحده) ── */
+function buildBenadDatalist(){
+  const set=new Set();
+  loadTreasuryPayments().forEach(v=>{if(v.type==='مصروفات'&&v.name)set.add(v.name);});
+  return Array.from(set).map(n=>`<option value="${esc(n)}">`).join('');
 }
 /* ── بناء قائمة اقتراحات لحقل المستلم (إذن صرف): الموردين + الموظفين + أسماء مستلمين سابقين ── */
 function buildRecipientDatalist(){
@@ -8803,13 +8820,6 @@ function buildRecipientDatalist(){
   // أسماء المستلمين من أذون صرف سابقة
   loadTreasuryPayments().forEach(v=>{if(v.recipient)set.add(v.recipient);});
   return Array.from(set).map(n=>`<option value="${esc(n)}">`).join('');
-}
-/* نسخ اسم المصروف له إلى حقل المستلم (اختصار شائع) */
-function copyNameToRecipient(kind){
-  if(kind!=='payment')return;
-  const nameEl=document.getElementById('vch-payment-name');
-  const recEl=document.getElementById('vch-payment-recipient');
-  if(nameEl&&recEl&&nameEl.value.trim()&&!recEl.value.trim())recEl.value=nameEl.value.trim();
 }
 /* ── لما المستخدم يختار حساب فرعى من القائمة المنسدلة المختصرة: نملأ خانة الاسم
    باسم الحساب فقط (مختصر بدون مسار/مبلغ)، ونظهر اختيار مدين/دائن لتحديد أثره على رصيد الحساب ── */
@@ -8878,6 +8888,19 @@ function vchTypeChanged(kind){
       vchPartnerSelChosen(kind);
     }else{
       pWrap.style.display='none';
+    }
+  }
+  if(kind==='payment'){
+    const isExpense=typeVal==='مصروفات';
+    const namecoaWrap=document.getElementById('vch-payment-namecoa-wrap');
+    const expWrap=document.getElementById('vch-payment-expwrap');
+    if(namecoaWrap)namecoaWrap.style.display=isExpense?'none':'';
+    if(expWrap)expWrap.style.display=isExpense?'flex':'none';
+    if(isExpense){
+      const seqPrev=document.getElementById('vch-payment-exp-seqpreview');
+      if(seqPrev)seqPrev.value='رقم القيد #'+(Number(_getItem('fm_seq')||0)+1);
+      const benadList=document.getElementById('vch-payment-benad-list');
+      if(benadList)benadList.innerHTML=buildBenadDatalist();
     }
   }
 }
@@ -8987,16 +9010,22 @@ function saveVoucher(kind){
   const amount=Number(document.getElementById(`vch-${kind}-amount`).value||0);
   const typeVal=document.getElementById(`vch-${kind}-type`).value||'أخرى';
   const isSettle=kind==='receipt'&&(typeVal==='تسوية قبض'||typeVal==='تسوية صرف');
+  const isExpense=kind==='payment'&&typeVal==='مصروفات';
   const custLines=(kind==='receipt'&&!isSettle)?_vchReceiptCustomers.filter(c=>Number(c.amount)>0):[];
-  if(!name&&!custLines.length){pgConfirm(kind==='receipt'?'من فضلك أدخل اسم المستلم منه أو اختر عميلاً من القائمة':'من فضلك أدخل اسم المصروف له',()=>{},'حسناً');return;}
-  // حقل المستلم (إذن صرف فقط) — اختياري، يستخدم لتسجيل فرق التأكيد كدين على المستلم
-  const recipient=(kind==='payment')?(document.getElementById('vch-payment-recipient')?.value.trim()||''):'';
+  const payer=isExpense?(document.getElementById('vch-payment-payer')?.value.trim()||''):'';
+  const benad=isExpense?(document.getElementById('vch-payment-benad')?.value.trim()||''):'';
+  if(isExpense){
+    if(!payer){pgConfirm('من فضلك أدخل اسم الصراف',()=>{},'حسناً');return;}
+    if(!benad){pgConfirm('من فضلك أدخل البند',()=>{},'حسناً');return;}
+  }else if(!name&&!custLines.length){
+    pgConfirm(kind==='receipt'?'من فضلك أدخل اسم المستلم منه أو اختر عميلاً من القائمة':'من فضلك أدخل اسم المصروف له',()=>{},'حسناً');return;
+  }
   const custTotal=Math.round(custLines.reduce((s,c)=>s+Number(c.amount||0),0)*100)/100;
   const total=Math.round((amount+custTotal)*100)/100;
   if(!total){pgConfirm('من فضلك أدخل المبلغ',()=>{},'حسناً');return;}
   const date=document.getElementById(`vch-${kind}-date`).value||todayStr();
   const seq=nextSeq();
-  const displayName=name||(custLines.length===1?custLines[0].name:'تحصيل عملاء ('+custLines.length+')');
+  const displayName=isExpense?benad:(name||(custLines.length===1?custLines[0].name:'تحصيل عملاء ('+custLines.length+')'));
   let extraNotes='';
   if(custLines.length){
     const sInv=loadSInvoices();
@@ -9013,9 +9042,8 @@ function saveVoucher(kind){
     desc:document.getElementById(`vch-${kind}-desc`).value.trim()||(custLines.length?'تحصيل مديونية عملاء':(isSettle?'تسوية فرق تحصيل':'')),
     notes:[notesVal,extraNotes].filter(Boolean).join(' — ')};
   if(linkMatch){v.linkSub=linkMatch.subId;v.linkAcc=linkMatch.accId;v.linkDir=linkDir;}
+  if(isExpense)v.payer=payer;
   if(custLines.length){v.lines=custLines.map(c=>({customerName:c.name,amount:Number(c.amount)}));v.status='pending';}
-  // خزّن اسم المستلم في الإذن الصرف
-  if(kind==='payment'&&recipient)v.recipient=recipient;
   if(kind==='receipt'){const l=loadTreasuryReceipts();l.push(v);saveTreasuryReceipts(l);}
   else{const l=loadTreasuryPayments();l.push(v);saveTreasuryPayments(l);}
   // لو الإذن مش معلّق (مالوش سطور عملاء بتستنى تأكيد)، أثر الربط بيتطبّق فورًا زي أثر الخزينة بالظبط
@@ -9065,17 +9093,22 @@ function viewVoucher(kind,id){
   const v=list.find(x=>x.id===id);
   if(!v)return;
   const title=kind==='receipt'?'إذن قبض':'إذن صرف';
-  const nameLbl=kind==='receipt'?'المستلم منه':'المصروف له';
+  const multi=v.lines&&v.lines.length>1;
+  const lineNames=voucherLineNames(v);
+  const displayName=lineNames||v.name;
+  const nameLbl=kind==='receipt'?(multi?'العملاء':'المستلم منه'):(multi?'الموردون':'المصروف له');
+  // اسم الصراف (الشخص اللى دفع المبلغ فعليًا) شيء مختلف عن اسم المورد نفسه، فبيتعرض كسطر منفصل
+  const payerRow=(kind==='payment'&&v.payer)?`<div class="biz-po-detail-line"><span>اسم الصراف</span><b>${esc(v.payer)}</b></div>`:'';
+  const linesRows=multi?v.lines.map(l=>`<div class="biz-po-detail-line"><span>${esc(l.supplierName||l.customerName)}</span><b style="color:${kind==='receipt'?'var(--green)':'var(--red)'};">${fmt(l.amount)}</b></div>`).join(''):'';
   const pendingNote=v.status==='pending'?`<div class="biz-po-detail-line"><span>الحالة</span><b style="color:var(--yellow);">⏳ معلق — فى انتظار تأكيد المبلغ</b></div>`:'';
   const confirmedNote=(v.status==='confirmed'&&v.confirmedAmount!=null)?`<div class="biz-po-detail-line"><span>المبلغ المؤكَّد فعلياً</span><b style="color:var(--green);">${fmt(v.confirmedAmount)}</b></div>`:'';
-  // صف المستلم يظهر فقط في إذن الصرف عند تسجيل اسم مستلم
-  const recipientRow=(kind==='payment'&&v.recipient)?`<div class="biz-po-detail-line"><span>المستلم</span><b style="color:var(--yellow);">👤 ${esc(v.recipient)}</b></div>`:'';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">${title} #${v.seq}</div>
       ${v.type?`<div class="biz-po-detail-line"><span>النوع</span><b style="color:var(--blue);">${esc(v.type)}</b></div>`:''}
-      <div class="biz-po-detail-line"><span>${nameLbl}</span><b>${esc(v.name)}</b></div>
-      ${recipientRow}
+      <div class="biz-po-detail-line"><span>${nameLbl}</span><b>${esc(displayName)}</b></div>
+      ${payerRow}
+      ${linesRows}
       <div class="biz-po-detail-line"><span>التاريخ</span><b>${v.date}</b></div>
       <div class="biz-po-detail-line"><span>${v.status==='pending'?'المبلغ المسجل':'المبلغ'}</span><b style="color:${kind==='receipt'?'var(--green)':'var(--red)'};">${fmt(v.amount)}</b></div>
       ${pendingNote}${confirmedNote}
@@ -9502,7 +9535,7 @@ function savePInvVoucherPrompt(invId,seq,print){
     const payments=loadTreasuryPayments();
     payments.push({id:'pmt_'+Date.now(),seq,name,amount,type:'شراء',
       date:inv.date,desc:'دفعة فاتورة مشتريات '+(inv.invNo?'#'+inv.invNo:'#'+inv.seq),notes:'',
-      status:'pending',sourceInvId:inv.id,recipient:name});
+      status:'pending',sourceInvId:inv.id});
     saveTreasuryPayments(payments);
   }
   closeInvoiceForm();renderInvoiceTab(document.getElementById('biz-purchase-tab-content'));
@@ -9573,6 +9606,7 @@ function returnRowHtml(r){
 }
 function openReturnForm(){
   _pRetItems=[{name:'',qty:'',price:''}];
+  _pretSupplierInvItems=[];
   document.getElementById('return-form-slot').innerHTML=`
     <div class="biz-po-form prv-wrap">
       <div class="prv-title">📋 فاتورة مردود المشتريات</div>
@@ -9582,9 +9616,10 @@ function openReturnForm(){
         <div class="prv-card-hdr"><b>👤 بيانات المورد</b><span class="prv-badge">مورد</span></div>
         <div class="prv-info-row">
           <div class="prv-info-box"><span>رقم الموبايل</span><input id="pret-phone" placeholder="01xxxxxxxxx"></div>
-          <div class="prv-info-box"><span>اسم المورد</span><input id="pret-supplier" list="pret-supplier-list" placeholder="اسم المورد" autocomplete="off"></div>
+          <div class="prv-info-box"><span>اسم المورد</span><input id="pret-supplier" list="pret-supplier-list" placeholder="اسم المورد" autocomplete="off" oninput="onPretSupplierChange()"></div>
         </div>
         <datalist id="pret-supplier-list">${getAllSupplierNames().map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+        <div class="biz-po-frow" style="margin-top:8px;"><select class="biz-po-inp" id="pret-inv-sel" onchange="onPretInvoiceSelected()"><option value="">اختر فاتورة الشراء (اختياري)...</option></select></div>
         <div class="prv-info-row" style="margin-top:8px;">
           <div class="prv-info-box"><span>رقم الفاتورة الأصلية</span><input id="pret-orig-no" placeholder="اختياري"></div>
           <div class="prv-info-box"><span>تاريخ الفاتورة الأصلية</span><input id="pret-orig-date" type="date"></div>
@@ -9593,6 +9628,7 @@ function openReturnForm(){
 
       <div class="prv-card">
         <div class="prv-card-hdr"><b>📦 أصناف المردود</b><span class="prv-badge" id="pret-items-count">0 صنف</span></div>
+        <div class="biz-po-frow"><select class="biz-po-inp" id="pret-item-sel" onchange="addRetItemFromSelect()"><option value="">اختر صنفاً من فواتير المورد...</option></select></div>
         <div class="prv-table">
           <div class="prv-thead"><span>م</span><span>الصنف</span><span>العدد</span><span>السعر</span><span>المبلغ</span><span></span></div>
           <div id="pret-items-tbl"></div>
@@ -9623,6 +9659,57 @@ function openReturnForm(){
         <button class="biz-po-btn cancel" onclick="closeReturnForm()">إلغاء</button>
       </div>
     </div>`;
+  renderRetItemsTable();
+}
+/* ── بعد اختيار/كتابة اسم مورد مطابق: نعرض قائمة فواتير شرائه، وقائمة كل الأصناف اللى اشتُريت منه بأسعارها ── */
+let _pretSupplierInvItems=[];
+function onPretSupplierChange(){
+  const nameEl=document.getElementById('pret-supplier');
+  const invSel=document.getElementById('pret-inv-sel');
+  const itemSel=document.getElementById('pret-item-sel');
+  if(!nameEl||!invSel||!itemSel)return;
+  const name=nameEl.value.trim();
+  const known=getAllSupplierNames().includes(name);
+  if(!known){
+    invSel.innerHTML='<option value="">اختر فاتورة الشراء (اختياري)...</option>';
+    itemSel.innerHTML='<option value="">اختر صنفاً من فواتير المورد...</option>';
+    _pretSupplierInvItems=[];
+    return;
+  }
+  const invs=loadPInvoices().filter(inv=>inv.supplierName===name).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  invSel.innerHTML='<option value="">اختر فاتورة الشراء (اختياري)...</option>'+
+    invs.map(inv=>`<option value="${esc(inv.id)}">فاتورة ${inv.invNo?'#'+esc(inv.invNo):'#'+inv.seq} — ${inv.date} — ${fmt(inv.total)}</option>`).join('');
+  // كل الأصناف اللى سبق شراؤها من هذا المورد (من كل فواتيره)، بدون تكرار (آخر سعر اتسجل بيه الصنف)
+  const map={};
+  invs.forEach(inv=>(inv.items||[]).forEach(it=>{if(it&&it.name)map[it.name]={name:it.name,price:it.price};}));
+  populatePretItemSelect(Object.values(map));
+}
+function populatePretItemSelect(items){
+  _pretSupplierInvItems=items;
+  const itemSel=document.getElementById('pret-item-sel');
+  if(!itemSel)return;
+  itemSel.innerHTML='<option value="">اختر صنفاً من فواتير المورد...</option>'+
+    items.map((it,i)=>`<option value="${i}">${esc(it.name)} — ${fmt(it.price)}</option>`).join('');
+}
+function onPretInvoiceSelected(){
+  const sel=document.getElementById('pret-inv-sel');
+  if(!sel||!sel.value)return;
+  const inv=loadPInvoices().find(x=>x.id===sel.value);
+  if(!inv)return;
+  const noEl=document.getElementById('pret-orig-no');if(noEl)noEl.value=inv.invNo||String(inv.seq);
+  const dateEl=document.getElementById('pret-orig-date');if(dateEl)dateEl.value=inv.date||'';
+  // نضيّق قائمة الأصناف على أصناف هذه الفاتورة تحديدًا
+  populatePretItemSelect((inv.items||[]).filter(it=>it&&it.name).map(it=>({name:it.name,price:it.price})));
+}
+function addRetItemFromSelect(){
+  const sel=document.getElementById('pret-item-sel');
+  if(!sel||sel.value==='')return;
+  const it=_pretSupplierInvItems[Number(sel.value)];
+  if(!it)return;
+  const emptyIdx=_pRetItems.findIndex(r=>!r.name||!r.name.trim());
+  const row={name:it.name,qty:1,price:it.price};
+  if(emptyIdx>-1)_pRetItems[emptyIdx]=row;else _pRetItems.push(row);
+  sel.value='';
   renderRetItemsTable();
 }
 function nextReturnRefPreview(){
@@ -10666,7 +10753,6 @@ let _inlinePayModeActive=false;
 function showPayModalWithDue(dueList){
   _payDue=dueList;
   const nameEl=document.getElementById('pay-payer-name');if(nameEl)nameEl.value='';
-  const recEl=document.getElementById('pay-recipient');if(recEl)recEl.value='';
   const dateEl=document.getElementById('pay-date');if(dateEl)dateEl.value=todayStr();
   const seqEl=document.getElementById('pay-seq-preview');if(seqEl)seqEl.value='رقم القيد #'+(Number(_getItem('fm_seq')||0)+1);
   renderPayList();
@@ -10775,9 +10861,6 @@ function updPayTotal(){
 function savePayment(){
   const payer=(document.getElementById('pay-payer-name').value||'').trim();
   if(!payer){pgConfirm('من فضلك أدخل اسم الصارف',()=>{},'حسناً');return;}
-  // المستلم اختياري: لو فاضي، نعتبره نفس الصارف
-  const recipientRaw=(document.getElementById('pay-recipient')?.value||'').trim();
-  const recipient=recipientRaw||payer;
   const date=document.getElementById('pay-date').value||todayStr();
   const lines=[];
   _payDue.forEach((s,i)=>{
@@ -10799,7 +10882,7 @@ function savePayment(){
     desc:'سداد مديونية موردين ('+lines.length+' مورد)',
     notes:lines.map(l=>l.supplierName+': '+fmt(l.amount)).join(' — '),
     lines:lines.map(l=>({supplierName:l.supplierName,amount:l.amount})),
-    status:'pending',payer,recipient};
+    status:'pending',payer};
   const payments=loadTreasuryPayments();payments.push(v);saveTreasuryPayments(payments);
   pushBizJournal(payer,total,'out','سداد موردين #'+seq,'var(--red)',date);
   closePayModal();
@@ -10940,7 +11023,7 @@ function saveReturnS(print){
   if(r.settleMethod==='استرداد نقدي'&&r.returnValue>0){
     const payments=loadTreasuryPayments();
     payments.push({id:'pmt_'+Date.now(),seq:nextSeq(),name:customerName,amount:r.returnValue,type:'مردود مبيعات',
-      date:r.date,desc:'استرداد نقدى — مردود مبيعات مرجع #'+refNo,notes:'',sourceRetId:r.id,recipient:customerName});
+      date:r.date,desc:'استرداد نقدى — مردود مبيعات مرجع #'+refNo,notes:'',sourceRetId:r.id});
     saveTreasuryPayments(payments);
   }
   closeReturnFormS();
@@ -11579,8 +11662,25 @@ function renderInvAddSlot(){
       <div class="biz-po-btns">
         <button class="biz-po-btn save" style="background:rgba(158,163,168,.15);color:var(--blue);" onclick="invAddMode='new-folder';renderInvAddSlot();">📁 مجلد</button>
         <button class="biz-po-btn save" onclick="invAddMode='new-item';renderInvAddSlot();">🏷️ صنف</button>
+        ${invAddTarget?`<button class="biz-po-btn save" style="background:rgba(158,163,168,.15);color:var(--green);" onclick="invAddMode='move-item';renderInvAddSlot();">📦 تصنيف صنف موجود</button>`:''}
       </div>
       <button class="biz-po-btn cancel" style="width:100%;" onclick="closeInvAddMenu()">إلغاء</button>
+    </div>`;
+  }else if(invAddMode==='move-item'){
+    // ── تصنيف صنف موجود (زى الأصناف اللى دخلت المخزن بدون تصنيف من فاتورة مشتريات) داخل هذا المجلد ──
+    const unclassified=loadInvItems().filter(i=>i.whId===invCurrentWh&&!i.folderId);
+    slot.innerHTML=`<div class="biz-po-form">
+      <div class="biz-po-form-title">تصنيف صنف موجود داخل هذا المجلد</div>
+      ${unclassified.length?`
+      <div class="biz-po-frow"><select class="biz-po-inp" id="itm-move-sel">
+        <option value="">اختر الصنف...</option>
+        ${unclassified.map(i=>`<option value="${i.id}">${esc(i.name)} (${i.qty} قطعة)</option>`).join('')}
+      </select></div>
+      <div class="biz-po-btns">
+        <button class="biz-po-btn save" onclick="moveInvItemToFolder()">تصنيف</button>
+        <button class="biz-po-btn cancel" onclick="closeInvAddMenu()">إلغاء</button>
+      </div>`:`<div class="biz-po-empty">لا توجد أصناف بدون تصنيف حالياً</div>
+      <button class="biz-po-btn cancel" style="width:100%;" onclick="closeInvAddMenu()">إلغاء</button>`}
     </div>`;
   }else if(invAddMode==='new-folder'){
     slot.innerHTML=`<div class="biz-po-form">
@@ -11611,6 +11711,17 @@ function renderInvAddSlot(){
   }else{
     slot.innerHTML='';
   }
+}
+function moveInvItemToFolder(){
+  const sel=document.getElementById('itm-move-sel');
+  const id=sel?sel.value:'';
+  if(!id){pgConfirm('اختر الصنف المراد تصنيفه',()=>{},'حسناً');return;}
+  const list=loadInvItems();
+  const it=list.find(x=>x.id===id);
+  if(it)it.folderId=invAddTarget;
+  saveInvItems(list);
+  invAddMode=null;invAddTarget=null;
+  refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
 }
 function saveInvFolder(){
   const name=(document.getElementById('fld-name').value||'').trim()||'مجلد';
