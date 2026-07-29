@@ -58,6 +58,14 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;displa
 .custom-picker label{font-size:11px;color:var(--muted);display:block;margin-bottom:2px;}
 .custom-picker input[type=date]{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:12px;}
 .custom-picker .btn-apply{background:var(--blue);border:none;border-radius:6px;color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:6px;cursor:pointer;}
+/* ── فلتر المدة والجزء المخصص فى القسم الشخصى: خلفية وأسلوب كحلي/بيضاوي مطابق للصورة المرجعية ── */
+body.ws-personal #home-period-tabs{background:#2e3748;border:1px solid #3a4459;border-radius:999px;padding:3px;gap:2px;box-shadow:inset 0 2px 4px rgba(0,0,0,.45);}
+body.ws-personal #home-period-tabs .ptab.active{background:rgba(64,56,184,.2);border-color:transparent;color:#6d64ff;box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 -1px 0 rgba(255,255,255,.04);}
+body.ws-personal #custom-picker{background:#2e3748;border:1px solid #3a4459;border-radius:16px;padding:12px;}
+body.ws-personal #custom-picker input[type=date]{background:#242b3a;border-radius:999px;padding:6px 12px;}
+body.ws-personal #custom-picker .btn-apply{background:#4038b8;border-radius:999px;}
+body.ws-personal .sum-box{background:#2e3748;border-color:#3a4459;}
+body.ws-personal .period-range-bar{background:#3e444f;}
 
 /* ── CARDS GRID: الدخل/المصروفات صف ثابت دايمًا، الباقى يتدفق طبيعيًا ── */
 .cards-grid-2col{flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:1fr;grid-auto-rows:min-content;gap:8px;padding-bottom:100px;scrollbar-width:none;align-content:start;}
@@ -365,6 +373,13 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 .cat-sel{width:100%;background:#0d1117;border:1px solid rgba(205,222,248,.1);border-radius:3px;color:rgba(205,222,248,.65);font-family:'Cairo',sans-serif;font-size:9px;padding:0;cursor:pointer;height:16px;line-height:16px;overflow-y:auto;appearance:none;-webkit-appearance:none;text-align:center;}
 .td-name.from-debt{color:var(--yellow);font-weight:800;}
 .td-name.is-loan{color:#ff6b6b;font-weight:800;}
+/* اسم البند على سطرين فى الجدول المصغّر (الدخل/المصروفات): السطر الأول البند، السطر الثانى تاريخ+طريقة الدفع بخط أصغر */
+#tbody-income .td-name.td-name-2l,#tbody-expense .td-name.td-name-2l{padding-top:0!important;padding-bottom:0!important;}
+#tbody-income .td-name-2l .tn-2l-wrap,#tbody-expense .td-name-2l .tn-2l-wrap{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:1px;height:100%;}
+#tbody-income .td-name-2l .tn-sub,#tbody-expense .td-name-2l .tn-sub{font-size:13px;font-weight:400;color:#14237a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+#tbody-income tr td,#tbody-expense tr td{height:54px;}
+#tbody-income tr:nth-child(odd) .tn-2l-wrap>span:first-child,#tbody-expense tr:nth-child(odd) .tn-2l-wrap>span:first-child{color:#1a1c1f;}
+#tbody-income tr:nth-child(even) .tn-2l-wrap>span:first-child,#tbody-expense tr:nth-child(even) .tn-2l-wrap>span:first-child{color:#2a2d33;}
 
 /* add/edit form — نافذة عائمة فى منتصف الشاشة */
 .add-form{display:flex;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);width:84vw;max-width:340px;background:var(--card);border-radius:14px;z-index:260;flex-direction:column;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.8);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,transform .25s cubic-bezier(.2,.8,.3,1),visibility .25s;}
@@ -1406,7 +1421,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
       <div style="position:absolute;top:2px;left:2px;font-size:7px;color:var(--muted);opacity:.6;">الكل</div>
     </div>
   </div>
-  <div class="ptabs">
+  <div class="ptabs" id="home-period-tabs">
     <button class="ptab" onclick="setPeriod(this,'day')">يوم</button>
     <button class="ptab" onclick="setPeriod(this,'week')">أسبوع</button>
     <button class="ptab active" onclick="setPeriod(this,'month')">شهر</button>
@@ -1571,7 +1586,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
   </div>
   <div class="ftable-body">
     <div class="tbl-wrap" id="tbl-income">
-      <table><colgroup><col style="width:70%"><col style="width:30%"></colgroup>
+      <table><colgroup><col style="width:76%"><col style="width:24%"></colgroup>
         <thead><tr><th>البند</th><th>المبلغ</th></tr></thead>
         <tbody id="tbody-income"></tbody>
       </table>
@@ -1593,8 +1608,8 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
   </div>
   <div class="ftable-body">
     <div class="tbl-wrap" id="tbl-expense">
-      <table><colgroup><col style="width:52%"><col style="width:13%"><col style="width:23%"><col style="width:12%"></colgroup>
-        <thead><tr><th>البند</th><th>المبلغ</th><th>الفئة</th><th>ت.الدفع</th></tr></thead>
+      <table><colgroup><col style="width:58%"><col style="width:15%"><col style="width:27%"></colgroup>
+        <thead><tr><th>البند</th><th>المبلغ</th><th>الفئة</th></tr></thead>
         <tbody id="tbody-expense"></tbody>
       </table>
     </div>
@@ -3088,9 +3103,8 @@ function renderIncome(){
     const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
     const tr=document.createElement('tr');
     tr.dataset.idx=ri;
-    tr.innerHTML=`<td class="td-name${nameCellMeta(r).cls}"><span style="display:inline-flex;align-items:center;gap:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nameCellMeta(r).prefix}${r.name}</span></td>
-      <td class="td-g td-edit" data-type="income" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
-      <td class="td-m td-date" data-type="income" data-idx="${ri}" style="font-size:9px;color:var(--muted);cursor:pointer;">${fmtDate(r.date)}</td>`;
+    tr.innerHTML=`<td class="td-name td-name-2l${nameCellMeta(r).cls}"><div class="tn-2l-wrap"><span style="display:inline-flex;align-items:center;gap:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nameCellMeta(r).prefix}${r.name}</span><span class="tn-sub td-date" data-type="income" data-idx="${ri}">${fmtDate(r.date)}${r.pay?' • '+r.pay:''}</span></div></td>
+      <td class="td-g td-edit" data-type="income" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>`;
     bindDblClick(tr,'income');tb.appendChild(tr);
   });
   document.getElementById('ct-income-amount').textContent=fmt(total);
@@ -3108,10 +3122,9 @@ function renderExpense(){
     total+=Number(r.amount||0);
     const ri=all.findIndex(x=>x.name===r.name&&x.date===r.date);
     const tr=document.createElement('tr');tr.dataset.idx=ri;
-    tr.innerHTML=`<td class="td-name">${r.name}</td>
+    tr.innerHTML=`<td class="td-name td-name-2l"><div class="tn-2l-wrap"><span style="display:inline-flex;align-items:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.name}</span><span class="tn-sub td-date" data-type="expense" data-idx="${ri}" title="${r.date||''}">${fmtDate(r.date)}${r.pay?' • '+r.pay:''}</span></div></td>
       <td class="td-b td-edit" data-type="expense" data-idx="${ri}" data-field="amount">${fmt(r.amount)}</td>
-      <td class="td-cat">${expenseCatSelectHTML(ri,r.cat)}</td>
-      <td class="td-m td-date" data-type="expense" data-idx="${ri}" title="${r.date||''}">${fmtDate(r.date)}</td>`;
+      <td class="td-cat">${expenseCatSelectHTML(ri,r.cat)}</td>`;
     bindDblClick(tr,'expense');tb.appendChild(tr);
   });
   document.getElementById('ct-expense-amount').textContent=fmt(total);
@@ -3794,12 +3807,14 @@ function updateRatioBars(income,exp,commitPaid,credPaid,debPaid,totalExp){
   // كرت المصروفات (stacked): نسبة المصروفات إلى الدخل
   drawSegmentedRing('chart-expense-side',pct(exp),'#7eb8e0',{pctId:'ct-expense-pct'});
   // كرت الالتزامات: نسبة المدفوع من الالتزامات إلى الدخل
-  drawSegmentedRing('chart-commit-side',pct(commitPaid),'#7eb8e0');
-  // كرت الديون: نسبة المدفوع فى التصنيف الحالى (دائن/مدين) إلى الدخل
+  drawSegmentedRing('chart-commit-side',pct(commitPaid),'#7eb8e0',{innerR:W_COMMIT_DEBT.innerR,outerR:W_COMMIT_DEBT.outerR,popOuter:W_COMMIT_DEBT.popOuter,fontScale:0.24});
+  // كرت الديون: نسبة المدفوع فى التصنيف الحالى (دائن/مدين) إلى الدخل — دائن أزرق (زى ما كان)، مدين أخضر
   const debtPct=debtMode==='creditor'?pct(credPaid):pct(debPaid);
-  const debtColor='#7eb8e0';
-  drawSegmentedRing('chart-debt-side',debtPct,debtColor);
+  const debtColor=debtMode==='creditor'?'#7eb8e0':'#3ecb6e';
+  drawSegmentedRing('chart-debt-side',debtPct,debtColor,{innerR:W_COMMIT_DEBT.innerR,outerR:W_COMMIT_DEBT.outerR,popOuter:W_COMMIT_DEBT.popOuter,fontScale:0.24});
 }
+// نصف أقطار موسّعة (حلقة أرفع/فتحة داخلية أوسع) لدائرتى الالتزامات والديون تحديدًا (viewBox=54)
+const W_COMMIT_DEBT={innerR:54*0.34,outerR:54*0.44,popOuter:54*0.482};
 
 // ══════════════════════════════════════════════
 //  MINI CHARTS (SVG)
@@ -3930,7 +3945,7 @@ function drawSegmentedRing(id,pct,color,opts){
   } else if(opts.showText!==false){
     const txt=document.createElementNS(NS,'text');
     txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
-    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',Math.max(8,Math.round(W*0.15)));
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',Math.max(8,Math.round(W*(opts.fontScale||0.15))));
     txt.setAttribute('font-family','Cairo,sans-serif');txt.setAttribute('font-weight','800');
     txt.setAttribute('fill','#dde4ef');
     txt.textContent=Math.round(pct)+'%';
@@ -11526,6 +11541,7 @@ function renderWarehouseDetail(root){
     </div>
     <div class="biz-po-tabs">
       <button class="ptab" id="witab-items" onclick="switchInvTab('items')">الأصناف</button>
+      <button class="ptab" id="witab-low" onclick="switchInvTab('low')">نواقص</button>
       <button class="ptab" id="witab-returns" onclick="switchInvTab('returns')">مردود</button>
       <button class="ptab" id="witab-damaged" onclick="switchInvTab('damaged')">تالف</button>
     </div>
