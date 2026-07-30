@@ -34,6 +34,8 @@ body.ws-personal{
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;display:flex;flex-direction:column;}
+/* خلفية الصفحة الرئيسية فى القسم الشخصى: نفس الخلفية الرمادية المستخدمة بالصفحة الرئيسية للقسم التجارى */
+body.ws-personal #pg-home{background:#121110;}
 /* توضيح الخط بالقسم التجاري كله: لون أفتح وأوضح تباين للنصوص الثانوية (muted) */
 #pg-workspace,#pg-biz-detail,#biz-expand-overlay,#collect-modal,#pay-modal{--muted:#aab8cb;}
 
@@ -798,6 +800,36 @@ select option{background:var(--card2);color:var(--txt);padding:10px 16px;min-wid
 .biz-po-btn.save{background:var(--green);color:#08221a;}
 .biz-po-btn.print{background:var(--blue);color:#fff;}
 .biz-po-btn.cancel{background:var(--card2);color:var(--muted);}
+/* ── تصميم سند الصرف الجديد (مطابق للنموذج المرجعى) ── */
+.pv-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.pv-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
+.pv-hdr-title{font-size:13.5px;font-weight:800;color:var(--txt);}
+.pv-hdr-icons{display:flex;gap:8px;}
+.pv-hdr-icon{width:30px;height:30px;border-radius:8px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--txt);}
+.pv-infobar{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.pv-info-item{flex:1;min-width:100px;display:flex;flex-direction:column;gap:4px;}
+.pv-info-lbl{font-size:9px;color:var(--muted);display:flex;align-items:center;gap:3px;white-space:nowrap;}
+.pv-info-item select,.pv-info-item input{background:transparent;border:none;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;font-weight:700;padding:0;width:100%;}
+.pv-info-item select:focus,.pv-info-item input:focus{outline:none;}
+.pv-body{display:flex;flex-direction:column;padding:2px 14px 8px;}
+.pv-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.pv-row:last-child{border-bottom:none;}
+.pv-row-lbl{font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto;}
+.pv-row-ctrl{flex:1;display:flex;justify-content:flex-start;min-width:0;}
+.pv-row-ctrl select,.pv-row-ctrl input,.pv-row-ctrl textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;padding:8px 10px;text-align:center;}
+.pv-amount-wrap{display:flex;align-items:center;gap:6px;width:100%;}
+.pv-amount-wrap select{flex:0 0 58px;padding:8px 4px;}
+.pv-amount-wrap input{flex:1;text-align:center;font-weight:800;}
+.pv-pay-methods{display:flex;gap:6px;width:100%;justify-content:flex-start;flex-wrap:wrap;}
+.pv-pay-opt{display:flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:10.5px;color:var(--muted);cursor:pointer;}
+.pv-pay-opt input{accent-color:var(--green);}
+.pv-pay-opt.active{border-color:var(--green);color:var(--green);}
+.pv-sig-wrap{display:flex;gap:10px;padding:14px;border-top:1px solid var(--border);}
+.pv-sig-box{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.pv-sig-lbl{font-size:10.5px;color:var(--muted);font-weight:700;}
+.pv-sig-canvas{width:100%;height:78px;background:var(--card2);border:1px dashed var(--border);border-radius:10px;touch-action:none;}
+.pv-sig-clear{font-size:9px;color:var(--muted);cursor:pointer;text-decoration:underline;}
+.pv-footer{display:flex;gap:8px;padding:2px 14px 14px;}
 .wh-row{cursor:default;}
 /* ══ تصميم فاتورة مردود المشتريات (بطاقات + شارات) ══ */
 .prv-wrap{display:flex;flex-direction:column;gap:12px;}
@@ -1983,6 +2015,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
         <div class="s-row"><span class="s-lbl">ملحق التقسيط بفاتورة البيع</span><label class="sw"><input type="checkbox" id="s-addon-installments" onchange="toggleAddon('addonInstallments',this.checked)"><span class="sw-sl"></span></label></div>
         <div class="s-row"><span class="s-lbl">حسابات شركاء</span><label class="sw"><input type="checkbox" id="s-addon-partners" onchange="toggleAddon('addonPartners',this.checked)"><span class="sw-sl"></span></label></div>
         <div class="s-row"><span class="s-lbl">إضافة باركود للأصناف</span><label class="sw"><input type="checkbox" id="s-addon-barcode" onchange="toggleAddon('addonBarcode',this.checked)"><span class="sw-sl"></span></label></div>
+        <div class="s-row"><span class="s-lbl">تاريخ صلاحية للأصناف</span><label class="sw"><input type="checkbox" id="s-addon-expiry" onchange="toggleAddon('addonExpiry',this.checked)"><span class="sw-sl"></span></label></div>
         <div class="s-row"><span class="s-lbl">إدارة موظفين</span><label class="sw"><input type="checkbox" id="s-addon-employees" onchange="toggleAddon('addonEmployees',this.checked)"><span class="sw-sl"></span></label></div>
       </div>
       <div id="set-partners-group" style="display:none;">
@@ -2262,7 +2295,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:stretch;background:#0a0c10;border-radius:14px;padding:6px;">
 
         <!-- المشتريات / الموردين -->
-        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="purchases" onclick="bizPurchaseTab='invoice';openBizDetail('purchases')">
+        <div class="biz-card" style="border:1px solid rgba(255,255,255,.06);background:#3e444f;" data-biz-key="purchases" onclick="bizPurchaseTab='invoice';openBizDetail('purchases')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('purchases')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(182,76,62,.16);">🛒</span>
@@ -2286,7 +2319,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
         </div>
 
         <!-- المخزون -->
-        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);align-items:center;text-align:center;background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="inventory" onclick="openBizDetail('inventory')">
+        <div class="biz-card" style="border:1px solid rgba(255,255,255,.06);align-items:center;text-align:center;background:#3e444f;" data-biz-key="inventory" onclick="openBizDetail('inventory')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('inventory')">⤢</span>
           <div class="biz-card-hdr" style="width:100%;">
             <span class="biz-ico" style="background:rgba(158,163,168,.16);">🎓</span>
@@ -2308,7 +2341,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
         </div>
 
         <!-- المبيعات / العملاء -->
-        <div class="biz-card" style="border:1px solid rgba(158,163,168,.22);background:linear-gradient(180deg,#26211a 0%,#18140f 100%);" data-biz-key="sales" onclick="bizSalesTab='invoice';openBizDetail('sales')">
+        <div class="biz-card" style="border:1px solid rgba(255,255,255,.06);background:#3e444f;" data-biz-key="sales" onclick="bizSalesTab='invoice';openBizDetail('sales')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('sales')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(158,163,168,.16);">👥</span>
@@ -2332,7 +2365,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
       </div>
 
       <!-- السيولة النقدية -->
-      <div class="biz-card" id="ws-liq-card" style="background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(158,163,168,.18);border-radius:14px;padding:7px;gap:4px;" data-biz-key="liquidity" onclick="openBizDetail('liquidity')">
+      <div class="biz-card" id="ws-liq-card" style="background:#2e3748;border:1px solid #3a4459;border-radius:14px;padding:7px;gap:4px;" data-biz-key="liquidity" onclick="openBizDetail('liquidity')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('liquidity')">⤢</span>
         <div class="liq-total-row">
           <span class="liq-total-ico">💼</span>
@@ -2366,7 +2399,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
 
       <!-- المصروفات + حسابات -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="biz-card" style="background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(158,163,168,.18);border-radius:14px;padding:6px;gap:2px;" data-biz-key="expenses" onclick="openBizDetail('expenses')">
+        <div class="biz-card" style="background:#2e3748;border:1px solid #3a4459;border-radius:14px;padding:6px;gap:2px;" data-biz-key="expenses" onclick="openBizDetail('expenses')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('expenses')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(224,138,62,.16);">🧾</span>
@@ -2383,7 +2416,7 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
             <span class="biz-card-title" style="color:#e08a3e;">المصروفات</span>
           </div>
         </div>
-        <div class="biz-card" style="background:linear-gradient(180deg,#1c2532 0%,#141c27 100%);border:1px solid rgba(158,163,168,.18);border-radius:14px;padding:6px;gap:2px;" data-biz-key="accounts" onclick="openBizDetail('accounts')">
+        <div class="biz-card" style="background:#2e3748;border:1px solid #3a4459;border-radius:14px;padding:6px;gap:2px;" data-biz-key="accounts" onclick="openBizDetail('accounts')">
           <span class="biz-expand-btn" onclick="event.stopPropagation();expandBizCard('accounts')">⤢</span>
           <div class="biz-card-hdr">
             <span class="biz-ico" style="background:rgba(158,163,168,.16);">📋</span>
@@ -8749,6 +8782,7 @@ function voucherFormSlotId(kind){return kind+'-form-slot';}
 let _vchReceiptCustomers=[];
 let _vchSettleKey=null;
 function openVoucherForm(kind){
+  if(kind==='payment'){renderPaymentVoucherForm();return;}
   const title=kind==='receipt'?'إذن قبض جديد':'إذن صرف جديد';
   const nameLbl=kind==='receipt'?'اسم المستلم منه':'اسم المصروف له';
   let types=(VOUCHER_TYPES[kind]||[]).slice();
@@ -8765,34 +8799,14 @@ function openVoucherForm(kind){
         <select class="biz-po-inp" id="vch-${kind}-partner" onchange="vchPartnerSelChosen('${kind}')"></select>
         <input class="biz-po-inp" id="vch-${kind}-partner-seq-preview" disabled>
       </div>
-      ${kind==='payment'?`
-      <div id="vch-payment-expwrap" style="display:none;flex-direction:column;gap:10px;">
-        <div class="biz-po-frow2">
-          <input class="biz-po-inp" id="vch-payment-payer" placeholder="اسم الصراف">
-          <input class="biz-po-inp" id="vch-payment-exp-seqpreview" disabled>
-        </div>
-        <div class="biz-po-frow"><input class="biz-po-inp" id="vch-payment-benad" list="vch-payment-benad-list" placeholder="البند" autocomplete="off">
-          <datalist id="vch-payment-benad-list"></datalist>
-        </div>
-      </div>`:''}
       <div id="vch-${kind}-namecoa-wrap">
       <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl}" autocomplete="off">
         <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
       </div>
-      <div class="biz-po-frow"><select class="biz-po-inp" id="vch-${kind}-coasel" onchange="vchCoaSelChanged('${kind}')">
-        <option value="">— ربط بحساب فرعى (اختياري) —</option>
-        ${listLinkableCoaAccounts().map(a=>`<option value="${esc(a.subId)}::${esc(a.accId)}">${esc(a.shortName)}</option>`).join('')}
-      </select></div>
       </div>
       <div class="biz-po-frow2">
         <input class="biz-po-inp" id="vch-${kind}-amount" type="number" placeholder="المبلغ">
         <span id="vch-${kind}-date-wrap"><input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}"></span>
-      </div>
-      <div class="biz-po-frow" id="vch-${kind}-linkdir-wrap" style="display:none;">
-        <select class="biz-po-inp" id="vch-${kind}-linkdir">
-          <option value="inc">مدين (عليه)</option>
-          <option value="dec">دائن (له)</option>
-        </select>
       </div>
       ${kind==='receipt'?`
       <div class="biz-po-frow" id="vch-settle-wrap" style="display:none;">
@@ -8812,6 +8826,140 @@ function openVoucherForm(kind){
     </div>`;
   if(kind==='receipt')renderVchCustRows();
   vchTypeChanged(kind);
+}
+/* رقم الإذن بشكل «P-2026-0001» / «R-2026-0001» للعرض فقط (لا يغيّر آلية الترقيم الداخلية) */
+function formatVoucherSeq(kind,seq){
+  const y=new Date().getFullYear();
+  return(kind==='receipt'?'R':'P')+'-'+y+'-'+String(seq).padStart(4,'0');
+}
+/* ── فورم إذن/سند صرف مالية بالتصميم الجديد (مطابق للنموذج المرجعى) ── */
+function renderPaymentVoucherForm(){
+  const kind='payment';
+  const types=(VOUCHER_TYPES.payment||[]).slice();
+  const suggestNames=getAllSupplierNames();
+  const seq=Number(_getItem('fm_seq')||0)+1;
+  const accounts=[{id:'',name:'الخزينة الرئيسية'}].concat(caFundsFlatAccounts().map(a=>({id:a.id,name:a.name})));
+  const currency=getSettings().currencySym||'ج.م';
+  document.getElementById(voucherFormSlotId(kind)).innerHTML=`
+    <div class="pv-card">
+      <div class="pv-hdr">
+        <div class="pv-hdr-icons"><div class="pv-hdr-icon" onclick="printPaymentVoucherForm()" title="طباعة">🖨️</div></div>
+        <div class="pv-hdr-title">إذن / سند صرف مالية</div>
+        <div class="pv-hdr-icons"><div class="pv-hdr-icon" onclick="closeVoucherForm('payment')" title="إغلاق">✕</div></div>
+      </div>
+      <div class="pv-infobar">
+        <div class="pv-info-item">
+          <span class="pv-info-lbl">🏦 الخزينة/البنك</span>
+          <select id="vch-payment-account">${accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('')}</select>
+        </div>
+        <div class="pv-info-item">
+          <span class="pv-info-lbl">📅 تاريخ الحركة</span>
+          <input type="date" id="vch-payment-date" value="${todayStr()}">
+        </div>
+        <div class="pv-info-item" style="flex:0 0 auto;">
+          <span class="pv-info-lbl">📄 رقم الإذن</span>
+          <input id="vch-payment-seqpreview" value="${formatVoucherSeq('payment',seq)}" disabled style="text-align:center;">
+        </div>
+      </div>
+      <div class="pv-body">
+        <div class="pv-row">
+          <span class="pv-row-lbl">نوع الحركة</span>
+          <div class="pv-row-ctrl"><select id="vch-payment-type" onchange="vchTypeChanged('payment')">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select></div>
+        </div>
+        <div id="vch-payment-namecoa-wrap">
+          <div class="pv-row">
+            <span class="pv-row-lbl">ادفعوا للسيد/الجهة</span>
+            <div class="pv-row-ctrl"><input id="vch-payment-name" list="vch-payment-name-list" placeholder="الاسم" autocomplete="off">
+            <datalist id="vch-payment-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div>
+          </div>
+        </div>
+        <div id="vch-payment-expwrap" style="display:none;">
+          <div class="pv-row">
+            <span class="pv-row-lbl">اسم الصراف</span>
+            <div class="pv-row-ctrl"><input id="vch-payment-payer" placeholder="اسم الصراف"></div>
+          </div>
+          <div class="pv-row">
+            <span class="pv-row-lbl">البند</span>
+            <div class="pv-row-ctrl"><input id="vch-payment-benad" list="vch-payment-benad-list" placeholder="البند" autocomplete="off">
+            <datalist id="vch-payment-benad-list"></datalist></div>
+          </div>
+        </div>
+        <div id="vch-payment-partner-wrap" class="pv-row" style="display:none;">
+          <span class="pv-row-lbl">الشريك</span>
+          <div class="pv-row-ctrl"><select id="vch-payment-partner" onchange="vchPartnerSelChosen('payment')"></select>
+          <input class="pv-row-ctrl" id="vch-payment-partner-seq-preview" disabled style="display:none;"></div>
+        </div>
+        <div class="pv-row">
+          <span class="pv-row-lbl">المبلغ رقماً</span>
+          <div class="pv-row-ctrl pv-amount-wrap">
+            <select id="vch-payment-currency"><option>${esc(currency)}</option></select>
+            <input id="vch-payment-amount" type="number" placeholder="0.00">
+          </div>
+        </div>
+        <div class="pv-row">
+          <span class="pv-row-lbl">طريقة الدفع</span>
+          <div class="pv-row-ctrl pv-pay-methods" id="vch-payment-paymethod-wrap">
+            ${['نقداً','تحويل بنكي','شيك'].map((m,i)=>`<label class="pv-pay-opt${i===0?' active':''}"><input type="radio" name="vch-payment-paymethod" value="${esc(m)}" ${i===0?'checked':''} onchange="vchPayMethodChanged(this)"> ${esc(m)}</label>`).join('')}
+          </div>
+        </div>
+        <div class="pv-row">
+          <span class="pv-row-lbl">البيان / الوصف</span>
+          <div class="pv-row-ctrl"><input id="vch-payment-desc" placeholder="البيان"></div>
+        </div>
+        <div class="pv-row">
+          <span class="pv-row-lbl">مرفقات</span>
+          <div class="pv-row-ctrl"><input id="vch-payment-attachment" placeholder="اسم/رقم المرفق (اختيارى)"></div>
+        </div>
+      </div>
+      <div class="pv-sig-wrap">
+        <div class="pv-sig-box">
+          <span class="pv-sig-lbl">👤 أمين الخزينة</span>
+          <canvas class="pv-sig-canvas" id="vch-payment-sig-custodian"></canvas>
+          <span class="pv-sig-clear" onclick="clearSigPad('vch-payment-sig-custodian')">مسح</span>
+        </div>
+        <div class="pv-sig-box">
+          <span class="pv-sig-lbl">👤 المستلم / المستفيد</span>
+          <canvas class="pv-sig-canvas" id="vch-payment-sig-recipient"></canvas>
+          <span class="pv-sig-clear" onclick="clearSigPad('vch-payment-sig-recipient')">مسح</span>
+        </div>
+      </div>
+      <div class="pv-footer">
+        <button class="biz-po-btn print" onclick="printPaymentVoucherForm()">🖨️ طباعة</button>
+        <button class="biz-po-btn save" onclick="saveVoucher('payment')">💾 حفظ الإذن</button>
+        <button class="biz-po-btn cancel" onclick="closeVoucherForm('payment')">إلغاء</button>
+      </div>
+    </div>`;
+  initSigPad('vch-payment-sig-custodian');
+  initSigPad('vch-payment-sig-recipient');
+  vchTypeChanged('payment');
+}
+function vchPayMethodChanged(el){
+  document.querySelectorAll('#vch-payment-paymethod-wrap .pv-pay-opt').forEach(l=>l.classList.remove('active'));
+  if(el&&el.checked)el.closest('.pv-pay-opt').classList.add('active');
+}
+/* ── لوحة توقيع بسيطة بالماوس/اللمس (للطباعة فقط، لا يتم حفظ الصورة فى البيانات) ── */
+function initSigPad(canvasId){
+  const cv=document.getElementById(canvasId);
+  if(!cv)return;
+  const dpr=window.devicePixelRatio||1;
+  const resize=()=>{const r=cv.getBoundingClientRect();cv.width=r.width*dpr;cv.height=r.height*dpr;const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.lineWidth=2;ctx.lineCap='round';ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--txt')||'#fff';};
+  resize();
+  let drawing=false,last=null;
+  const pos=(e)=>{const r=cv.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return{x:p.clientX-r.left,y:p.clientY-r.top};};
+  const start=(e)=>{drawing=true;last=pos(e);e.preventDefault();};
+  const move=(e)=>{if(!drawing)return;const ctx=cv.getContext('2d');const p=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;e.preventDefault();};
+  const end=()=>{drawing=false;};
+  cv.addEventListener('mousedown',start);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+  cv.addEventListener('touchstart',start,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',end);
+}
+function clearSigPad(canvasId){
+  const cv=document.getElementById(canvasId);
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+}
+function printPaymentVoucherForm(){
+  setTimeout(()=>window.print(),150);
 }
 /* ── اقتراحات "البند" لإذن صرف من نوع مصروفات: من بنود أذون مصروفات سابقة (النشاط التجاري) فقط،
    لا علاقة لها ببنود المصروفات الشخصية (تلك تخص قسم الشخصى وحده) ── */
@@ -9050,12 +9198,21 @@ function saveVoucher(kind){
   }
   if(isSettle&&_vchSettleKey)settleOtherDebitOrPartner(_vchSettleKey,total,date,seq,typeVal);
   const linkDir=document.getElementById(`vch-${kind}-linkdir`)?.value||'inc';
-  const notesVal=document.getElementById(`vch-${kind}-notes`).value.trim();
+  const notesVal=document.getElementById(`vch-${kind}-notes`)?.value.trim()||'';
   const v={id:(kind==='receipt'?'rcpt_':'pmt_')+Date.now(),seq,name:displayName,amount:total,
     type:typeVal,
     date,
     desc:document.getElementById(`vch-${kind}-desc`).value.trim()||(custLines.length?'تحصيل مديونية عملاء':(isSettle?'تسوية فرق تحصيل':'')),
     notes:[notesVal,extraNotes].filter(Boolean).join(' — ')};
+  if(kind==='payment'){
+    const accSel=document.getElementById('vch-payment-account');
+    if(accSel&&accSel.value){v.accountId=accSel.value;v.accountName=accSel.options[accSel.selectedIndex].textContent;}
+    else if(accSel){v.accountName=accSel.options[accSel.selectedIndex].textContent;}
+    const payMethodEl=document.querySelector('input[name="vch-payment-paymethod"]:checked');
+    if(payMethodEl)v.payMethod=payMethodEl.value;
+    const attach=document.getElementById('vch-payment-attachment')?.value.trim();
+    if(attach)v.attachment=attach;
+  }
   if(linkMatch){v.linkSub=linkMatch.subId;v.linkAcc=linkMatch.accId;v.linkDir=linkDir;}
   if(isExpense)v.payer=payer;
   if(custLines.length){v.lines=custLines.map(c=>({customerName:c.name,amount:Number(c.amount)}));v.status='pending';}
@@ -9117,17 +9274,23 @@ function viewVoucher(kind,id){
   const linesRows=multi?v.lines.map(l=>`<div class="biz-po-detail-line"><span>${esc(l.supplierName||l.customerName)}</span><b style="color:${kind==='receipt'?'var(--green)':'var(--red)'};">${fmt(l.amount)}</b></div>`).join(''):'';
   const pendingNote=v.status==='pending'?`<div class="biz-po-detail-line"><span>الحالة</span><b style="color:var(--yellow);">⏳ معلق — فى انتظار تأكيد المبلغ</b></div>`:'';
   const confirmedNote=(v.status==='confirmed'&&v.confirmedAmount!=null)?`<div class="biz-po-detail-line"><span>المبلغ المؤكَّد فعلياً</span><b style="color:var(--green);">${fmt(v.confirmedAmount)}</b></div>`:'';
+  const accountRow=(kind==='payment'&&v.accountName)?`<div class="biz-po-detail-line"><span>الخزينة/البنك</span><b>${esc(v.accountName)}</b></div>`:'';
+  const payMethodRow=(kind==='payment'&&v.payMethod)?`<div class="biz-po-detail-line"><span>طريقة الدفع</span><b>${esc(v.payMethod)}</b></div>`:'';
+  const attachRow=(kind==='payment'&&v.attachment)?`<div class="biz-po-detail-line"><span>مرفقات</span><b>📎 ${esc(v.attachment)}</b></div>`:'';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
     <div class="biz-po-form">
-      <div class="biz-po-form-title">${title} #${v.seq}</div>
+      <div class="biz-po-form-title">${title} ${formatVoucherSeq(kind,v.seq)}</div>
       ${v.type?`<div class="biz-po-detail-line"><span>النوع</span><b style="color:var(--blue);">${esc(v.type)}</b></div>`:''}
+      ${accountRow}
       <div class="biz-po-detail-line"><span>${nameLbl}</span><b>${esc(displayName)}</b></div>
       ${payerRow}
       ${linesRows}
       <div class="biz-po-detail-line"><span>التاريخ</span><b>${v.date}</b></div>
       <div class="biz-po-detail-line"><span>${v.status==='pending'?'المبلغ المسجل':'المبلغ'}</span><b style="color:${kind==='receipt'?'var(--green)':'var(--red)'};">${fmt(v.amount)}</b></div>
       ${pendingNote}${confirmedNote}
+      ${payMethodRow}
       ${v.desc?`<div class="biz-po-detail-line"><span>البيان</span><b>${esc(v.desc)}</b></div>`:''}
+      ${attachRow}
       ${v.notes?`<div class="biz-po-detail-line"><span>ملاحظات</span><b>${esc(v.notes)}</b></div>`:''}
       <div class="biz-po-btns">
         ${v.status==='pending'?`<button class="biz-po-btn save" onclick="confirmFromVoucherView('${kind}','${v.id}')">تأكيد المبلغ</button>`:''}
@@ -11326,6 +11489,7 @@ function loadInvDamaged(){return JSON.parse(_getItem('fm_inv_damaged')||'[]');}
 function saveInvDamaged(l){_setItem('fm_inv_damaged',JSON.stringify(l));}
 
 let invCurrentWh=null,invTab='items';
+let _invLowStockThreshold=0;
 let _invCollapsedFld=new Set();
 let invAddTarget=null,invAddMode=null;
 let _whExpandedView=new Set();
@@ -11586,7 +11750,7 @@ function saveWhOpening(){
 }
 function switchInvTab(tab){
   invTab=tab;
-  ['items','returns','damaged'].forEach(t=>{
+  ['items','low','returns','damaged'].forEach(t=>{
     const b=document.getElementById('witab-'+t);
     if(!b)return;
     if(t===tab){b.style.background='var(--blue)';b.style.color='#fff';b.style.borderColor='var(--blue)';}
@@ -11595,12 +11759,62 @@ function switchInvTab(tab){
   const c=document.getElementById('inv-tab-content');
   if(!c)return;
   if(tab==='items')renderInvItemsTab(c);
+  else if(tab==='low')renderInvLowStockTab(c);
   else renderInvReturnsTab(c,tab);
+}
+/* ── تبويب نواقص المخزون: أصناف برصيدها صفر، أو حسب حد يحدده المستخدم (رصيد ≤ الحد) ── */
+function itemFolderPath(folderId){
+  const folders=loadInvFolders();
+  const path=[];
+  let cur=folders.find(f=>f.id===folderId);
+  while(cur){path.unshift(cur.name);cur=cur.parentId?folders.find(f=>f.id===cur.parentId):null;}
+  return path.join(' / ');
+}
+function renderInvLowStockTab(c){
+  const th=_invLowStockThreshold||0;
+  c.innerHTML=`
+    <div class="biz-po-form" style="gap:8px;">
+      <div class="biz-po-form-title">⚠️ نواقص المخزون</div>
+      <div class="biz-po-frow" style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap;">إظهار الأصناف برصيد أقل من أو يساوي</span>
+        <input class="biz-po-inp" type="number" min="0" id="inv-lowstock-th" value="${th}" style="width:80px;" oninput="setInvLowStockThreshold(this.value)">
+      </div>
+      <div style="font-size:9.5px;color:var(--muted);">اترك القيمة صفر لعرض الأصناف المنتهية فقط</div>
+    </div>
+    <div id="inv-lowstock-list"></div>`;
+  renderInvLowStockList();
+}
+function setInvLowStockThreshold(v){
+  _invLowStockThreshold=Math.max(0,Number(v||0));
+  renderInvLowStockList();
+}
+function renderInvLowStockList(){
+  const listEl=document.getElementById('inv-lowstock-list');
+  if(!listEl)return;
+  const th=_invLowStockThreshold||0;
+  const items=loadInvItems().filter(i=>i.whId===invCurrentWh&&Number(i.qty||0)<=th).sort((a,b)=>Number(a.qty||0)-Number(b.qty||0));
+  listEl.innerHTML=`<div style="font-size:10px;color:var(--muted);margin:4px 2px;">${items.length} صنف مطابق</div>`+
+    (items.length?`<div class="inv-items-rows2">${items.map(it=>{
+      const zero=Number(it.qty||0)===0;
+      const fp=it.folderId?itemFolderPath(it.folderId):'';
+      return`<div class="inv-item-row2" onclick="editInvItem('${it.id}')" style="${zero?'border-color:var(--red);':''}">
+        <div class="inv-item-row2-top"><span class="inv-item-row2-code">${itemIcon(it.name)}</span><span class="inv-item-row2-qty" style="${zero?'color:var(--red);':''}">${it.qty}</span></div>
+        <div class="inv-item-row2-meta"><span class="inv-item-row2-name">${esc(it.name)}${fp?` <span style="color:var(--muted);font-size:9px;">(${esc(fp)})</span>`:''}</span><b>${fmt(it.cost)}</b></div>
+      </div>`;
+    }).join('')}</div>`:'<div class="biz-po-empty">لا توجد أصناف مطابقة</div>');
 }
 
 /* ── تبويب الأصناف: قسم ← مجموعة ← صنف ── */
 let invItemsView='rows';
 function setInvItemsView(mode){invItemsView=mode;renderInvItemsTab(document.getElementById('inv-tab-content'));}
+function expiryBadge(exp){
+  if(!exp)return'';
+  const days=Math.ceil((new Date(exp)-new Date(new Date().toDateString()))/86400000);
+  let color='var(--muted)';
+  if(days<0)color='var(--red)';
+  else if(days<=30)color='var(--yellow)';
+  return`<span class="inv-item-exp" style="color:${color};font-size:9px;">⏳ ${exp}</span>`;
+}
 function itemsListHtml(items){
   if(!items.length)return'';
   if(invItemsView==='grid'){
@@ -11608,11 +11822,13 @@ function itemsListHtml(items){
       <div class="inv-item-card-top"><span class="inv-item-card-ic">${itemIcon(it.name)}</span><span class="inv-item-card-qty">${it.qty}</span></div>
       <div class="inv-item-card-name">${esc(it.name)}</div>
       <div class="inv-item-card-meta"><b>${fmt(it.cost)}</b></div>
+      ${expiryBadge(it.expiry)}
     </div>`).join('')}</div>`;
   }
   return`<div class="inv-items-rows2">${items.map(it=>`<div class="inv-item-row2" onclick="editInvItem('${it.id}')">
     <div class="inv-item-row2-top"><span class="inv-item-row2-code">${itemIcon(it.name)}</span><span class="inv-item-row2-qty">${it.qty}</span></div>
     <div class="inv-item-row2-meta"><span class="inv-item-row2-name">${esc(it.name)}</span><b>${fmt(it.cost)}</b></div>
+    ${expiryBadge(it.expiry)}
   </div>`).join('')}</div>`;
 }
 function renderInvItemsTab(c){
@@ -11711,6 +11927,7 @@ function renderInvAddSlot(){
     if(inp){inp.focus();inp.select();}
   }else if(invAddMode==='new-item'){
     const barcodeOn=getSettings().addonBarcode;
+    const expiryOn=getSettings().addonExpiry;
     slot.innerHTML=`<div class="biz-po-form">
       <div class="biz-po-form-title">صنف جديد</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="itm-name" placeholder="اسم الصنف"></div>
@@ -11719,6 +11936,7 @@ function renderInvAddSlot(){
         <input class="biz-po-inp" id="itm-cost" type="number" placeholder="تكلفة الوحدة">
       </div>
       ${barcodeOn?'<div class="biz-po-frow"><input class="biz-po-inp" id="itm-barcode" placeholder="الباركود"></div>':''}
+      ${expiryOn?'<div class="biz-po-frow"><input class="biz-po-inp" id="itm-expiry" type="date" placeholder="تاريخ الصلاحية"></div>':''}
       <div class="biz-po-btns">
         <button class="biz-po-btn save" onclick="saveInvItem()">حفظ</button>
         <button class="biz-po-btn cancel" onclick="closeInvAddMenu()">إلغاء</button>
@@ -11765,7 +11983,8 @@ function saveInvItem(){
   list.push({id:'itm_'+Date.now(),folderId:invAddTarget||null,whId:invCurrentWh,name,
     qty:Number(document.getElementById('itm-qty').value||0),
     cost:Number(document.getElementById('itm-cost').value||0),
-    barcode:document.getElementById('itm-barcode')?document.getElementById('itm-barcode').value.trim():''});
+    barcode:document.getElementById('itm-barcode')?document.getElementById('itm-barcode').value.trim():'',
+    expiry:document.getElementById('itm-expiry')?document.getElementById('itm-expiry').value:''});
   saveInvItems(list);
   invAddMode=null;invAddTarget=null;
   refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
@@ -11774,6 +11993,7 @@ function editInvItem(id){
   const it=loadInvItems().find(x=>x.id===id);
   if(!it)return;
   const barcodeOn=getSettings().addonBarcode;
+  const expiryOn=getSettings().addonExpiry;
   document.getElementById('item-form-slot').innerHTML=`
     <div class="biz-po-form">
       <div class="biz-po-form-title">تعديل الصنف ${itemIcon(it.name)}</div>
@@ -11783,6 +12003,7 @@ function editInvItem(id){
         <input class="biz-po-inp" id="itm-e-cost" type="number" value="${it.cost}">
       </div>
       ${barcodeOn?`<div class="biz-po-frow"><input class="biz-po-inp" id="itm-e-barcode" placeholder="الباركود" value="${esc(it.barcode||'')}"></div>`:''}
+      ${expiryOn?`<div class="biz-po-frow"><input class="biz-po-inp" id="itm-e-expiry" type="date" value="${esc(it.expiry||'')}"></div>`:''}
       <div class="biz-po-btns">
         <button class="biz-po-btn save" onclick="updateInvItem('${id}')">حفظ</button>
         <button class="biz-po-btn cancel" onclick="pgConfirm('حذف هذا الصنف؟',()=>deleteInvItem('${id}'))">حذف</button>
@@ -11797,6 +12018,7 @@ function updateInvItem(id){
   it.qty=Number(document.getElementById('itm-e-qty').value||0);
   it.cost=Number(document.getElementById('itm-e-cost').value||0);
   if(document.getElementById('itm-e-barcode'))it.barcode=document.getElementById('itm-e-barcode').value.trim();
+  if(document.getElementById('itm-e-expiry'))it.expiry=document.getElementById('itm-e-expiry').value;
   saveInvItems(list);
   closeItemFormSlot();
   refreshInvHeader();renderInvItemsTab(document.getElementById('inv-tab-content'));
@@ -12169,6 +12391,7 @@ function loadSettingsPage(){
     if(document.getElementById('s-addon-installments'))document.getElementById('s-addon-installments').checked=!!s.addonInstallments;
     if(document.getElementById('s-addon-partners'))document.getElementById('s-addon-partners').checked=!!s.addonPartners;
     if(document.getElementById('s-addon-barcode'))document.getElementById('s-addon-barcode').checked=!!s.addonBarcode;
+    if(document.getElementById('s-addon-expiry'))document.getElementById('s-addon-expiry').checked=!!s.addonExpiry;
     if(document.getElementById('s-addon-employees'))document.getElementById('s-addon-employees').checked=!!s.addonEmployees;
     const pg=document.getElementById('set-partners-group');
     if(pg)pg.style.display=s.addonPartners?'block':'none';
