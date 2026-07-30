@@ -85,6 +85,11 @@ body.ws-personal .period-range-bar{background:#3e444f;}
 .fa-row.open{max-width:2000px;max-height:120px;min-height:36px;opacity:1;}
 .scard-side-chart{position:absolute;top:0;bottom:0;left:0;width:58px;display:flex;align-items:center;justify-content:center;background:transparent;}
 .scard-side-chart svg{width:54px;height:54px;opacity:.85;}
+/* دوائر الالتزامات والديون أكبر من باقي الكروت */
+.scard.commit.has-side-chart{padding-left:70px;}
+.scard.debt.has-side-chart.side-chart-right{padding-right:70px;}
+.scard.commit .scard-side-chart,.scard.debt .scard-side-chart{width:68px;}
+#chart-commit-side,#chart-debt-side{width:64px;height:64px;}
 
 /* عكس موضع الشارت: على اليمين (side-chart-right) — الشارت يمين، الـ accent يمين (من الطرف) */
 .scard.has-side-chart.side-chart-right{padding-left:0;padding-right:60px;}
@@ -3926,14 +3931,14 @@ function updateRatioBars(income,exp,commitPaid,credPaid,debPaid,totalExp){
   // كرت المصروفات (stacked): نسبة المصروفات إلى الدخل
   drawSegmentedRing('chart-expense-side',pct(exp),'#7eb8e0',{pctId:'ct-expense-pct'});
   // كرت الالتزامات: نسبة المدفوع من الالتزامات إلى الدخل
-  drawSegmentedRing('chart-commit-side',pct(commitPaid),'#7eb8e0',{innerR:W_COMMIT_DEBT.innerR,outerR:W_COMMIT_DEBT.outerR,popOuter:W_COMMIT_DEBT.popOuter,fontScale:0.24});
+  drawSegmentedRing('chart-commit-side',pct(commitPaid),'#7eb8e0',{innerR:W_COMMIT_DEBT.innerR,outerR:W_COMMIT_DEBT.outerR,popOuter:W_COMMIT_DEBT.popOuter,fontScale:0.28});
   // كرت الديون: نسبة المدفوع فى التصنيف الحالى (دائن/مدين) إلى الدخل — دائن أزرق (زى ما كان)، مدين أخضر
   const debtPct=debtMode==='creditor'?pct(credPaid):pct(debPaid);
   const debtColor=debtMode==='creditor'?'#7eb8e0':'#3ecb6e';
-  drawSegmentedRing('chart-debt-side',debtPct,debtColor,{innerR:W_COMMIT_DEBT.innerR,outerR:W_COMMIT_DEBT.outerR,popOuter:W_COMMIT_DEBT.popOuter,fontScale:0.24});
+  drawSegmentedRing('chart-debt-side',debtPct,debtColor,{innerR:W_COMMIT_DEBT.innerR,outerR:W_COMMIT_DEBT.outerR,popOuter:W_COMMIT_DEBT.popOuter,fontScale:0.28});
 }
 // نصف أقطار موسّعة (حلقة أرفع/فتحة داخلية أوسع) لدائرتى الالتزامات والديون تحديدًا (viewBox=54)
-const W_COMMIT_DEBT={innerR:54*0.34,outerR:54*0.44,popOuter:54*0.482};
+const W_COMMIT_DEBT={innerR:54*0.38,outerR:54*0.44,popOuter:54*0.482};
 
 // ══════════════════════════════════════════════
 //  MINI CHARTS (SVG)
