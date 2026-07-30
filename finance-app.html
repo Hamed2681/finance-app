@@ -378,8 +378,8 @@ tbody tr.row-anim{animation:rowSlideIn .28s cubic-bezier(.2,.8,.3,1) both;}
 /* اسم البند على سطرين فى الجدول المصغّر (الدخل/المصروفات): السطر الأول البند، السطر الثانى تاريخ+طريقة الدفع بخط أصغر */
 #tbody-income .td-name.td-name-2l,#tbody-expense .td-name.td-name-2l{padding-top:0!important;padding-bottom:0!important;}
 #tbody-income .td-name-2l .tn-2l-wrap,#tbody-expense .td-name-2l .tn-2l-wrap{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:1px;height:100%;}
-#tbody-income .td-name-2l .tn-sub,#tbody-expense .td-name-2l .tn-sub{font-size:13px;font-weight:400;color:#14237a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
-#tbody-income tr td,#tbody-expense tr td{height:54px;}
+#tbody-income .td-name-2l .tn-sub,#tbody-expense .td-name-2l .tn-sub{font-size:10px;font-weight:400;color:#14237a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+#tbody-income tr td,#tbody-expense tr td{height:40px;}
 #tbody-income tr:nth-child(odd) .tn-2l-wrap>span:first-child,#tbody-expense tr:nth-child(odd) .tn-2l-wrap>span:first-child{color:#1a1c1f;}
 #tbody-income tr:nth-child(even) .tn-2l-wrap>span:first-child,#tbody-expense tr:nth-child(even) .tn-2l-wrap>span:first-child{color:#2a2d33;}
 
@@ -800,6 +800,89 @@ select option{background:var(--card2);color:var(--txt);padding:10px 16px;min-wid
 .biz-po-btn.save{background:var(--green);color:#08221a;}
 .biz-po-btn.print{background:var(--blue);color:#fff;}
 .biz-po-btn.cancel{background:var(--card2);color:var(--muted);}
+/* ── نمط "ورقة" للفواتير والأذون: خلفية كريمية دافئة بدل الثيم الداكن، لإحساس ورقة مطبوعة حقيقية ── */
+.paper-doc{
+  --card:#3a362e;--card2:#443f35;--border:#5c5647;
+  --txt:#e9e2ce;--muted:#a89f89;
+  --green:#5fb377;--red:#d16a5b;--yellow:#e0b25a;--blue:#6fabd1;
+  background:var(--card);
+  background-image:repeating-linear-gradient(180deg,rgba(255,245,220,.035) 0px,rgba(255,245,220,.035) 1px,transparent 1px,transparent 27px);
+  color:var(--txt)!important;
+  border:1px solid var(--border)!important;
+  border-radius:8px;
+  box-shadow:0 10px 26px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.06) inset;
+}
+/* سطر منقّط بدل شكل «الخلية» المضغوط فى إجماليات وتفاصيل الفواتير/الأذونات */
+.paper-doc .biz-po-total-row,.paper-doc .biz-po-detail-line{gap:8px;}
+.paper-doc .biz-po-total-row>span:first-child,.paper-doc .biz-po-detail-line>span:first-child{
+  flex:1;border-bottom:1px dotted var(--muted);white-space:nowrap;overflow:hidden;line-height:1.9;
+}
+.paper-doc .biz-po-total-row>b,.paper-doc .biz-po-total-row>span:last-child,
+.paper-doc .biz-po-detail-line>b,.paper-doc .biz-po-detail-line>span:last-child{flex:0 0 auto;}
+/* إلغاء شكل خلايا مدفوع/متبقي المضغوطة فى فاتورة المشتريات، واستبدالها بسطر منقّط */
+.paper-doc .pinv-twocards{grid-template-columns:1fr;gap:0;}
+.paper-doc .pinv-mini{background:transparent;border-radius:0;padding:6px 2px;flex-direction:row;justify-content:space-between;align-items:center;text-align:right;}
+.paper-doc .pinv-mini .top{flex:1;border-bottom:1px dotted var(--muted);margin-left:8px;padding-bottom:3px;}
+.paper-doc .pinv-mini input,.paper-doc .pinv-mini span.val{border-bottom:none;width:auto;text-align:left;margin-top:0;flex:0 0 auto;}
+/* إلغاء شكل الصندوق من كل حقول الإدخال والأقسام والبطاقات الفرعية داخل الفواتير/الأذونات، واستبداله بخط سفلى منقّط */
+.paper-doc .biz-po-inp,.paper-doc .pv-row-ctrl select,.paper-doc .pv-row-ctrl input:not([type="radio"]):not([type="checkbox"]),.paper-doc .pv-row-ctrl textarea{
+  background:transparent!important;border:none!important;border-bottom:1px dotted var(--muted)!important;
+  border-radius:0!important;padding:6px 2px!important;
+}
+.paper-doc .prv-info-box{background:transparent;border-radius:0;border-bottom:1px dotted var(--muted);padding:6px 2px;}
+.paper-doc .pinv-section{background:transparent;border-radius:0;border-bottom:1px dotted var(--muted);padding:6px 2px;}
+.paper-doc .pinv-meta-row input{border-bottom:1px dotted var(--muted);}
+.paper-doc .prv-action-card{background:transparent!important;border:none!important;border-bottom:1px dotted var(--muted)!important;border-radius:0;padding:8px 2px;}
+.paper-doc .prv-action-card select{background:transparent;}
+/* Flat كامل: إزالة كل الصناديق الداخلية المتبقية (صفوف الأصناف، الأيقونات، الشارات، رؤوس الجداول، القوائم) واستبدالها بخطوط فاصلة بسيطة */
+.paper-doc .biz-po-item-row{border-radius:0;border-bottom:1px dotted var(--muted);padding:8px 4px;}
+.paper-doc .biz-po-item-row.odd,.paper-doc .biz-po-item-row.even{background:transparent;}
+.paper-doc .pv-hdr-icon{background:transparent;border:none;}
+.paper-doc .prv-badge{background:transparent;color:var(--blue);border:1px dotted var(--blue);border-radius:0;padding:2px 8px;}
+.paper-doc .prv-thead{background:transparent;color:var(--muted);border-bottom:1px dotted var(--muted);border-radius:0;padding:6px;}
+.paper-doc .prv-trow{background:transparent;border-bottom:1px dotted var(--border);}
+.paper-doc .pinv-hdr,.paper-doc .pinv-tbl-hdr{background:transparent;border-bottom:1px dotted var(--muted);}
+.paper-doc .pinv-hdr-title,.paper-doc .pinv-hdr-ico,.paper-doc .pinv-tbl-hdr span{color:var(--txt);}
+.paper-doc .pinv-wh-sel{background:transparent;border:none;border-bottom:1px dotted var(--muted);border-radius:0;}
+.paper-doc .pv-sig-canvas{background:transparent;border:none;border-bottom:1px dotted var(--muted);border-radius:0;height:60px;}
+.paper-doc .biz-po-form-title,.paper-doc .pv-hdr-title{border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:2px;font-family:Georgia,'Cairo',serif;letter-spacing:.3px;}
+.paper-doc .biz-po-item-row.odd{background:rgba(255,245,220,.05);}
+.paper-doc .biz-po-item-row.even{background:transparent;}
+.paper-doc select,.paper-doc select option{background:var(--card2);color:var(--txt);}
+@media print{
+  body *{visibility:hidden!important;}
+  .paper-doc,.paper-doc *{visibility:visible!important;}
+  .paper-doc{position:fixed;inset:0 auto auto 0;width:100%;box-shadow:none;border:none!important;margin:0;}
+  .biz-po-btns,.pv-footer,.pv-hdr-icons,.pinv-btns{display:none!important;}
+}
+/* ── تصميم إذن القبض الجديد: لوح نيومورفيك غامق مطابق للصورة المرجعية ── */
+.rcpt-card{background:linear-gradient(180deg,#1a2029 0%,#12161d 100%);border:1px solid #2a3140;border-radius:24px;padding:18px 16px;box-shadow:0 20px 50px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.03) inset;display:flex;flex-direction:column;}
+.rcpt-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:14px;border-bottom:1px dashed #333c4d;margin-bottom:14px;flex-wrap:wrap;}
+.rcpt-title{font-size:18px;font-weight:900;color:#f2f4f8;white-space:nowrap;}
+.rcpt-type-sel{display:flex;align-items:center;gap:8px;background:#161b24;border:1px solid #262d3a;border-radius:16px;padding:9px 14px;box-shadow:inset 0 2px 4px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.03);}
+.rcpt-type-sel .chev{color:#5b8fd1;font-size:11px;}
+.rcpt-type-sel select{background:transparent;border:none;color:#dfe6f0;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;max-width:130px;}
+.rcpt-field{display:flex;align-items:center;gap:10px;background:#161b24;border:1px solid #232a37;border-radius:18px;padding:13px 15px;margin-bottom:12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.02);}
+.rcpt-field .ic{color:#5b8fd1;font-size:16px;flex-shrink:0;}
+.rcpt-field .chev{color:#5b8fd1;font-size:11px;flex-shrink:0;}
+.rcpt-field input,.rcpt-field select,.rcpt-field textarea{flex:1;min-width:0;background:transparent;border:none;color:#eef1f6;font-family:'Cairo',sans-serif;font-size:12.5px;text-align:right;}
+.rcpt-field input::placeholder,.rcpt-field textarea::placeholder{color:#8a93a5;}
+.rcpt-field select{color:#eef1f6;}
+.rcpt-field input:focus,.rcpt-field select:focus,.rcpt-field textarea:focus{outline:none;}
+.rcpt-row2{display:flex;gap:10px;}
+.rcpt-row2 .rcpt-field{flex:1;margin-bottom:12px;min-width:0;}
+.rcpt-field.notes{align-items:flex-start;}
+.rcpt-field.notes textarea{resize:none;min-height:54px;}
+.rcpt-cust-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.rcpt-cust-row .rcpt-field{flex:1;margin-bottom:0;padding:10px 14px;}
+.rcpt-cust-row .rcpt-del{color:#d16a5b;font-size:16px;cursor:pointer;flex-shrink:0;padding:0 4px;}
+.rcpt-field select,.rcpt-type-sel select{-webkit-appearance:none;appearance:none;}
+.rcpt-field input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;position:absolute;left:0;right:0;width:100%;cursor:pointer;}
+.rcpt-btns{display:flex;gap:10px;margin-top:6px;}
+.rcpt-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:18px;padding:14px;font-size:13.5px;font-weight:800;font-family:'Cairo',sans-serif;cursor:pointer;}
+.rcpt-btn .circ{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid currentColor;font-size:11px;flex-shrink:0;}
+.rcpt-btn.cancel{background:#161b24;color:#eef1f6;border:1px solid #232a37;}
+.rcpt-btn.save{background:linear-gradient(180deg,#3568b8 0%,#1c3f80 100%);color:#fff;border:none;box-shadow:0 6px 16px rgba(30,70,150,.5);}
 /* ── تصميم سند الصرف الجديد (مطابق للنموذج المرجعى) ── */
 .pv-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:0;overflow:hidden;display:flex;flex-direction:column;}
 .pv-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
@@ -816,7 +899,7 @@ select option{background:var(--card2);color:var(--txt);padding:10px 16px;min-wid
 .pv-row:last-child{border-bottom:none;}
 .pv-row-lbl{font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto;}
 .pv-row-ctrl{flex:1;display:flex;justify-content:flex-start;min-width:0;}
-.pv-row-ctrl select,.pv-row-ctrl input,.pv-row-ctrl textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;padding:8px 10px;text-align:center;}
+.pv-row-ctrl select,.pv-row-ctrl input:not([type="radio"]):not([type="checkbox"]),.pv-row-ctrl textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;padding:8px 10px;text-align:center;}
 .pv-amount-wrap{display:flex;align-items:center;gap:6px;width:100%;}
 .pv-amount-wrap select{flex:0 0 58px;padding:8px 4px;}
 .pv-amount-wrap input{flex:1;text-align:center;font-weight:800;}
@@ -8783,49 +8866,75 @@ let _vchReceiptCustomers=[];
 let _vchSettleKey=null;
 function openVoucherForm(kind){
   if(kind==='payment'){renderPaymentVoucherForm();return;}
-  const title=kind==='receipt'?'إذن قبض جديد':'إذن صرف جديد';
-  const nameLbl=kind==='receipt'?'اسم المستلم منه':'اسم المصروف له';
-  let types=(VOUCHER_TYPES[kind]||[]).slice();
-  if(kind==='receipt'&&getSettings().addonEmployees)types.splice(types.indexOf('تسوية قبض')+1,0,'تسوية عهدة');
-  const suggestNames=kind==='receipt'?getAllCustomerNames():getAllSupplierNames();
-  if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}
+  if(kind==='receipt'){renderReceiptVoucherForm();return;}
+}
+/* ── فورم إذن قبض بالتصميم النيومورفيك الغامق الجديد (مطابق للصورة المرجعية) ── */
+function renderReceiptVoucherForm(){
+  const kind='receipt';
+  const types=(VOUCHER_TYPES.receipt||[]).slice();
+  if(getSettings().addonEmployees)types.splice(types.indexOf('تسوية قبض')+1,0,'تسوية عهدة');
+  const suggestNames=getAllCustomerNames();
+  _vchReceiptCustomers=[];_vchSettleKey=null;
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
-    <div class="biz-po-form">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <select class="biz-po-inp" id="vch-${kind}-type" onchange="vchTypeChanged('${kind}')" style="flex:0 0 auto;width:auto;">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
-        <div class="biz-po-form-title" style="margin:0;flex:1;">${title}</div>
+    <div class="rcpt-card">
+      <div class="rcpt-hdr">
+        <div class="rcpt-title">إذن قبض جديد</div>
+        <div class="rcpt-type-sel">
+          <select id="vch-receipt-type" onchange="vchTypeChanged('receipt')">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
+          <span class="chev">⌄</span>
+        </div>
       </div>
-      <div class="biz-po-frow" id="vch-${kind}-partner-wrap" style="display:none;">
-        <select class="biz-po-inp" id="vch-${kind}-partner" onchange="vchPartnerSelChosen('${kind}')"></select>
-        <input class="biz-po-inp" id="vch-${kind}-partner-seq-preview" disabled>
+      <div class="rcpt-field" id="vch-receipt-partner-wrap" style="display:none;">
+        <span class="ic">🏷️</span>
+        <select id="vch-receipt-partner" onchange="vchPartnerSelChosen('receipt')"></select>
+        <span class="chev">⌄</span>
       </div>
-      <div id="vch-${kind}-namecoa-wrap">
-      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-name" list="vch-${kind}-name-list" placeholder="${nameLbl}" autocomplete="off">
-        <datalist id="vch-${kind}-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+      <div id="vch-receipt-namecoa-wrap">
+        <div class="rcpt-field">
+          <span class="ic">👤</span>
+          <input id="vch-receipt-name" list="vch-receipt-name-list" placeholder="اسم المستلم منه" autocomplete="off">
+          <datalist id="vch-receipt-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+        </div>
       </div>
+      <div class="rcpt-row2">
+        <div class="rcpt-field" id="vch-receipt-date-wrap">
+          <span class="chev">⌄</span>
+          <input id="vch-receipt-date" type="date" value="${todayStr()}">
+          <span class="ic" onclick="try{document.getElementById('vch-receipt-date').showPicker()}catch(e){}">📅</span>
+        </div>
+        <div class="rcpt-field">
+          <input id="vch-receipt-amount" type="number" placeholder="المبلغ">
+          <span class="ic">👛</span>
+        </div>
       </div>
-      <div class="biz-po-frow2">
-        <input class="biz-po-inp" id="vch-${kind}-amount" type="number" placeholder="المبلغ">
-        <span id="vch-${kind}-date-wrap"><input class="biz-po-inp" id="vch-${kind}-date" type="date" value="${todayStr()}"></span>
+      <div class="rcpt-field" id="vch-settle-wrap" style="display:none;">
+        <span class="ic">🔁</span>
+        <select id="vch-settle-target" onchange="vchSettleTargetChosen()"></select>
+        <span class="chev">⌄</span>
       </div>
-      ${kind==='receipt'?`
-      <div class="biz-po-frow" id="vch-settle-wrap" style="display:none;">
-        <select class="biz-po-inp" id="vch-settle-target" onchange="vchSettleTargetChosen()"></select>
-        <input class="biz-po-inp" id="vch-settle-seq-preview" disabled>
+      <div class="rcpt-field" id="vch-receipt-custsel-wrap">
+        <select id="vch-receipt-custsel" onchange="vchAddCustomerRow()"><option value="">+ إضافة عميل مستحق عليه سداد...</option></select>
+        <span class="ic">👤+</span>
+        <span class="chev">⌄</span>
       </div>
-      <div class="biz-po-frow"><select class="biz-po-inp" id="vch-receipt-custsel" onchange="vchAddCustomerRow()"></select></div>
-      <div id="vch-receipt-custlist"></div>`:''}
+      <div id="vch-receipt-custlist"></div>
       <div id="vch-${kind}-extra-wrap">
-      <div class="biz-po-frow"><input class="biz-po-inp" id="vch-${kind}-desc" placeholder="البيان"></div>
-      <textarea class="biz-po-inp" id="vch-${kind}-notes" placeholder="ملاحظات" rows="2" style="resize:none;"></textarea>
+        <div class="rcpt-field">
+          <span class="ic">📄</span>
+          <input id="vch-receipt-desc" placeholder="البيان">
+        </div>
+        <div class="rcpt-field notes">
+          <span class="ic">✏️</span>
+          <textarea id="vch-receipt-notes" placeholder="ملاحظات" rows="2"></textarea>
+        </div>
       </div>
-      <div class="biz-po-btns">
-        <button class="biz-po-btn save" onclick="saveVoucher('${kind}')">حفظ</button>
-        <button class="biz-po-btn cancel" onclick="closeVoucherForm('${kind}')">إلغاء</button>
+      <div class="rcpt-btns">
+        <button class="rcpt-btn cancel" onclick="closeVoucherForm('receipt')"><span class="circ">✕</span> إلغاء</button>
+        <button class="rcpt-btn save" onclick="saveVoucher('receipt')"><span class="circ">✓</span> حفظ</button>
       </div>
     </div>`;
-  if(kind==='receipt')renderVchCustRows();
-  vchTypeChanged(kind);
+  renderVchCustRows();
+  vchTypeChanged('receipt');
 }
 /* رقم الإذن بشكل «P-2026-0001» / «R-2026-0001» للعرض فقط (لا يغيّر آلية الترقيم الداخلية) */
 function formatVoucherSeq(kind,seq){
@@ -8841,7 +8950,7 @@ function renderPaymentVoucherForm(){
   const accounts=[{id:'',name:'الخزينة الرئيسية'}].concat(caFundsFlatAccounts().map(a=>({id:a.id,name:a.name})));
   const currency=getSettings().currencySym||'ج.م';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
-    <div class="pv-card">
+    <div class="pv-card paper-doc">
       <div class="pv-hdr">
         <div class="pv-hdr-icons"><div class="pv-hdr-icon" onclick="printPaymentVoucherForm()" title="طباعة">🖨️</div></div>
         <div class="pv-hdr-title">إذن / سند صرف مالية</div>
@@ -9021,7 +9130,7 @@ function vchTypeChanged(kind){
     const isPartnerMove=!!moveCfg;
     const minimal=isSettle||isPartnerMove;
     const settleWrap=document.getElementById('vch-settle-wrap');
-    const custRow=document.getElementById('vch-receipt-custsel');
+    const custRow=document.getElementById('vch-receipt-custsel-wrap')||document.getElementById('vch-receipt-custsel');
     const custList=document.getElementById('vch-receipt-custlist');
     const namecoaWrap=document.getElementById('vch-receipt-namecoa-wrap');
     const extraWrap=document.getElementById('vch-receipt-extra-wrap');
@@ -9157,12 +9266,12 @@ function renderVchCustRows(){
   renderVchCustSelect();
   if(!_vchReceiptCustomers.length){wrap.innerHTML='';return;}
   wrap.innerHTML=_vchReceiptCustomers.map((c,i)=>`
-    <div class="biz-po-frow2" style="align-items:center;margin-top:6px;">
-      <div class="biz-po-inp" style="flex:1.4;background:rgba(255,241,214,.04);">${esc(c.name)}</div>
-      <input class="biz-po-inp" style="flex:1;" type="number" value="${c.amount}" placeholder="المبلغ" oninput="vchUpdCustAmt(${i},this.value)">
-      <button class="biz-po-btn cancel" style="flex:0 0 auto;padding:7px 10px;" onclick="vchRemoveCustRow(${i})">×</button>
+    <div class="rcpt-cust-row">
+      <div class="rcpt-field" style="flex:1.4;"><span class="ic">👤</span>${esc(c.name)}</div>
+      <div class="rcpt-field" style="flex:1;"><input type="number" value="${c.amount}" placeholder="المبلغ" oninput="vchUpdCustAmt(${i},this.value)"></div>
+      <span class="rcpt-del" onclick="vchRemoveCustRow(${i})">✕</span>
     </div>`).join('')+
-    `<div style="text-align:left;font-size:11px;color:var(--muted);margin-top:4px;">إجمالي العملاء: <b id="vch-cust-total" style="color:var(--green);">${fmt(_vchReceiptCustomers.reduce((s,c)=>s+Number(c.amount||0),0))}</b></div>`;
+    `<div style="text-align:left;font-size:11px;color:#8a93a5;margin:2px 2px 12px;">إجمالي العملاء: <b id="vch-cust-total" style="color:#5fb377;">${fmt(_vchReceiptCustomers.reduce((s,c)=>s+Number(c.amount||0),0))}</b></div>`;
 }
 function closeVoucherForm(kind){const s=document.getElementById(voucherFormSlotId(kind));if(s)s.innerHTML='';if(kind==='receipt'){_vchReceiptCustomers=[];_vchSettleKey=null;}}
 function saveVoucher(kind){
@@ -9278,7 +9387,7 @@ function viewVoucher(kind,id){
   const payMethodRow=(kind==='payment'&&v.payMethod)?`<div class="biz-po-detail-line"><span>طريقة الدفع</span><b>${esc(v.payMethod)}</b></div>`:'';
   const attachRow=(kind==='payment'&&v.attachment)?`<div class="biz-po-detail-line"><span>مرفقات</span><b>📎 ${esc(v.attachment)}</b></div>`:'';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
-    <div class="biz-po-form">
+    <div class="biz-po-form paper-doc">
       <div class="biz-po-form-title">${title} ${formatVoucherSeq(kind,v.seq)}</div>
       ${v.type?`<div class="biz-po-detail-line"><span>النوع</span><b style="color:var(--blue);">${esc(v.type)}</b></div>`:''}
       ${accountRow}
@@ -9305,7 +9414,7 @@ function confirmFromVoucherView(kind,id){
   if(!v)return;
   const ph=kind==='receipt'?'أدخل المبلغ الفعلى المستلم':'أدخل المبلغ الفعلى المصروف';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
-    <div class="biz-po-form">
+    <div class="biz-po-form paper-doc">
       <div class="biz-po-form-title">تأكيد ${kind==='receipt'?'إذن قبض':'إذن صرف'} #${v.seq} — ${esc(v.name)}</div>
       <div class="biz-po-detail-line"><span>المبلغ المسجل</span><b style="color:var(--yellow);">${fmt(v.amount)}</b></div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="confirm-amt-inp-vch" type="number" placeholder="${ph}" value="${v.amount}"></div>
@@ -9519,7 +9628,7 @@ function openInvoiceForm(){
   const autoNo=nextPInvNoPreview();
   const whs=loadInvWarehouses();
   document.getElementById('invoice-form-slot').innerHTML=`
-    <div class="pinv-card">
+    <div class="pinv-card paper-doc">
       <div class="pinv-hdr">
         <button class="pinv-hdr-ico" onclick="closeInvoiceForm()">⇥</button>
         <span class="pinv-hdr-title">مشتريات</span>
@@ -9684,7 +9793,7 @@ function saveInvoice(print){
 function openPInvVoucherPrompt(inv,paid,print){
   const seq=nextSeq();
   document.getElementById('invoice-form-slot').innerHTML=`
-    <div class="biz-po-form">
+    <div class="biz-po-form paper-doc">
       <div class="biz-po-form-title">📤 إذن صرف — دفعة فاتورة مشتريات</div>
       <div class="biz-po-frow">
         <input class="biz-po-inp" id="pinv-vch-name" list="pinv-vch-name-list" placeholder="اسم المستلم/القائم بالشراء (مالك، شريك، أو موظف)" autocomplete="off">
@@ -9731,7 +9840,7 @@ function viewInvoice(id){
   if(!inv)return;
   const wh=inv.whId?loadInvWarehouses().find(w=>w.id===inv.whId):null;
   document.getElementById('invoice-form-slot').innerHTML=`
-    <div class="biz-po-form">
+    <div class="biz-po-form paper-doc">
       <div class="biz-po-form-title">فاتورة ${inv.invNo?'#'+esc(inv.invNo):''} — ${esc(inv.supplierName)}</div>
       <div class="biz-po-detail-line"><span>التاريخ</span><b>${inv.date}</b></div>
       ${inv.phone?`<div class="biz-po-detail-line"><span>الهاتف</span><b>${esc(inv.phone)}</b></div>`:''}
@@ -10361,7 +10470,7 @@ function openInvoiceFormS(){
   _sInvItems=[{name:'',qty:'',price:''}];
   const autoNo=nextSInvNoPreview();
   document.getElementById('invoice-form-slot').innerHTML=`
-    <div class="biz-po-form">
+    <div class="biz-po-form paper-doc">
       <div class="biz-po-form-title">فاتورة مبيعات جديدة</div>
       <div class="biz-po-frow"><input class="biz-po-inp" id="sinv-customer" placeholder="اسم العميل"></div>
       <div class="biz-po-frow2">
@@ -10536,7 +10645,7 @@ function viewInvoiceS(id){
         ${x.paid?`<span style="color:var(--green);font-size:9.5px;">✔ ${x.paidDate||''}</span>`:`<span class="biz-po-inst-pay" onclick="paySInstallment('${inv.id}',${x.no})">سداد</span>`}
       </div>`).join('')}`:'';
   document.getElementById('invoice-form-slot').innerHTML=`
-    <div class="biz-po-form">
+    <div class="biz-po-form paper-doc">
       <div class="biz-po-form-title">فاتورة ${inv.invNo?'#'+esc(inv.invNo):''} — ${esc(inv.customerName)}</div>
       <div class="biz-po-detail-line"><span>التاريخ</span><b>${inv.date}</b></div>
       ${inv.phone?`<div class="biz-po-detail-line"><span>الهاتف</span><b>${esc(inv.phone)}</b></div>`:''}
