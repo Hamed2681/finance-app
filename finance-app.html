@@ -892,35 +892,26 @@ select option{background:var(--card2);color:var(--txt);padding:10px 16px;min-wid
 .rcpt-btn.cancel{background:#161b24;color:#eef1f6;border:1px solid #232a37;}
 .rcpt-btn.save{background:linear-gradient(180deg,#3568b8 0%,#1c3f80 100%);color:#fff;border:none;box-shadow:0 6px 16px rgba(30,70,150,.5);}
 /* ── تصميم سند الصرف الجديد (مطابق للنموذج المرجعى) ── */
-.pv-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:0;overflow:hidden;display:flex;flex-direction:column;}
-.pv-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
-.pv-hdr-title{font-size:13.5px;font-weight:800;color:var(--txt);}
-.pv-hdr-icons{display:flex;gap:8px;}
-.pv-hdr-icon{width:30px;height:30px;border-radius:8px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--txt);}
-.pv-infobar{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
-.pv-info-item{flex:1;min-width:100px;display:flex;flex-direction:column;gap:4px;}
-.pv-info-lbl{font-size:9px;color:var(--muted);display:flex;align-items:center;gap:3px;white-space:nowrap;}
-.pv-info-item select,.pv-info-item input{background:transparent;border:none;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;font-weight:700;padding:0;width:100%;}
-.pv-info-item select:focus,.pv-info-item input:focus{outline:none;}
-.pv-body{display:flex;flex-direction:column;padding:2px 14px 8px;}
-.pv-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
-.pv-row:last-child{border-bottom:none;}
-.pv-row-lbl{font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto;}
-.pv-row-ctrl{flex:1;display:flex;justify-content:flex-start;min-width:0;}
-.pv-row-ctrl select,.pv-row-ctrl input:not([type="radio"]):not([type="checkbox"]),.pv-row-ctrl textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:11.5px;padding:8px 10px;text-align:center;}
-.pv-amount-wrap{display:flex;align-items:center;gap:6px;width:100%;}
-.pv-amount-wrap select{flex:0 0 58px;padding:8px 4px;}
-.pv-amount-wrap input{flex:1;text-align:center;font-weight:800;}
-.pv-pay-methods{display:flex;gap:6px;width:100%;justify-content:flex-start;flex-wrap:wrap;}
-.pv-pay-opt{display:flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:10.5px;color:var(--muted);cursor:pointer;}
-.pv-pay-opt input{accent-color:var(--green);}
-.pv-pay-opt.active{border-color:var(--green);color:var(--green);}
-.pv-sig-wrap{display:flex;gap:10px;padding:14px;border-top:1px solid var(--border);}
-.pv-sig-box{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
-.pv-sig-lbl{font-size:10.5px;color:var(--muted);font-weight:700;}
-.pv-sig-canvas{width:100%;height:78px;background:var(--card2);border:1px dashed var(--border);border-radius:10px;touch-action:none;}
-.pv-sig-clear{font-size:9px;color:var(--muted);cursor:pointer;text-decoration:underline;}
-.pv-footer{display:flex;gap:8px;padding:2px 14px 14px;}
+/* ── إذن الصرف: تصميم ورقي بألوان وردية وخطوط متقطعة زي الصورة المرجعية ── */
+.pvs-card{background:#ecd3d8;border-radius:14px;padding:16px 12px 14px;font-family:'Cairo',sans-serif;color:#33363f;max-width:100%;box-sizing:border-box;overflow:hidden;}
+.pvs-titlerow{display:flex;align-items:center;gap:4px;margin-bottom:18px;direction:ltr;min-width:0;}
+.pvs-idbox,.pvs-typebox{border:1.5px solid #55565f;border-radius:7px;padding:6px 8px;font-weight:800;font-size:10.5px;color:#33363f;background:transparent;flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Cairo',sans-serif;max-width:32%;}
+.pvs-typebox{-webkit-appearance:none;appearance:none;text-align:center;cursor:pointer;}
+.pvs-dash{flex:1 1 8px;border-top:2px dashed #55565f;margin:0 1px;min-width:6px;}
+.pvs-arrow{color:#55565f;font-size:12px;flex-shrink:0;}
+.pvs-title{font-size:17px;font-weight:900;border-bottom:2.5px solid #33363f;padding:0 4px 4px;white-space:nowrap;direction:rtl;flex-shrink:0;}
+.pvs-row{display:flex;align-items:center;gap:6px;margin:14px 0;}
+.pvs-lbl{border:1.5px solid #55565f;border-radius:7px;padding:7px 12px;font-weight:800;font-size:11.5px;color:#33363f;background:transparent;white-space:nowrap;flex-shrink:0;}
+.pvs-line{flex:1;border-bottom:2px dashed #55565f;padding-bottom:4px;min-width:0;}
+.pvs-line input,.pvs-line select{width:100%;background:transparent;border:none;outline:none;font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;color:#33363f;text-align:center;-webkit-appearance:none;appearance:none;}
+.pvs-footer{display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap;}
+.pvs-btn{border:1.5px solid #55565f;border-radius:7px;padding:10px 30px;font-weight:800;font-size:12.5px;background:transparent;color:#33363f;cursor:pointer;font-family:'Cairo',sans-serif;}
+.pvs-btn:active{background:rgba(51,54,63,.08);}
+/* ── سداد الموردين: نفس أسلوب إذن الصرف، ما عدا جزء إضافة الموردين اللي فضل زي ما هو ── */
+#pay-modal .pvs-paymodal-box{background:#ecd3d8;color:#33363f;}
+#pay-modal .pvs-idbox:disabled{opacity:1;-webkit-text-fill-color:#33363f;}
+.pvs-plain-inp{width:100%;background:transparent;border:none;outline:none;font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;color:#33363f;text-align:center;}
+@media print{.pvs-footer{display:none!important;}}
 .wh-row{cursor:default;}
 /* ══ تصميم فاتورة مردود المشتريات (بطاقات + شارات) ══ */
 .prv-wrap{display:flex;flex-direction:column;gap:12px;}
@@ -2294,9 +2285,9 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
     </div>
   </div>
   <div style="flex-shrink:0;display:flex;background:var(--card2);border-bottom:2px solid var(--border);padding:6px 4px;">
-    <div style="width:16%;text-align:center;font-size:11px;font-weight:800;color:var(--txt);">الرصيد</div>
-    <div style="width:42%;text-align:center;font-size:12px;font-weight:800;color:var(--green);">وارد</div>
-    <div style="width:42%;text-align:center;font-size:12px;font-weight:800;color:var(--red);border-left:2px solid var(--border);">صادر</div>
+    <div style="width:4%;text-align:center;font-size:11px;font-weight:800;color:var(--txt);">الرصيد</div>
+    <div style="width:48%;text-align:center;font-size:12px;font-weight:800;color:var(--green);">وارد</div>
+    <div style="width:48%;text-align:center;font-size:12px;font-weight:800;color:var(--red);border-left:2px solid var(--border);">صادر</div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:4px 2px;padding-bottom:100px;" id="log-list"></div>
 </div>
@@ -2599,20 +2590,25 @@ body.ws-personal .val,body.ws-personal .scard-num-val,body.ws-personal [class$="
 
 <!-- ══ سداد مديونية الموردين MODAL ══ -->
 <div class="collect-modal" id="pay-modal">
-  <div class="collect-box">
-    <div class="ws-name-title" style="text-align:center;">💸 سداد مديونية الموردين</div>
-    <div style="display:flex;gap:8px;">
-      <input class="ws-name-inp" id="pay-payer-name" placeholder="اسم الصارف" style="flex:1;">
-      <input class="ws-name-inp" id="pay-seq-preview" disabled style="flex:1;">
+  <div class="collect-box pvs-paymodal-box">
+    <div class="pvs-titlerow" style="margin-bottom:14px;">
+      <input class="pvs-idbox" id="pay-seq-preview" disabled style="text-align:center;max-width:44%;">
+      <span class="pvs-arrow">◄</span>
+      <span class="pvs-dash"></span>
+      <div class="pvs-title">سداد</div>
     </div>
-    <input class="ws-name-inp" id="pay-date" type="date">
+    <div class="pvs-row">
+      <div class="pvs-lbl">اسم الصراف</div>
+      <div class="pvs-line"><input class="pvs-plain-inp" id="pay-payer-name" placeholder=""></div>
+    </div>
     <select class="ws-name-inp" id="pay-add-sup" onchange="payAddSupplierRow()"></select>
     <div class="collect-list" id="pay-list"></div>
     <div class="collect-total-bar"><span>الإجمالي المسدد</span><b id="pay-total-val" style="color:var(--red);">0.00</b></div>
-    <div class="ws-name-btns">
-      <button class="ws-name-cancel" onclick="closePayModal()">إلغاء</button>
-      <button class="ws-name-save" onclick="savePayment()">حفظ</button>
+    <div class="pvs-footer">
+      <button class="pvs-btn save" onclick="savePayment()">حفظ</button>
+      <button class="pvs-btn cancel" onclick="closePayModal()">إلغاء</button>
     </div>
+    <input type="hidden" id="pay-date">
   </div>
 </div>
 
@@ -3046,6 +3042,48 @@ function stepPeriod(dir){
   periodOffset+=dir;
   renderAll();
   renderPeriodRangeBar();
+}
+function initHomePeriodSwipe(){
+  const wrap=document.getElementById('pg-home');
+  if(!wrap||wrap._periodSwipe)return;
+  wrap._periodSwipe=true;
+  let startX=0,startY=0;
+  wrap.addEventListener('touchstart',e=>{
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+  },{passive:true});
+  wrap.addEventListener('touchend',e=>{
+    if(currentPeriod==='custom')return; // مفيش إزاحة في الوضع المخصص
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy))return;
+    // نفس منطق سوايب الالتزامات: يمين = للخلف (فترة أقدم)، شمال = للأمام (فترة أحدث)
+    // بيشتغل تلقائيًا مع أي مدة مختارة (يوم/أسبوع/شهر/سنة) لأن stepPeriod بيستخدم getRange بنفس النوع الحالي
+    if(dx>0)stepPeriod(-1);
+    else stepPeriod(1);
+  },{passive:true});
+}
+function stepLogPeriod(dir){
+  periodOffset+=dir;
+  renderLogPage();
+}
+function initLogPeriodSwipe(){
+  const wrap=document.getElementById('pg-log');
+  if(!wrap||wrap._periodSwipe)return;
+  wrap._periodSwipe=true;
+  let startX=0,startY=0;
+  wrap.addEventListener('touchstart',e=>{
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+  },{passive:true});
+  wrap.addEventListener('touchend',e=>{
+    if(logPeriod==='custom'||logPeriod==='all')return; // مفيش إزاحة فى "الكل"/"مخصص"
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy))return;
+    if(dx>0)stepLogPeriod(-1);
+    else stepLogPeriod(1);
+  },{passive:true});
 }
 const AR_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 function fmtRangeDate(dt){
@@ -8954,98 +8992,41 @@ function renderPaymentVoucherForm(){
   const suggestNames=getAllSupplierNames();
   const seq=Number(_getItem('fm_seq')||0)+1;
   const accounts=[{id:'',name:'الخزينة الرئيسية'}].concat(caFundsFlatAccounts().map(a=>({id:a.id,name:a.name})));
-  const currency=getSettings().currencySym||'ج.م';
   document.getElementById(voucherFormSlotId(kind)).innerHTML=`
-    <div class="pv-card paper-doc">
-      <div class="pv-hdr">
-        <div class="pv-hdr-icons"><div class="pv-hdr-icon" onclick="printPaymentVoucherForm()" title="طباعة">🖨️</div></div>
-        <div class="pv-hdr-title">إذن / سند صرف مالية</div>
-        <div class="pv-hdr-icons"><div class="pv-hdr-icon" onclick="closeVoucherForm('payment')" title="إغلاق">✕</div></div>
+    <div class="pvs-card">
+      <div class="pvs-titlerow">
+        <div class="pvs-idbox">رقم القيد ${formatVoucherSeq('payment',seq)}</div>
+        <span class="pvs-arrow">◄</span>
+        <span class="pvs-dash"></span>
+        <div class="pvs-title">اذن صرف</div>
+        <span class="pvs-dash"></span>
+        <span class="pvs-arrow">◄</span>
+        <select class="pvs-typebox" id="vch-payment-type" onchange="vchTypeChanged('payment')">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
       </div>
-      <div class="pv-infobar">
-        <div class="pv-info-item">
-          <span class="pv-info-lbl">🏦 الخزينة/البنك</span>
-          <select id="vch-payment-account">${accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('')}</select>
-        </div>
-        <div class="pv-info-item">
-          <span class="pv-info-lbl">📅 تاريخ الحركة</span>
-          <input type="date" id="vch-payment-date" value="${todayStr()}">
-        </div>
-        <div class="pv-info-item" style="flex:0 0 auto;">
-          <span class="pv-info-lbl">📄 رقم الإذن</span>
-          <input id="vch-payment-seqpreview" value="${formatVoucherSeq('payment',seq)}" disabled style="text-align:center;">
-        </div>
+      <div class="pvs-row">
+        <div class="pvs-lbl">اسم الصراف</div>
+        <div class="pvs-line"><input id="vch-payment-name" list="vch-payment-name-list" autocomplete="off" oninput="document.getElementById('vch-payment-payer').value=this.value">
+        <datalist id="vch-payment-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div>
       </div>
-      <div class="pv-body">
-        <div class="pv-row">
-          <span class="pv-row-lbl">نوع الحركة</span>
-          <div class="pv-row-ctrl"><select id="vch-payment-type" onchange="vchTypeChanged('payment')">${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select></div>
-        </div>
-        <div id="vch-payment-namecoa-wrap">
-          <div class="pv-row">
-            <span class="pv-row-lbl">ادفعوا للسيد/الجهة</span>
-            <div class="pv-row-ctrl"><input id="vch-payment-name" list="vch-payment-name-list" placeholder="الاسم" autocomplete="off">
-            <datalist id="vch-payment-name-list">${suggestNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div>
-          </div>
-        </div>
-        <div id="vch-payment-expwrap" style="display:none;">
-          <div class="pv-row">
-            <span class="pv-row-lbl">اسم الصراف</span>
-            <div class="pv-row-ctrl"><input id="vch-payment-payer" placeholder="اسم الصراف"></div>
-          </div>
-          <div class="pv-row">
-            <span class="pv-row-lbl">البند</span>
-            <div class="pv-row-ctrl"><input id="vch-payment-benad" list="vch-payment-benad-list" placeholder="البند" autocomplete="off">
-            <datalist id="vch-payment-benad-list"></datalist></div>
-          </div>
-        </div>
-        <div id="vch-payment-partner-wrap" class="pv-row" style="display:none;">
-          <span class="pv-row-lbl">الشريك</span>
-          <div class="pv-row-ctrl"><select id="vch-payment-partner" onchange="vchPartnerSelChosen('payment')"></select>
-          <input class="pv-row-ctrl" id="vch-payment-partner-seq-preview" disabled style="display:none;"></div>
-        </div>
-        <div class="pv-row">
-          <span class="pv-row-lbl">المبلغ رقماً</span>
-          <div class="pv-row-ctrl pv-amount-wrap">
-            <select id="vch-payment-currency"><option>${esc(currency)}</option></select>
-            <input id="vch-payment-amount" type="number" placeholder="0.00">
-          </div>
-        </div>
-        <div class="pv-row">
-          <span class="pv-row-lbl">طريقة الدفع</span>
-          <div class="pv-row-ctrl pv-pay-methods" id="vch-payment-paymethod-wrap">
-            ${['نقداً','تحويل بنكي','شيك'].map((m,i)=>`<label class="pv-pay-opt${i===0?' active':''}"><input type="radio" name="vch-payment-paymethod" value="${esc(m)}" ${i===0?'checked':''} onchange="vchPayMethodChanged(this)"> ${esc(m)}</label>`).join('')}
-          </div>
-        </div>
-        <div class="pv-row">
-          <span class="pv-row-lbl">البيان / الوصف</span>
-          <div class="pv-row-ctrl"><input id="vch-payment-desc" placeholder="البيان"></div>
-        </div>
-        <div class="pv-row">
-          <span class="pv-row-lbl">مرفقات</span>
-          <div class="pv-row-ctrl"><input id="vch-payment-attachment" placeholder="اسم/رقم المرفق (اختيارى)"></div>
-        </div>
+      <div class="pvs-row">
+        <div class="pvs-lbl">الحساب</div>
+        <div class="pvs-line"><select id="vch-payment-account">${accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('')}</select></div>
+        <span class="pvs-arrow">◄</span>
       </div>
-      <div class="pv-sig-wrap">
-        <div class="pv-sig-box">
-          <span class="pv-sig-lbl">👤 أمين الخزينة</span>
-          <canvas class="pv-sig-canvas" id="vch-payment-sig-custodian"></canvas>
-          <span class="pv-sig-clear" onclick="clearSigPad('vch-payment-sig-custodian')">مسح</span>
-        </div>
-        <div class="pv-sig-box">
-          <span class="pv-sig-lbl">👤 المستلم / المستفيد</span>
-          <canvas class="pv-sig-canvas" id="vch-payment-sig-recipient"></canvas>
-          <span class="pv-sig-clear" onclick="clearSigPad('vch-payment-sig-recipient')">مسح</span>
-        </div>
+      <div class="pvs-row">
+        <div class="pvs-lbl">المبلغ</div>
+        <div class="pvs-line"><input id="vch-payment-amount" type="number" placeholder="0.00"></div>
       </div>
-      <div class="pv-footer">
-        <button class="biz-po-btn print" onclick="printPaymentVoucherForm()">🖨️ طباعة</button>
-        <button class="biz-po-btn save" onclick="saveVoucher('payment')">💾 حفظ الإذن</button>
-        <button class="biz-po-btn cancel" onclick="closeVoucherForm('payment')">إلغاء</button>
+      <div class="pvs-footer">
+        <button class="pvs-btn save" onclick="saveVoucher('payment')">حفظ</button>
+        <button class="pvs-btn cancel" onclick="closeVoucherForm('payment')">إلغاء</button>
       </div>
+      <!-- حقول مساعدة مخفية (مش فى الصورة) لازمة عشان منطق الحفظ الحالى ما يتعطلش -->
+      <input type="hidden" id="vch-payment-payer" value="">
+      <input type="hidden" id="vch-payment-benad" value="مصروفات">
+      <input type="hidden" id="vch-payment-desc" value="">
+      <input type="hidden" id="vch-payment-date" value="${todayStr()}">
     </div>`;
-  initSigPad('vch-payment-sig-custodian');
-  initSigPad('vch-payment-sig-recipient');
   vchTypeChanged('payment');
 }
 function vchPayMethodChanged(el){
@@ -13034,6 +13015,8 @@ function seedDemo(){
 renderDebtCats();
 initDebtSwipe();
 initDebtCardSwipe();
+initHomePeriodSwipe();
+initLogPeriodSwipe();
 autoAddCommitItems();
 renderAll();
 renderPeriodRangeBar();
